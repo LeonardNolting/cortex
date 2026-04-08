@@ -99,9 +99,10 @@ function cellParagraph(options: IParagraphOptions = {}): Paragraph {
   return new Paragraph({ spacing: { before: 0, after: 0 }, ...options });
 }
 
-function baseCell(content: Paragraph | Paragraph[], borderTop = false) {
+function baseCell(content: Paragraph | Paragraph[], width: number, borderTop = false) {
   return new TableCell({
     verticalAlign: VerticalAlign.BOTTOM,
+    width: { size: width, type: WidthType.DXA },
     margins: { top: 120, bottom: 120, left: 0, right: 0 },
     borders: {
       top: borderTop ? { style: BorderStyle.SINGLE, size: 6, color: "000000" } : { style: BorderStyle.NONE },
@@ -116,10 +117,21 @@ function baseCell(content: Paragraph | Paragraph[], borderTop = false) {
 function row(c1: string, c2: string, c3: string, c4: string, bold = false, borderTop = false) {
   return new TableRow({
     children: [
-      baseCell(cellParagraph({ children: [run(c1, { bold })] }), borderTop),
-      baseCell(cellParagraph({ children: [run(c2)] }), borderTop),
-      baseCell(cellParagraph({ children: [run(c3)] }), borderTop),
-      baseCell(cellParagraph({ alignment: AlignmentType.RIGHT, children: [run(c4, { bold })] }), borderTop),
+      baseCell(cellParagraph({ children: [run(c1, { bold })] }), COL1, borderTop),
+      baseCell(cellParagraph({ children: [run(c2)] }), COL2, borderTop),
+      baseCell(cellParagraph({ children: [run(c3)] }), COL3, borderTop),
+      baseCell(cellParagraph({ alignment: AlignmentType.RIGHT, children: [run(c4, { bold })] }), COL4, borderTop),
+    ],
+  });
+}
+
+function rowMulti(lines: string[], quantity: string) {
+  return new TableRow({
+    children: [
+      baseCell(lines.map(line => new Paragraph({ children: [run(line)] })), COL1),
+      baseCell(cellParagraph({ children: [run(quantity)] }), COL2),
+      baseCell(cellParagraph(), COL3),
+      baseCell(cellParagraph({ alignment: AlignmentType.RIGHT }), COL4),
     ],
   });
 }
@@ -222,8 +234,21 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
           },
           rows: [
             row("Anfahrt:", `${assignment.travelTime || 0} Minuten`, "", ""),
-            row("Exploration, Fremdanamnese und Durchsicht der Unterlagen:", `${assignment.preparationTime || 0} Minuten`, "", ""),
-            row("Auswertung der Untersuchung und der neuropsycholog. Testung, Verfassen des Gutachtens:", `${assignment.evaluationTime || 0} Minuten`, "", ""),
+            rowMulti(
+              [
+                "Exploration, Fremdanamnese",
+                "und Durchsicht der Unterlagen:",
+              ],
+              `${assignment.preparationTime || 0} Minuten`
+            ),
+            rowMulti(
+              [
+                "Auswertung der Untersuchung und",
+                "der neuropsycholog. Testung,",
+                "Verfassen des Gutachtens:",
+              ],
+              `${assignment.evaluationTime || 0} Minuten`
+            ),
             row("Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
             row("Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
             row("Kilometerpauschale:", `${assignment.kmCount || 0} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
