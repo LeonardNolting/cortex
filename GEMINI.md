@@ -9,6 +9,8 @@ The app has three central functions:
 
 The central screen should be the list of assignments.
 
+The app is made for German users, thus many strings and some code may be German.
+
 # Developer environment
 
 This project currently contains a Tauri + React scaffold and uses a Tauri SQL database. TailwindCSS is included for styling and you can use shadcn presets from https://ui.shadcn.com/docs/components and add them with `npx shadcn@latest add accordion` (for an accordion for example).
@@ -38,7 +40,7 @@ This is the total data that has to be stored for the first step. In the second s
 
 All data should be editable by the user.
 
-The user information (name and address) alongside the tax rate (19% atm), kilometer fee rate (0.42€/km) and writing fee (1.5€/1000) should be stored and editable globally. Important note: All strings from the invoice should be editable. 
+The user information (name and address) alongside the tax rate (19% atm), kilometer fee rate (0.42€/km) and writing fee (1.5€/1000) should be stored and editable globally. Important note: All strings from the invoice should be editable. As they may contain values that should be inserted, the handlebars templating engine is included. For example, one sentence coming up on the invoice is "Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe M2 zu berechnen:", where "M2" is the name of a remuneration group. The remuneration group is selected per assignment, so this is a dynamic value that can then be inserted like "Für die Erstellung ... Vergütungsgruppe {{vergütungsgruppe.name}} zu berechnen:".
 
 For the courts (name, address and department) and remuneration groups, we should keep separate editable list. Then in each assignment the user only has to select which court and remuneration group applies to this assignment from a dropdown.
 
