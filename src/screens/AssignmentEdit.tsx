@@ -10,7 +10,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Save } from "lucide-react";
+import { Save, FileText } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
 import { Court, RemunerationGroup } from "../types";
@@ -24,7 +24,7 @@ export function AssignmentEdit() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [remGroups, setRemGroups] = useState<RemunerationGroup[]>([]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     patientName: "",
     patientBirthdate: "",
     fileNumber: "",
@@ -36,7 +36,10 @@ export function AssignmentEdit() {
     writingCharacters: 0,
     printingPages: 0,
     kmCount: 0,
-    shippingFee: 0
+    shippingFee: 0,
+    invoiceNumber: "",
+    status: "Offen" as const,
+    printingDate: ""
   });
 
   useEffect(() => {
@@ -56,7 +59,11 @@ export function AssignmentEdit() {
         if (!isNew) {
           const assignment = await AssignmentService.getById(Number(id));
           if (assignment) {
-            setFormData(assignment);
+            setFormData({
+              ...assignment,
+              invoiceNumber: assignment.invoiceNumber || "",
+              printingDate: assignment.printingDate || ""
+            });
           }
         }
       } catch (error) {
@@ -75,6 +82,21 @@ export function AssignmentEdit() {
       ...prev,
       [name]: type === "number" ? (value === "" ? 0 : parseFloat(value)) : value
     }));
+  };
+
+  const handleGenerateInvoiceNumber = async () => {
+    try {
+      const nextNumber = await AssignmentService.getNextInvoiceNumber();
+      setFormData(prev => ({
+        ...prev,
+        invoiceNumber: nextNumber,
+        status: "Abgeschlossen",
+        printingDate: new Date().toISOString().split('T')[0]
+      }));
+    } catch (error) {
+      console.error("Failed to generate invoice number:", error);
+      alert("Fehler beim Generieren der Rechnungsnummer.");
+    }
   };
 
   const handleSave = async () => {
@@ -110,10 +132,18 @@ export function AssignmentEdit() {
   }
 
   const actions = (
-    <Button onClick={handleSave}>
-      <Save className="mr-2 h-4 w-4" />
-      Speichern
-    </Button>
+    <div className="flex gap-2">
+      {!formData.invoiceNumber && !isNew && (
+        <Button variant="outline" onClick={handleGenerateInvoiceNumber}>
+          <FileText className="mr-2 h-4 w-4" />
+          Rechnung generieren
+        </Button>
+      )}
+      <Button onClick={handleSave}>
+        <Save className="mr-2 h-4 w-4" />
+        Speichern
+      </Button>
+    </div>
   );
 
   return (
@@ -134,15 +164,17 @@ export function AssignmentEdit() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="patientName">Patientenname</Label>
-              <Input 
-                id="patientName" 
-                name="patientName" 
-                value={formData.patientName} 
-                onChange={handleChange} 
-                placeholder="Max Mustermann"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="patientName">Patientenname</Label>
+                <Input 
+                  id="patientName" 
+                  name="patientName" 
+                  value={formData.patientName} 
+                  onChange={handleChange} 
+                  placeholder="Max Mustermann"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -175,7 +207,7 @@ export function AssignmentEdit() {
                 onChange={handleChange}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value={0} disabled={!isNew && formData.courtId !== 0}>-- Bitte wählen --</option>
+                <option value={0} disabled>-- Bitte wählen --</option>
                 {courts.map(court => (
                   <option key={court.id} value={court.id}>{court.name}</option>
                 ))}
@@ -195,6 +227,44 @@ export function AssignmentEdit() {
                 ))}
               </select>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="Offen">Offen</option>
+                  <option value="In Bearbeitung">In Bearbeitung</option>
+                  <option value="Abgeschlossen">Abgeschlossen</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoiceNumber">Rechnungsnummer</Label>
+                <Input 
+                  id="invoiceNumber" 
+                  name="invoiceNumber" 
+                  value={formData.invoiceNumber} 
+                  onChange={handleChange} 
+                  placeholder="Noch nicht generiert"
+                  readOnly
+                />
+              </div>
+            </div>
+            {formData.printingDate && (
+              <div className="space-y-2">
+                <Label htmlFor="printingDate">Rechnungsdatum</Label>
+                <Input 
+                  id="printingDate" 
+                  name="printingDate" 
+                  value={formData.printingDate} 
+                  readOnly
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 

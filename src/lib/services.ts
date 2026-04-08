@@ -119,6 +119,7 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
+        a.status,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -126,7 +127,7 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       ORDER BY a.created_at DESC
     `);
-    return rows.map(r => ({ ...r, status: "Offen" }));
+    return rows;
   },
 
   async getById(id: number): Promise<Assignment | null> {
@@ -149,6 +150,7 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
+        a.status,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -157,7 +159,32 @@ export const AssignmentService = {
       WHERE a.id = ?
     `, [id]);
     if (results.length === 0) return null;
-    return { ...results[0], status: "Offen" } as Assignment;
+    return results[0] as Assignment;
+  },
+
+  async getNextInvoiceNumber(): Promise<string> {
+    const db = await getDb();
+    const now = new Date();
+    const yearMonth = `${now.getFullYear().toString().slice(-2)}${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    const prefix = `ZZK${yearMonth}`;
+    
+    // Find the highest invoice number for this month
+    const results = await db.select<{ invoiceNumber: string }[]>(
+      "SELECT invoice_number as invoiceNumber FROM assignments WHERE invoice_number LIKE ? ORDER BY invoice_number DESC LIMIT 1",
+      [`${prefix}%`]
+    );
+    
+    let nextIndex = 1;
+    if (results.length > 0 && results[0].invoiceNumber) {
+      const lastInvoice = results[0].invoiceNumber;
+      const lastIndexStr = lastInvoice.slice(-2);
+      const lastIndex = parseInt(lastIndexStr, 10);
+      if (!isNaN(lastIndex)) {
+        nextIndex = lastIndex + 1;
+      }
+    }
+    
+    return `${prefix}${nextIndex.toString().padStart(2, '0')}`;
   },
 
   async create(assignment: Partial<Assignment>): Promise<number> {
@@ -166,8 +193,8 @@ export const AssignmentService = {
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, preparation_time, evaluation_time, writing_characters, 
-        printing_pages, km_count, shipping_fee, printing_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+        printing_pages, km_count, shipping_fee, printing_date, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -175,7 +202,8 @@ export const AssignmentService = {
         assignment.travelTime || 0, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
-        assignment.printingDate || null
+        assignment.printingDate || null,
+        assignment.status || "Offen"
       ]
     );
     return result.lastInsertId!;
@@ -189,7 +217,7 @@ export const AssignmentService = {
         court_id = ?, remuneration_group_id = ?,
         travel_time = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
-        shipping_fee = ?, printing_date = ?
+        shipping_fee = ?, printing_date = ?, status = ?
       WHERE id = ?`,
       [
         assignment.invoiceNumber || null,
@@ -199,6 +227,7 @@ export const AssignmentService = {
         assignment.writingCharacters, assignment.printingPages, 
         assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
+        assignment.status,
         assignment.id
       ]
     );

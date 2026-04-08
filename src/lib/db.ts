@@ -55,6 +55,7 @@ async function runMigrations(db: Database) {
       shipping_fee REAL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       printing_date TEXT,
+      status TEXT DEFAULT 'Offen',
       FOREIGN KEY (court_id) REFERENCES courts(id),
       FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
     )
