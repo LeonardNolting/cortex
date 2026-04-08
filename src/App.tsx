@@ -3,8 +3,7 @@ import reactLogo from "./assets/react.svg";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import Database from '@tauri-apps/plugin-sql';
-import {exists, BaseDirectory} from '@tauri-apps/plugin-fs';
-import {generateInvoice, InvoiceData} from "./rechnung.ts";
+import {Button} from "@/components/ui/button.tsx";
 
 const db = await Database.load('sqlite:test.db');
 
@@ -49,97 +48,9 @@ function App() {
                 <button type="submit">Greet</button>
             </form>
             <p>{greetMsg}</p>
-
-            <button onClick={async () => {
-                const invoiceData: InvoiceData = {
-                    sender: {
-                        name: "Dr. C. N.",
-                        street: "Am xxx 20",
-                        zipCity: "12345 Schönweitoben",
-                        birthDate: "02.02.2022",
-                        taxId: "90 898 767 545",
-                    },
-
-                    recipient: {
-                        name: "Amtsgericht Sonnenstrahl",
-                        street: "- Abteilung für Betreuungssachen -",
-                        zipCity: "Süßigkeitenstraße 99",
-                        extraLines: ["98765 Sonnenstrahl"],
-                    },
-
-                    placeAndDate: "Höchstadt, 03.03.2025",
-                    invoiceNumber: "ZZK251211",
-
-                    referencePerson:
-                        "Andrea Hastenichtgesehn, geb. am 05.02.1912",
-                    referenceDetails: "Aktenzeichen: 023 XVII 55/12",
-
-                    introText:
-                        "Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir bei gemäß Vergütungsgruppe M2 zu berechnen:",
-
-                    serviceRows: [
-                        {
-                            description:
-                                "Anfahrten (2x, davon 1x Mini-Anteil)",
-                            value: "80 Minuten",
-                        },
-                        {
-                            description:
-                                "Exploration, Fremdanamnese und Durchsicht der Unterlagen",
-                            value: "304 Minuten",
-                        },
-                        {
-                            description:
-                                "Auswertung der Untersuchung und der neuropsycholog. Testung, Verfassen des Gutachtens",
-                            value: "192 Minuten",
-                        },
-                        {
-                            description: "Gesamtzeit",
-                            value: "576 Minuten (600 Minuten)    900,00",
-                        },
-                        {
-                            description:
-                                "Schreibgebühr: 27.733 á 1,50 Euro/1000",
-                            value: "42,00",
-                        },
-                        {
-                            description:
-                                "Kilometerpauschale: 76 km á 0,42 Euro/km",
-                            value: "31,92",
-                        },
-                        {
-                            description: "Versandkosten",
-                            value: "2,00",
-                        },
-                        {
-                            description: "Gesamt",
-                            value: "975,92",
-                        },
-                        {
-                            description: "Umsatzsteuer 19%",
-                            value: "185,42",
-                        },
-                        {
-                            description: "Gesamt",
-                            value: "1161,34",
-                        },
-                    ],
-
-                    totals: [], // (optional if you want totals separate)
-
-                    signatureName: "Dr. C. Nolting",
-
-                    bankDetails: {
-                        accountHolder: "Frau Dr. C. Nolting",
-                        bank: "Stadt- und Kreissparkasse Erlangen",
-                        iban: "DE46 7635 0000 0060 1113 31",
-                        bic: "BYLADEM1ERH",
-                    },
-                };
-
-                await generateInvoice(invoiceData, "invoice.docx").catch(console.error);
-            }}>Rechnung drucken
-            </button>
+            <Button>
+                Test Button
+            </Button>
         </main>
     );
 }
