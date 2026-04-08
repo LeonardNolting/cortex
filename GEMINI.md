@@ -2,14 +2,16 @@
 
 This is a lightweight assignment/commission manager for psychiatric examiners that create examinations of patients as requested by court assignments/commissions.
 
-It currently contains a Tauri + React scaffold and uses a Tauri SQL database.
-
 The app has three central functions:
 1. Manage the assignments
 2. Let the user enter certain data per assignment, and global data
 3. Generating docx invoices for assignments
 
 The central screen should be the list of assignments.
+
+# Developer environment
+
+This project currently contains a Tauri + React scaffold and uses a Tauri SQL database. TailwindCSS is included for styling.
 
 # Data management
 
