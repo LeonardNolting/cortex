@@ -28,3 +28,15 @@ export interface RemunerationGroup {
   name: string;
   value: number;
 }
+
+export interface Settings {
+  userName: string;
+  userBirthday: string;
+  userStreet: string;
+  userZip: string;
+  userCity: string;
+  userTaxId: string;
+  taxRate: number;
+  kmFee: number;
+  writingFee: number;
+}

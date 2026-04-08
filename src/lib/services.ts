@@ -1,5 +1,33 @@
 import { getDb } from "./db";
-import { Court, RemunerationGroup } from "../types";
+import { Court, RemunerationGroup, Settings } from "../types";
+
+export const SettingsService = {
+  async getSettings(): Promise<Settings> {
+    const db = await getDb();
+    const rows = await db.select<{ key: string; value: string }[]>("SELECT * FROM settings");
+    
+    const settings: Partial<Settings> = {};
+    for (const row of rows) {
+      if (['taxRate', 'kmFee', 'writingFee'].includes(row.key)) {
+        settings[row.key as keyof Settings] = parseFloat(row.value) as any;
+      } else {
+        settings[row.key as keyof Settings] = row.value as any;
+      }
+    }
+    
+    return settings as Settings;
+  },
+
+  async updateSettings(settings: Settings): Promise<void> {
+    const db = await getDb();
+    for (const [key, value] of Object.entries(settings)) {
+      await db.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
+        [key, value.toString()]
+      );
+    }
+  }
+};
 
 export const CourtService = {
   async getAll(): Promise<Court[]> {
