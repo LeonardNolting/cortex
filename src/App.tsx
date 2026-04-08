@@ -17,9 +17,11 @@ import {
 } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import { PlusCircle, Settings, FileText } from "lucide-react";
+import { PlusCircle, Settings, FileText, ArrowLeft, Save } from "lucide-react";
 
 // Types
+type Screen = "LIST" | "EDIT" | "SETTINGS";
+
 interface Assignment {
   id: string;
   invoiceNumber: string;
@@ -70,6 +72,8 @@ const SAMPLE_ASSIGNMENTS: Assignment[] = [
 ];
 
 function App() {
+  const [currentScreen, setCurrentScreen] = useState<Screen>("LIST");
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
   const [assignments] = useState<Assignment[]>(SAMPLE_ASSIGNMENTS);
 
   const getStatusVariant = (status: Assignment["status"]) => {
@@ -85,18 +89,22 @@ function App() {
     }
   };
 
-  return (
-    <main className="container mx-auto py-10 px-4">
+  const selectedAssignment = assignments.find(a => a.id === selectedAssignmentId);
+
+  // --- RENDERING FUNCTIONS ---
+
+  const renderList = () => (
+    <>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Cortex</h1>
           <p className="text-muted-foreground">Auftragsverwaltung für psychiatrische Gutachter</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" onClick={() => setCurrentScreen("SETTINGS")}>
             <Settings className="h-4 w-4" />
           </Button>
-          <Button>
+          <Button onClick={() => { setSelectedAssignmentId(null); setCurrentScreen("EDIT"); }}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Neuer Auftrag
           </Button>
@@ -126,7 +134,14 @@ function App() {
             </TableHeader>
             <TableBody>
               {assignments.map((assignment) => (
-                <TableRow key={assignment.id}>
+                <TableRow 
+                  key={assignment.id} 
+                  className="cursor-pointer"
+                  onDoubleClick={() => {
+                    setSelectedAssignmentId(assignment.id);
+                    setCurrentScreen("EDIT");
+                  }}
+                >
                   <TableCell className="font-medium">{assignment.invoiceNumber}</TableCell>
                   <TableCell>{assignment.patientName}</TableCell>
                   <TableCell>{assignment.patientBirthdate}</TableCell>
@@ -141,7 +156,14 @@ function App() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        setSelectedAssignmentId(assignment.id);
+                        setCurrentScreen("EDIT");
+                      }}
+                    >
                       <FileText className="mr-2 h-4 w-4" />
                       Bearbeiten
                     </Button>
@@ -152,6 +174,102 @@ function App() {
           </Table>
         </CardContent>
       </Card>
+    </>
+  );
+
+  const renderEdit = () => (
+    <>
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => setCurrentScreen("LIST")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {selectedAssignment ? `Auftrag: ${selectedAssignment.invoiceNumber}` : "Neuer Auftrag"}
+            </h1>
+            <p className="text-muted-foreground">
+              {selectedAssignment ? `Bearbeiten von ${selectedAssignment.patientName}` : "Erstellen eines neuen Gutachtenauftrags"}
+            </p>
+          </div>
+        </div>
+        <Button onClick={() => setCurrentScreen("LIST")}>
+          <Save className="mr-2 h-4 w-4" />
+          Speichern
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Auftragsdetails</CardTitle>
+          <CardDescription>
+            Geben Sie hier die Patientendaten und Rechnungsdetails ein.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+          [Formular-Platzhalter für Auftragsdaten]
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  const renderSettings = () => (
+    <>
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => setCurrentScreen("LIST")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Einstellungen</h1>
+            <p className="text-muted-foreground">Globale Daten und Rechnungstexte verwalten</p>
+          </div>
+        </div>
+        <Button onClick={() => setCurrentScreen("LIST")}>
+          <Save className="mr-2 h-4 w-4" />
+          Speichern
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Benutzerdaten</CardTitle>
+            <CardDescription>Name, Adresse und Steuernummer des Gutachters.</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+            [Platzhalter: Benutzerdaten]
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerichte & Sätze</CardTitle>
+            <CardDescription>Verwalten Sie Gerichte und Honorargruppen.</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+            [Platzhalter: Gerichte / Honorare]
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Rechnungstexte</CardTitle>
+            <CardDescription>Standardformulierungen für die DOCX-Erstellung.</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+            [Platzhalter: Rechnungsvorlagen / Texte]
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  );
+
+  return (
+    <main className="container mx-auto py-10 px-4">
+      {currentScreen === "LIST" && renderList()}
+      {currentScreen === "EDIT" && renderEdit()}
+      {currentScreen === "SETTINGS" && renderSettings()}
     </main>
   );
 }
