@@ -50,6 +50,13 @@ The remaining information should be stored within each assignment (patient info,
 
 Each court order has exactly one invoice number. The invoice number is built from the static prefix "ZZK", the date in "YYMM" form and a two digit running index per month starting at 01.
 
+## Courts
+
+The data stored for each court is:
+- Name
+- Department (default: "Abteilung für Betreuungssachen")
+- Address
+
 # UI
 
 There are mainly three screens:
