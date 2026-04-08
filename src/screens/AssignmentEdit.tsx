@@ -15,7 +15,7 @@ export function AssignmentEdit() {
   const navigate = useNavigate();
   const { id } = useParams();
   
-  const selectedAssignment = SAMPLE_ASSIGNMENTS.find(a => a.id === id);
+  const selectedAssignment = SAMPLE_ASSIGNMENTS.find(a => a.id === Number(id));
 
   const actions = (
     <Button onClick={() => navigate("/")}>

@@ -1,13 +1,13 @@
 export type Screen = "LIST" | "EDIT" | "SETTINGS";
 
 export interface Assignment {
-  id: string;
+  id: number;
   invoiceNumber: string;
   patientName: string;
   patientBirthdate: string;
   fileNumber: string;
-  courtId: string;
-  remunerationGroupId: string;
+  courtId: number;
+  remunerationGroupId: number;
   court?: string; // For UI display
   remunerationGroup?: string; // For UI display
   status: "Offen" | "In Bearbeitung" | "Abgeschlossen";

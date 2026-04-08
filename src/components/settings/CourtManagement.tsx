@@ -16,8 +16,17 @@ import {
   DialogFooter, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
 } from "../ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { CourtService } from "../../lib/services";
@@ -26,7 +35,9 @@ import { Court } from "../../types";
 export function CourtManagement() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCourt, setEditingCourt] = useState<Court | null>(null);
+  const [courtToDelete, setCourtToDelete] = useState<number | null>(null);
   
   const [formData, setFormData] = useState<Omit<Court, "id">>({
     name: "",
@@ -78,9 +89,16 @@ export function CourtManagement() {
     loadCourts();
   }
 
-  async function handleDelete(id: number) {
-    if (confirm("Möchten Sie dieses Gericht wirklich löschen?")) {
-      await CourtService.delete(id);
+  function handleDeleteClick(id: number) {
+    setCourtToDelete(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (courtToDelete !== null) {
+      await CourtService.delete(courtToDelete);
+      setCourtToDelete(null);
+      setIsDeleteDialogOpen(false);
       loadCourts();
     }
   }
@@ -153,6 +171,23 @@ export function CourtManagement() {
         </Dialog>
       </div>
 
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Möchten Sie dieses Gericht wirklich löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Das Gericht wird dauerhaft aus der Datenbank entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="border rounded-md">
         <Table>
           <TableHeader>
@@ -174,7 +209,7 @@ export function CourtManagement() {
                     <Button variant="ghost" size="icon" onClick={() => handleOpen(court)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(court.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(court.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -187,3 +222,4 @@ export function CourtManagement() {
     </div>
   );
 }
+

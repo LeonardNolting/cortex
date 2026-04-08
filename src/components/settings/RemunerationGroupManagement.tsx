@@ -17,6 +17,16 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "../ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { RemunerationGroupService } from "../../lib/services";
@@ -25,7 +35,9 @@ import { RemunerationGroup } from "../../types";
 export function RemunerationGroupManagement() {
   const [groups, setGroups] = useState<RemunerationGroup[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<RemunerationGroup | null>(null);
+  const [groupIdToDelete, setGroupIdToDelete] = useState<number | null>(null);
   
   const [formData, setFormData] = useState<Omit<RemunerationGroup, "id">>({
     name: "",
@@ -68,9 +80,16 @@ export function RemunerationGroupManagement() {
     loadGroups();
   }
 
-  async function handleDelete(id: number) {
-    if (confirm("Möchten Sie diese Vergütungsgruppe wirklich löschen?")) {
-      await RemunerationGroupService.delete(id);
+  function handleDeleteClick(id: number) {
+    setGroupIdToDelete(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (groupIdToDelete !== null) {
+      await RemunerationGroupService.delete(groupIdToDelete);
+      setGroupIdToDelete(null);
+      setIsDeleteDialogOpen(false);
       loadGroups();
     }
   }
@@ -118,6 +137,23 @@ export function RemunerationGroupManagement() {
         </Dialog>
       </div>
 
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Möchten Sie diese Vergütungsgruppe wirklich löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Die Vergütungsgruppe wird dauerhaft aus der Datenbank entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="border rounded-md">
         <Table>
           <TableHeader>
@@ -137,7 +173,7 @@ export function RemunerationGroupManagement() {
                     <Button variant="ghost" size="icon" onClick={() => handleOpen(group)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(group.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(group.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -150,3 +186,4 @@ export function RemunerationGroupManagement() {
     </div>
   );
 }
+

@@ -45,7 +45,7 @@ export function SettingsScreen() {
         <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Gerichte & Sätze</CardTitle>
-            <CardDescription>Verwalten Sie Gerichte und Honorargruppen.</CardDescription>
+            <CardDescription>Verwalten Sie Gerichte und Vergütungsgruppen.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
             <CourtManagement />
