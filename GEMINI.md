@@ -11,7 +11,7 @@ The central screen should be the list of assignments.
 
 # Developer environment
 
-This project currently contains a Tauri + React scaffold and uses a Tauri SQL database. TailwindCSS is included for styling.
+This project currently contains a Tauri + React scaffold and uses a Tauri SQL database. TailwindCSS is included for styling and you can use shadcn presets from https://ui.shadcn.com/docs/components and add them with `npx shadcn@latest add accordion` (for an accordion for example).
 
 # Data management
 
