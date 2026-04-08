@@ -30,6 +30,7 @@ Each assignment should have a unique ID in the background. The data stored per a
 - Evaluation and writing (minutes)
 - Total time (= sum of previous three entries)
 - Writing fee (number of characters charged at 1.5€/1000)
+- Printing fee (number of pages charged at 0,5€/page)
 - Kilometer fee (km charged at 0.42€/km)
 - Shipping fee (€)
 - Total (= sum of previous entries)
@@ -72,6 +73,22 @@ There should be default entries for this table:
 - id: m1, name: M1, value: 80
 - id: m2, name: M2, value: 90
 - id: m3, name: M3, value: 120
+
+## Assignments
+
+The data stored for each assignment is:
+- Patient name, birthdate, file number
+- Remuneration group ("Vergütungsgruppe", reference)
+- Travel time ("Anfahrt", minutes)
+- Preparation and examination ("Exploration, Fremdanamnese und Durchsicht der Unterlagen", minutes)
+- Evaluation and writing ("Auswertung der Untersuchung und der neuropsycholog. Testung, Verfassen des Gutachtens", minutes)
+- Amount of characters for the writing fee ("Schreibgebühr")
+- Amount of pages for printing fee ("Kopierkosten", optional)
+- Amount of km for Kilometer fee ("Kilometerpauschale")
+- Shipping fee ("Versandkosten", optional)
+- Creation time
+- Printing date (optional, only set after printing)
+- Invoice number (optional, only set after printing)
 
 # UI
 
