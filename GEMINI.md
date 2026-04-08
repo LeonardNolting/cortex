@@ -53,9 +53,25 @@ Each court order has exactly one invoice number. The invoice number is built fro
 ## Courts
 
 The data stored for each court is:
+- ID (auto generated, not user-facing)
 - Name
 - Department (default: "Abteilung für Betreuungssachen")
-- Address
+- Address (split up into a typical address format, you decide the specifics)
+
+There should be one default entry for this table:
+- name: "Amtsgericht Fürth", department: "Abteilung für Betreuungssachen", address: Amtsgericht Fürth Hallstraße 1 90762 Fürth
+
+## Remuneration groups (Vergütungsgruppen)
+
+The data stored for each remuneration group is:
+- ID (auto generated, not user-facing)
+- Name
+- Value (meaning €/hour)
+
+There should be default entries for this table:
+- id: m1, name: M1, value: 80
+- id: m2, name: M2, value: 90
+- id: m3, name: M3, value: 120
 
 # UI
 
