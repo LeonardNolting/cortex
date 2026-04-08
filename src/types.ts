@@ -44,8 +44,12 @@ export interface Settings {
   userZip: string;
   userCity: string;
   userTaxId: string;
+  userBank: string;
+  userIban: string;
+  userBic: string;
   taxRate: number;
   kmFee: number;
   writingFee: number;
   printingFee: number;
+  invoiceIntro: string;
 }

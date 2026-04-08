@@ -32,6 +32,11 @@ import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { getStatusVariant } from "../lib/status";
 import { PageHeader } from "../components/PageHeader";
+import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
+import { generateInvoiceDocx } from "../lib/invoice";
+import { writeFile } from "@tauri-apps/plugin-fs";
+import { open } from "@tauri-apps/plugin-opener";
+import { documentDir, join } from "@tauri-apps/api/path";
 
 export function AssignmentList() {
   const navigate = useNavigate();
@@ -86,13 +91,48 @@ export function AssignmentList() {
     }
   };
 
-  const handleConfirmInvoice = () => {
-    // CALLBACK: This is where the invoice generation logic will be implemented
-    console.log("Confirming invoice for assignment:", selectedAssignment?.id);
-    console.log("Invoice Details:", invoiceForm);
-    
-    // For now, we just close the dialog as requested
-    setIsInvoiceDialogOpen(false);
+  const handleConfirmInvoice = async () => {
+    if (!selectedAssignment) return;
+
+    try {
+      const [court, remunerationGroup, settings] = await Promise.all([
+        CourtService.getById(selectedAssignment.courtId),
+        RemunerationGroupService.getById(selectedAssignment.remunerationGroupId),
+        SettingsService.getSettings()
+      ]);
+
+      if (!court || !remunerationGroup) {
+        throw new Error("Gericht oder Vergütungsgruppe nicht gefunden");
+      }
+
+      const docxBuffer = await generateInvoiceDocx({
+        assignment: selectedAssignment,
+        court,
+        remunerationGroup,
+        settings,
+        invoiceNumber: invoiceForm.invoiceNumber,
+        printingDate: invoiceForm.printingDate
+      });
+
+      const fileName = `Rechnung_${invoiceForm.invoiceNumber}_${selectedAssignment.patientName.replace(/\s+/g, '_')}.docx`;
+      const docPath = await join(await documentDir(), fileName);
+      
+      await writeFile(docPath, docxBuffer);
+      await open(docPath);
+
+      await AssignmentService.update({
+        ...selectedAssignment,
+        invoiceNumber: invoiceForm.invoiceNumber,
+        printingDate: invoiceForm.printingDate,
+        status: "Abgeschlossen"
+      });
+
+      await loadAssignments();
+      setIsInvoiceDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to generate invoice:", error);
+      alert("Fehler beim Generieren der Rechnung: " + (error instanceof Error ? error.message : String(error)));
+    }
   };
 
   const actions = (

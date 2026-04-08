@@ -86,10 +86,14 @@ async function runMigrations(db: Database) {
     ['userZip', '12345'],
     ['userCity', 'Musterstadt'],
     ['userTaxId', 'DE 123 456 789'],
+    ['userBank', 'Stadt- und Kreissparkasse Erlangen'],
+    ['userIban', 'DE46 7635 0000 0060 1113 31'],
+    ['userBic', 'BYLADEM1ERH'],
     ['taxRate', '19'],
     ['kmFee', '0.42'],
     ['writingFee', '1.5'],
-    ['printingFee', '0.5']
+    ['printingFee', '0.5'],
+    ['invoiceIntro', 'Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe {{remunerationGroup.name}} zu berechnen:']
   ];
 
   for (const [key, value] of defaultSettings) {

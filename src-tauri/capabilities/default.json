@@ -8,10 +8,33 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "opener:allow-open",
     "sql:allow-execute",
     "sql:allow-select",
     "sql:allow-load",
     "sql:default",
-    "fs:default"
+    "fs:default",
+    "fs:allow-write",
+    "fs:allow-read",
+    "fs:allow-exists",
+    "path:default",
+    {
+      "identifier": "fs:allow-document-write-recursive",
+      "capability": "fs:allow-write",
+      "scope": {
+        "allow": [
+          "$DOCUMENT/*"
+        ]
+      }
+    },
+    {
+      "identifier": "fs:allow-document-read-recursive",
+      "capability": "fs:allow-read",
+      "scope": {
+        "allow": [
+          "$DOCUMENT/*"
+        ]
+      }
+    }
   ]
 }
