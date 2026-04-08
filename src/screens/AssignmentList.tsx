@@ -18,41 +18,31 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { PlusCircle, Settings, FileText } from "lucide-react";
 import { SAMPLE_ASSIGNMENTS } from "../data/sampleData";
-import { Assignment } from "../types";
+import { getStatusVariant } from "../lib/status";
+import { PageHeader } from "../components/PageHeader";
 
 export function AssignmentList() {
   const navigate = useNavigate();
 
-  const getStatusVariant = (status: Assignment["status"]) => {
-    switch (status) {
-      case "Offen":
-        return "secondary";
-      case "In Bearbeitung":
-        return "default";
-      case "Abgeschlossen":
-        return "outline";
-      default:
-        return "default";
-    }
-  };
+  const actions = (
+    <>
+      <Button variant="outline" size="icon" onClick={() => navigate("/settings")}>
+        <Settings className="h-4 w-4" />
+      </Button>
+      <Button onClick={() => navigate("/edit/new")}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Neuer Auftrag
+      </Button>
+    </>
+  );
 
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cortex</h1>
-          <p className="text-muted-foreground">Auftragsverwaltung für psychiatrische Gutachter</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => navigate("/settings")}>
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button onClick={() => navigate("/edit/new")}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Neuer Auftrag
-          </Button>
-        </div>
-      </div>
+      <PageHeader 
+        title="Cortex" 
+        description="Auftragsverwaltung für psychiatrische Gutachter"
+        actions={actions}
+      />
 
       <Card>
         <CardHeader>

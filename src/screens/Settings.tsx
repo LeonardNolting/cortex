@@ -7,28 +7,27 @@ import {
   CardTitle 
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
+import { PageHeader } from "../components/PageHeader";
 
 export function SettingsScreen() {
   const navigate = useNavigate();
 
+  const actions = (
+    <Button onClick={() => navigate("/")}>
+      <Save className="mr-2 h-4 w-4" />
+      Speichern
+    </Button>
+  );
+
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Einstellungen</h1>
-            <p className="text-muted-foreground">Globale Daten und Rechnungstexte verwalten</p>
-          </div>
-        </div>
-        <Button onClick={() => navigate("/")}>
-          <Save className="mr-2 h-4 w-4" />
-          Speichern
-        </Button>
-      </div>
+      <PageHeader 
+        title="Einstellungen" 
+        description="Globale Daten und Rechnungstexte verwalten"
+        actions={actions}
+        showBack={true}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

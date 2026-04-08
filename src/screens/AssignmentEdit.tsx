@@ -7,8 +7,9 @@ import {
   CardTitle 
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { SAMPLE_ASSIGNMENTS } from "../data/sampleData";
+import { PageHeader } from "../components/PageHeader";
 
 export function AssignmentEdit() {
   const navigate = useNavigate();
@@ -16,27 +17,21 @@ export function AssignmentEdit() {
   
   const selectedAssignment = SAMPLE_ASSIGNMENTS.find(a => a.id === id);
 
+  const actions = (
+    <Button onClick={() => navigate("/")}>
+      <Save className="mr-2 h-4 w-4" />
+      Speichern
+    </Button>
+  );
+
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {selectedAssignment ? `Auftrag: ${selectedAssignment.invoiceNumber}` : "Neuer Auftrag"}
-            </h1>
-            <p className="text-muted-foreground">
-              {selectedAssignment ? `Bearbeiten von ${selectedAssignment.patientName}` : "Erstellen eines neuen Gutachtenauftrags"}
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => navigate("/")}>
-          <Save className="mr-2 h-4 w-4" />
-          Speichern
-        </Button>
-      </div>
+      <PageHeader 
+        title={selectedAssignment ? `Auftrag: ${selectedAssignment.invoiceNumber}` : "Neuer Auftrag"}
+        description={selectedAssignment ? `Bearbeiten von ${selectedAssignment.patientName}` : "Erstellen eines neuen Gutachtenauftrags"}
+        actions={actions}
+        showBack={true}
+      />
 
       <Card>
         <CardHeader>
