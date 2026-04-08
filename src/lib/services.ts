@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { Court, RemunerationGroup, Settings } from "../types";
+import {Assignment, Court, RemunerationGroup, Settings} from "../types";
 
 export const SettingsService = {
   async getSettings(): Promise<Settings> {
@@ -101,7 +101,7 @@ export const RemunerationGroupService = {
 export const AssignmentService = {
   async getAll(): Promise<Assignment[]> {
     const db = await getDb();
-    return db.select<Assignment[]>(`
+    const rows = await db.select<any[]>(`
       SELECT 
         a.id, 
         a.invoice_number as invoiceNumber, 
@@ -117,7 +117,6 @@ export const AssignmentService = {
         a.printing_pages as printingPages, 
         a.km_count as kmCount, 
         a.shipping_fee as shippingFee, 
-        a.status, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
         c.name as court,
@@ -127,11 +126,12 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       ORDER BY a.created_at DESC
     `);
+    return rows.map(r => ({ ...r, status: "Offen" }));
   },
 
   async getById(id: number): Promise<Assignment | null> {
     const db = await getDb();
-    const results = await db.select<Assignment[]>(`
+    const results = await db.select<any[]>(`
       SELECT 
         a.id, 
         a.invoice_number as invoiceNumber, 
@@ -147,7 +147,6 @@ export const AssignmentService = {
         a.printing_pages as printingPages, 
         a.km_count as kmCount, 
         a.shipping_fee as shippingFee, 
-        a.status, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
         c.name as court,
@@ -157,7 +156,8 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       WHERE a.id = ?
     `, [id]);
-    return results.length > 0 ? results[0] : null;
+    if (results.length === 0) return null;
+    return { ...results[0], status: "Offen" } as Assignment;
   },
 
   async create(assignment: Partial<Assignment>): Promise<number> {
@@ -166,8 +166,8 @@ export const AssignmentService = {
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, preparation_time, evaluation_time, writing_characters, 
-        printing_pages, km_count, shipping_fee, status, printing_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        printing_pages, km_count, shipping_fee, printing_date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -175,11 +175,10 @@ export const AssignmentService = {
         assignment.travelTime || 0, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
-        assignment.status || 'Offen',
         assignment.printingDate || null
       ]
     );
-    return result.lastInsertId;
+    return result.lastInsertId!;
   },
 
   async update(assignment: Assignment): Promise<void> {
@@ -190,7 +189,7 @@ export const AssignmentService = {
         court_id = ?, remuneration_group_id = ?,
         travel_time = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
-        shipping_fee = ?, status = ?, printing_date = ?
+        shipping_fee = ?, printing_date = ?
       WHERE id = ?`,
       [
         assignment.invoiceNumber || null,
@@ -198,7 +197,7 @@ export const AssignmentService = {
         assignment.courtId, assignment.remunerationGroupId,
         assignment.travelTime, assignment.preparationTime, assignment.evaluationTime, 
         assignment.writingCharacters, assignment.printingPages, 
-        assignment.kmCount, assignment.shippingFee, assignment.status, 
+        assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
         assignment.id
       ]

@@ -53,7 +53,6 @@ async function runMigrations(db: Database) {
       printing_pages INTEGER DEFAULT 0,
       km_count REAL DEFAULT 0,
       shipping_fee REAL DEFAULT 0,
-      status TEXT DEFAULT 'Offen',
       created_at TEXT DEFAULT (datetime('now')),
       printing_date TEXT,
       FOREIGN KEY (court_id) REFERENCES courts(id),

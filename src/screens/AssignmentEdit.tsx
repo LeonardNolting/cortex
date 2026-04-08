@@ -24,7 +24,7 @@ export function AssignmentEdit() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [remGroups, setRemGroups] = useState<RemunerationGroup[]>([]);
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     patientName: "",
     patientBirthdate: "",
     fileNumber: "",
@@ -36,8 +36,7 @@ export function AssignmentEdit() {
     writingCharacters: 0,
     printingPages: 0,
     kmCount: 0,
-    shippingFee: 0,
-    status: "Offen"
+    shippingFee: 0
   });
 
   useEffect(() => {
@@ -50,9 +49,6 @@ export function AssignmentEdit() {
         setCourts(courtsData);
         setRemGroups(remGroupsData);
 
-        if (courtsData.length > 0 && isNew) {
-          setFormData(prev => ({ ...prev, courtId: courtsData[0].id }));
-        }
         if (remGroupsData.length > 0 && isNew) {
           setFormData(prev => ({ ...prev, remunerationGroupId: remGroupsData[0].id }));
         }
@@ -82,6 +78,16 @@ export function AssignmentEdit() {
   };
 
   const handleSave = async () => {
+    if (!formData.patientName || formData.patientName.trim() === "") {
+      alert("Bitte geben Sie einen Patientenname ein.");
+      return;
+    }
+
+    if (!formData.courtId || formData.courtId === 0) {
+      alert("Bitte wählen Sie ein Gericht aus.");
+      return;
+    }
+
     try {
       if (isNew) {
         await AssignmentService.create(formData);
@@ -113,7 +119,7 @@ export function AssignmentEdit() {
   return (
     <div className="space-y-6 pb-10">
       <PageHeader 
-        title={isNew ? "Neuer Auftrag" : `Auftrag: ${formData.invoiceNumber || formData.fileNumber}`}
+        title={isNew ? "Neuer Auftrag" : `Auftrag: ${formData.patientName}`}
         description={isNew ? "Erstellen eines neuen Gutachtenauftrags" : `Bearbeiten von ${formData.patientName}`}
         actions={actions}
         showBack={true}
@@ -169,40 +175,25 @@ export function AssignmentEdit() {
                 onChange={handleChange}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
+                <option value={0} disabled={!isNew && formData.courtId !== 0}>-- Bitte wählen --</option>
                 {courts.map(court => (
                   <option key={court.id} value={court.id}>{court.name}</option>
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="remunerationGroupId">Vergütungsgruppe</Label>
-                <select
-                  id="remunerationGroupId"
-                  name="remunerationGroupId"
-                  value={formData.remunerationGroupId}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {remGroups.map(group => (
-                    <option key={group.id} value={group.id}>{group.name} ({group.value}€/h)</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Offen">Offen</option>
-                  <option value="In Bearbeitung">In Bearbeitung</option>
-                  <option value="Abgeschlossen">Abgeschlossen</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="remunerationGroupId">Vergütungsgruppe</Label>
+              <select
+                id="remunerationGroupId"
+                name="remunerationGroupId"
+                value={formData.remunerationGroupId}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {remGroups.map(group => (
+                  <option key={group.id} value={group.id}>{group.name} ({group.value}€/h)</option>
+                ))}
+              </select>
             </div>
           </CardContent>
         </Card>
