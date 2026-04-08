@@ -67,7 +67,8 @@ async function runMigrations(db: Database) {
       ['userTaxId', 'DE 123 456 789'],
       ['taxRate', '19'],
       ['kmFee', '0.42'],
-      ['writingFee', '1.5']
+      ['writingFee', '1.5'],
+      ['printingFee', '0.5']
     ];
     for (const [key, value] of defaultSettings) {
       await db.execute("INSERT INTO settings (key, value) VALUES (?, ?)", [key, value]);

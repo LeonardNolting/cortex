@@ -99,7 +99,7 @@ export function UserManagement() {
 
       <div className="pt-4">
         <h4 className="text-sm font-medium mb-4">Gebühren & Sätze</h4>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="taxRate">Umsatzsteuer (%)</Label>
             <Input 
@@ -127,6 +127,16 @@ export function UserManagement() {
               step="0.01"
               value={settings.writingFee} 
               onChange={(e) => setSettings({ ...settings, writingFee: parseFloat(e.target.value) })} 
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="printingFee">Kopierkosten (€/Seite)</Label>
+            <Input 
+              id="printingFee" 
+              type="number"
+              step="0.01"
+              value={settings.printingFee} 
+              onChange={(e) => setSettings({ ...settings, printingFee: parseFloat(e.target.value) })} 
             />
           </div>
         </div>

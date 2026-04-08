@@ -13,6 +13,7 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     remunerationGroup: "M2",
     status: "Offen",
     createdAt: "2026-04-01",
+    printingPages: 10,
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     remunerationGroup: "M3",
     status: "In Bearbeitung",
     createdAt: "2026-04-02",
+    printingPages: 25,
   },
   {
     id: 3,
@@ -39,5 +41,6 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     remunerationGroup: "M2",
     status: "Abgeschlossen",
     createdAt: "2026-03-15",
+    printingPages: 5,
   },
 ];

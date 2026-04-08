@@ -8,7 +8,7 @@ export const SettingsService = {
     
     const settings: Partial<Settings> = {};
     for (const row of rows) {
-      if (['taxRate', 'kmFee', 'writingFee'].includes(row.key)) {
+      if (['taxRate', 'kmFee', 'writingFee', 'printingFee'].includes(row.key)) {
         settings[row.key as keyof Settings] = parseFloat(row.value) as any;
       } else {
         settings[row.key as keyof Settings] = row.value as any;

@@ -8,6 +8,13 @@ export interface Assignment {
   fileNumber: string;
   courtId: number;
   remunerationGroupId: number;
+  travelTime?: number; // minutes
+  preparationTime?: number; // minutes
+  evaluationTime?: number; // minutes
+  writingCharacters?: number;
+  printingPages?: number;
+  kmCount?: number;
+  shippingFee?: number;
   court?: string; // For UI display
   remunerationGroup?: string; // For UI display
   status: "Offen" | "In Bearbeitung" | "Abgeschlossen";
@@ -39,4 +46,5 @@ export interface Settings {
   taxRate: number;
   kmFee: number;
   writingFee: number;
+  printingFee: number;
 }
