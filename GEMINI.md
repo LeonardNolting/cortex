@@ -62,3 +62,7 @@ There are mainly three screens:
 ## Simplified previous version
 
 The original version of this project is in legacy.html. It does _not_ manage assignments but only acts as a calculator for the invoice values. You can see how the invoice data is calculated.
+
+## Docx generation draft
+
+A proof-of-concept docx generation file can be found in print.ts. It was tested in a node environment and thus may not work here, but the code creates a docx file exactly how I want the app to produce them.

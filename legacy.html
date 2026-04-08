@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Gutachtenrechner</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+		html {
+			font-family: sans-serif;
+			font-size: 1.2em;
+		}
+		body, html {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			user-select: none;
+		}
+		form {
+			display: flex;
+			gap: 1em;
+			flex-wrap: wrap;
+			width: 900px;
+			max-width: 100%;
+			padding: 1em;
+			margin: 0 auto;
+			justify-content: center;
+		}
+		form section {
+			flex-basis: 0;
+			flex-grow: 1;
+		}
+		fieldset legend {
+			font-size: .6em;
+			text-transform: uppercase;
+			color: #777;
+			font-weight: 800;
+			padding: 0 .6em;
+		}
+		fieldset {
+			display: flex;
+			flex-direction: column;
+			border-radius: 4px;
+			width: 100%;
+
+			padding-block-start: 0.35em;
+			padding-inline-start: 0.75em;
+			padding-inline-end: 0.75em;
+			padding-block-end: 0.625em;
+
+			margin: 0 2px;
+		}
+		form fieldset {
+			margin-bottom: 1em;
+			background-color: white;
+		}
+		form fieldset:last-child {
+			margin-bottom: 0;
+		}
+		fieldset#exceptions {
+			border-color: khaki;
+		}
+		fieldset#actions {
+			display: block;
+			border-color: cornflowerblue;
+		}
+		fieldset#actions > * {
+			display: inline-block;
+		}
+		fieldset#outputs {
+			border-color: darkviolet;
+		}
+		fieldset#values {
+			border-color: plum;
+		}
+		label {
+			display: flex;
+			align-items: center;
+			padding: .2em;
+		}
+		label:not( .left ) {
+			justify-content: space-between;
+		}
+		.input[type="checkbox"] {
+			margin-right: .6em;
+		}
+		.input[type="number"] {
+			text-align: right;
+		}
+		.input:not( [type=checkbox] ), .output {
+			padding: .2em;
+			width: 100px;
+			font-size: inherit;
+		}
+		.input:not( [type=checkbox] ), .output:not(:empty) {
+			border: 1px solid #777;
+			border-radius: 2px;
+		}
+		.input[required]:not( [type=checkbox] ) {
+			border-width: 2px;
+			border-color: #333;
+		}
+		/*.input[required] ~ *, *:has(~ .input[required]) {
+			font-weight: bold;
+			color: #111;
+		}*/
+		.output:empty::after {
+			content: "—";
+		}
+		.output {
+			text-align: right;
+			position: relative;
+		}
+		.output:not(:empty) {
+			cursor: pointer;
+		}
+		::placeholder {
+			font-style: italic;
+		}
+		hr {
+			width: 100%;
+		}
+		span + input, span + output {
+			margin-left: 8px;
+		}
+		.output::before {
+			content: "✓";
+			color: green;
+			pointer-events: none;
+
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 100%;
+			padding: 0 .3em;
+			opacity: 0;
+		}
+
+		.output:not(:empty):focus-within::before {
+			animation: fadeOut .5s ease-in-out forwards;
+			opacity: 1;
+			animation-delay: 1s;
+		}
+
+		@keyframes fadeOut {
+			0% {
+				opacity: 1;
+			}
+			100% {
+				opacity: 0;
+			}
+		}
+
+		body .input:focus-within, body .output:not(:empty):focus-within {
+			outline: 4px cornflowerblue solid;
+			outline-offset: -2px;
+		}
+		body .input[type=checkbox]:focus-within {
+			outline-offset: 2px;
+		}
+		label:not(:has(.output:empty)), select, input[type=checkbox] {
+			cursor: pointer;
+		}
+
+		/*#values:has(.input:user-valid) *::placeholder {
+			color: transparent;
+		}*/
+		::placeholder {
+			color: transparent;
+		}
+
+		.input:user-valid {
+			border-color: transparent !important;
+			outline: 3px darkgreen solid;
+			outline-offset: -2px;
+		}
+		.input:user-invalid {
+			border-color: transparent !important;
+			outline: 3px firebrick solid;
+			outline-offset: -2px;
+		}
+
+		#anleitung {
+			flex-basis: 100%;
+		}
+		#anleitung fieldset {
+			padding: .5em .75em .56em;
+			background-color: #334155;
+			border: none;
+			color: white;
+		}
+		/*#anleitung:has(details[open])::after {
+			content: "";
+			position: fixed;
+			z-index: 1;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			backdrop-filter: blur(3px);
+		}
+		#anleitung > * {
+			position: relative;
+			z-index: 2;
+		}*/
+		details > summary {
+			cursor: pointer;
+		}
+		details[open] > summary {
+			margin-bottom: .6rem;
+		}
+
+		#inputs label > span:has(+ .input)::after, #outputs label > span:has(+ .output)::after {
+			content: ":";
+		}
+		#inputs label > span:has(+ .input:required)::after {
+			content: "*:";
+		}
+
+		#usst_prozent:empty::after {
+			display: none;
+		}
+		#usst_prozent:not(:empty)::before {
+			content: " (";
+		}
+		#usst_prozent:not(:empty)::after {
+			content: "%)";
+		}
+
+		code {
+			background-color: #ccc;
+			padding: .1rem .2rem;
+			border-radius: 4px;
+			line-height: 1.6;
+			color: black;
+		}
+
+		#anleitung ul {
+			margin: 0;
+			padding-inline-start: 20px;
+		}
+		#anleitung ul li + li {
+			margin-top: .2rem;
+		}
+	</style>
+</head>
+<body>
+<form>
+	<section id="anleitung">
+		<fieldset>
+			<details>
+				<summary>Anleitung zur schnellen Bedienung:</summary>
+				<ul>
+					<li>Auswahl der Vergütungsgruppe ist am Anfang automatisch ausgewählt, kann mit <code>Pfeil nach
+						oben/unten</code> genutzt werden</li>
+					<li><code>Tab</code> um zum nächsten Eingabefeld zu kommen</li>
+					<li><code>Enter</code> um sofort zu den Ausgaben zu springen</li>
+					<li><code>Tab</code> um die nächste Ausgabe zu kopieren</li>
+					<li><code>Strg + R</code> um neu anzufangen</li>
+				</ul>
+			</details>
+		</fieldset>
+	</section>
+	<section id="inputs">
+		<fieldset id="values">
+			<legend>Werte eingeben</legend>
+			<label>
+				<span>Vergütungsgruppe</span>
+				<select required class="input" id="mx" autofocus>
+					<option value="" id="m0" hidden disabled selected></option>
+					<option value="80" id="m1">M1</option>
+					<option value="90" id="m2">M2</option>
+					<option value="120" id="m3">M3</option>
+				</select>
+			</label>
+			<hr>
+			<label><span>Anfahrt (Minuten)</span><input required class="input" type="number" step=any placeholder="54" id="anfahrt" /></label>
+			<label><span>Kilometer (1 Weg)</span><input class="input" type="number" step=any placeholder="48" id="kilometer" /></label>
+			<label><span>Anzahl Anfahrten (1 Weg)</span><input required class="input" type="number" step=any value="2" min="0" id="anfahrten" /></label>
+			<hr>
+			<label><span>Exploration (Minuten)</span><input required class="input" type="number" step=any placeholder="121" id="exploration" /></label>
+			<label><span>Auswertung (Minuten)</span><input required class="input" type="number" step=any placeholder="124" id="auswertung" /></label>
+			<hr>
+			<label><span>Zeichen (Anzahl)</span><input required class="input" type="number" step=any placeholder="14179" id="schreibgeb" /></label>
+			<label><span>Seiten (Seiten)</span><input class="input" type="number" step=any placeholder="30" id="kopier" /></label>
+			<label><span>Versand (in €)</span><input class="input" type="number" step=any placeholder="12,5" id="versand" /></label>
+			<hr>
+			<label><span>Umsatzsteuer (in %)</span><input required class="input" type="number" step=any value="19" id="usst" /></label>
+		</fieldset>
+		<fieldset id="exceptions">
+			<legend>Ausnahmen</legend>
+			<label class="left">
+				<input class="input" type="checkbox" id="erlangen" />
+				<span>Erlangen (auf 2. Stelle runden)</span>
+			</label>
+		</fieldset>
+		<fieldset id="actions">
+			<legend>Aktionen</legend>
+			<input type="submit" value="BERECHNEN" />
+			<input type="button" accesskey="h" onclick="if ( confirm( 'Möchtest du wirklich alle Felder leeren?' ) ) form.reset()" value="LEEREN" />
+		</fieldset>
+	</section>
+	<section>
+		<fieldset id="outputs">
+			<legend>Ausgaben</legend>
+			<label><span>Gesamtzeit</span><output class="output" id="gesamtzeit"></output></label>
+			<label><span>Gesamtzeit gerundet</span><output class="output" id="gesamtzeit_gerundet"></output></label>
+			<label><span>Gesamtzeit in Euro</span><output class="output" id="gesamtzeit_euro"></output></label>
+			<hr>
+			<label><span>Schreibgebühr in Euro</span><output class="output" id="schreibgeb_euro"></output></label>
+			<label><span>Kopierkosten in Euro</span><output class="output" id="kopier_euro"></output></label>
+			<label><span>Kilometerpauschale in Euro</span><output class="output" id="kilometer_euro"></output></label>
+			<label><span>Versandkosten</span><output class="output" id="versand_euro"></output></label>
+			<hr>
+			<label><span>Summe</span><output class="output" id="netto_euro"></output></label>
+			<label><span>Umsatzsteuer<span id="usst_prozent"></span></span><output class="output" id="usst_euro"></output></label>
+			<label><span><b>Gesamt</b></span><output class="output" id="brutto_euro"></output></label>
+		</fieldset>
+	</section>
+</form>
+<script type="text/javascript">
+	document.documentElement.scrollTop = 0;
+
+	function toNumber ( e ) {
+		return Number( Math.round( Number( String( e ).replace( ',', '.' ) ) * 1000 ) / 1000 );
+	}
+	function toEuro ( e ) {
+		return ( Math.round( Number( e ) * 100 ) / 100 ).toFixed( 2 ).toString().replace( '.', ',' );
+	}
+
+	HTMLElement.prototype.copy = function () {
+		const el = document.createElement('textarea');
+
+		el.value = this.textContent.trim();
+		document.body.appendChild(el);
+		el.select();
+		document.execCommand('copy');
+		document.body.removeChild(el);
+	}
+
+	const form = document.forms[0],
+			elements = form.elements,
+			inputs = document.querySelectorAll( '.input', form ),
+			outputs = document.querySelectorAll( '.output', form );
+
+	form.addEventListener( 'submit', e => {
+		e.preventDefault();
+		output();
+		document.getElementById("outputs").scrollIntoView()
+		document.querySelector(".output").focus()
+	} );
+	form.addEventListener( 'change', e => {
+		if ( form.checkValidity() ) output();
+	} );
+	form.addEventListener( 'input', e => {
+		if ( form.checkValidity() ) output();
+	} );
+
+	const usstInput = document.getElementById("usst");
+	const usstMirror = document.getElementById("usst_prozent");
+	const mirrorUsst = () => {
+		usstMirror.textContent = usstInput.value || "";
+	}
+	usstInput.addEventListener("change", event => mirrorUsst());
+	mirrorUsst();
+
+	[...document.getElementsByClassName( 'output', form )].forEach( output => {
+		const copy = () => {
+			if (output.value === "") return
+			output.copy();
+			output.focus();
+		}
+
+		output.addEventListener( 'focus', e => copy() );
+		output.addEventListener("keyup", event => {
+			if (event.ctrlKey && event.key === "c") copy()
+			else if (event.key === "Enter") copy()
+		})
+	} );
+
+	function output () {
+		const inputValues = {};
+
+		[...document.querySelectorAll( 'fieldset:not( #actions ):not( #outputs ) .input' )].forEach( input => {
+			inputValues[input.id] = String( input.type === 'checkbox' ? String( Number( input.checked ) ) : input.value );
+		} );
+
+		for ( let i in inputValues ) {
+			inputValues[i] = toNumber( inputValues[i] );
+		}
+
+		rechnen( inputValues, outputValues => {
+			for ( let i in outputValues ) {
+				let e = document.getElementById( i, form );
+				if ( e ) {
+					let value = outputValues[i];
+					let valid = toNumber( String( value ) ) > 0;
+					e.value = ( valid ? value : '' );
+					if (valid) e.tabIndex = 0
+					else e.removeAttribute("tabindex")
+				}
+			}
+		} );
+	}
+
+	function rechnen ( inputValues, cb ) {
+		const outputValues = {};
+		outputValues.gesamtzeit = (inputValues.anfahrt * inputValues.anfahrten) + inputValues.exploration + inputValues.auswertung;
+		outputValues.gesamtzeit_gerundet = Math.ceil( outputValues.gesamtzeit / 30 ) * 30;
+		outputValues.gesamtzeit_euro = toNumber( ( outputValues.gesamtzeit_gerundet / 60 ) * inputValues.mx );
+
+		outputValues.schreibgeb_gerundet = Math.ceil( inputValues.schreibgeb / 1000 );
+		outputValues.schreibgeb_euro = toNumber( outputValues.schreibgeb_gerundet * 1.5 );
+
+		outputValues.kopier_euro = toNumber( inputValues.kopier * 0.5 );
+
+		outputValues.kilometer_euro = toNumber( (inputValues.kilometer * inputValues.anfahrten) * 0.42 );
+
+		outputValues.versand_euro = toNumber( inputValues.versand );
+
+		outputValues.netto_euro = toNumber(
+				outputValues.gesamtzeit_euro +
+				outputValues.schreibgeb_euro +
+				outputValues.kopier_euro +
+				outputValues.kilometer_euro +
+				outputValues.versand_euro );
+
+		// console.log( inputValues.erlangen, outputValues.netto_euro * 0.19, Math.round( ( 0.19 * outputValues.netto_euro ) * 10 ) / 10, Math.round( ( 0.19 * outputValues.netto_euro ) * 100 ) / 100 );
+		outputValues.usst_euro = toNumber(
+				!inputValues.erlangen
+						? Math.round( ( (inputValues.usst / 100) * outputValues.netto_euro ) * 10 ) / 10
+						: Math.round( ( (inputValues.usst / 100) * outputValues.netto_euro ) * 100 ) / 100
+		);
+
+		outputValues.brutto_euro = toNumber( outputValues.netto_euro + outputValues.usst_euro );
+		for ( let i in outputValues ) {
+			outputValues[i] = toEuro( outputValues[i] )
+		}
+		cb( outputValues );
+	}
+</script>
+</body>
+</html>
