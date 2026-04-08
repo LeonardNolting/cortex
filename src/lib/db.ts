@@ -37,6 +37,30 @@ async function runMigrations(db: Database) {
     )
   `);
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS assignments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      invoice_number TEXT,
+      patient_name TEXT NOT NULL,
+      patient_birthdate TEXT NOT NULL,
+      file_number TEXT NOT NULL,
+      court_id INTEGER NOT NULL,
+      remuneration_group_id INTEGER NOT NULL,
+      travel_time INTEGER DEFAULT 0,
+      preparation_time INTEGER DEFAULT 0,
+      evaluation_time INTEGER DEFAULT 0,
+      writing_characters INTEGER DEFAULT 0,
+      printing_pages INTEGER DEFAULT 0,
+      km_count REAL DEFAULT 0,
+      shipping_fee REAL DEFAULT 0,
+      status TEXT DEFAULT 'Offen',
+      created_at TEXT DEFAULT (datetime('now')),
+      printing_date TEXT,
+      FOREIGN KEY (court_id) REFERENCES courts(id),
+      FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
+    )
+  `);
+
   // Default entries for courts
   const courtsCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM courts");
   if (courtsCount[0].count === 0) {

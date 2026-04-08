@@ -19,6 +19,7 @@ export interface Assignment {
   remunerationGroup?: string; // For UI display
   status: "Offen" | "In Bearbeitung" | "Abgeschlossen";
   createdAt: string;
+  printingDate?: string;
 }
 
 export interface Court {

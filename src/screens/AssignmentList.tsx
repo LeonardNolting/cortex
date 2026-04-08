@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { 
   Table, 
   TableBody, 
@@ -16,13 +17,42 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { PlusCircle, Settings, FileText } from "lucide-react";
-import { SAMPLE_ASSIGNMENTS } from "../data/sampleData";
+import { PlusCircle, Settings, FileText, Trash2 } from "lucide-react";
+import { AssignmentService } from "../lib/services";
+import { Assignment } from "../types";
 import { getStatusVariant } from "../lib/status";
 import { PageHeader } from "../components/PageHeader";
 
 export function AssignmentList() {
   const navigate = useNavigate();
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAssignments();
+  }, []);
+
+  const loadAssignments = async () => {
+    try {
+      const data = await AssignmentService.getAll();
+      setAssignments(data);
+    } catch (error) {
+      console.error("Failed to load assignments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Möchten Sie diesen Auftrag wirklich löschen?")) {
+      try {
+        await AssignmentService.delete(id);
+        await loadAssignments();
+      } catch (error) {
+        console.error("Failed to delete assignment:", error);
+      }
+    }
+  };
 
   const actions = (
     <>
@@ -66,40 +96,62 @@ export function AssignmentList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {SAMPLE_ASSIGNMENTS.map((assignment) => (
-                <TableRow 
-                  key={assignment.id} 
-                  className="cursor-pointer"
-                  onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
-                >
-                  <TableCell className="font-medium">{assignment.invoiceNumber}</TableCell>
-                  <TableCell>{assignment.patientName}</TableCell>
-                  <TableCell>{assignment.patientBirthdate}</TableCell>
-                  <TableCell>{assignment.fileNumber}</TableCell>
-                  <TableCell>{assignment.court}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(assignment.status)}>
-                      {assignment.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/edit/${assignment.id}`);
-                      }}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Bearbeiten
-                    </Button>
-                  </TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10">Lade Aufträge...</TableCell>
                 </TableRow>
-              ))}
+              ) : assignments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
+                </TableRow>
+              ) : (
+                assignments.map((assignment) => (
+                  <TableRow 
+                    key={assignment.id} 
+                    className="cursor-pointer"
+                    onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
+                  >
+                    <TableCell className="font-medium">{assignment.invoiceNumber || "-"}</TableCell>
+                    <TableCell>{assignment.patientName}</TableCell>
+                    <TableCell>{assignment.patientBirthdate}</TableCell>
+                    <TableCell>{assignment.fileNumber}</TableCell>
+                    <TableCell>{assignment.court}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(assignment.status)}>
+                        {assignment.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/edit/${assignment.id}`);
+                          }}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(assignment.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
