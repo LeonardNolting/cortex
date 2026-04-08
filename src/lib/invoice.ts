@@ -124,7 +124,7 @@ function row(c1: string, c2: string, c3: string, c4: string, bold = false, borde
   });
 }
 
-export async function generateInvoiceDocx(data: InvoiceData): Promise<Buffer> {
+export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array> {
   const values = calculateInvoiceValues(data);
   const { assignment, court, remunerationGroup, settings, invoiceNumber, printingDate } = data;
 
@@ -259,5 +259,5 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Buffer> {
     }]
   });
 
-  return await Packer.toBuffer(doc);
+  return new Uint8Array(await Packer.toArrayBuffer(doc));
 }

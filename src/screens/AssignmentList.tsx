@@ -105,7 +105,7 @@ export function AssignmentList() {
         throw new Error("Gericht oder Vergütungsgruppe nicht gefunden");
       }
 
-      const docxBuffer = await generateInvoiceDocx({
+      const docxArray = await generateInvoiceDocx({
         assignment: selectedAssignment,
         court,
         remunerationGroup,
@@ -117,7 +117,7 @@ export function AssignmentList() {
       const fileName = `Rechnung_${invoiceForm.invoiceNumber}_${selectedAssignment.patientName.replace(/\s+/g, '_')}.docx`;
       const docPath = await join(await documentDir(), fileName);
       
-      await writeFile(docPath, docxBuffer);
+      await writeFile(docPath, docxArray);
       await openPath(docPath);
 
       await AssignmentService.update({
