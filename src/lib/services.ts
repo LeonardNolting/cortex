@@ -119,7 +119,6 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
-        a.status,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -127,7 +126,7 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       ORDER BY a.created_at DESC
     `);
-    return rows;
+    return rows.map(r => ({ ...r, status: "Offen" }));
   },
 
   async getById(id: number): Promise<Assignment | null> {
@@ -150,7 +149,6 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
-        a.status,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -159,7 +157,7 @@ export const AssignmentService = {
       WHERE a.id = ?
     `, [id]);
     if (results.length === 0) return null;
-    return results[0] as Assignment;
+    return { ...results[0], status: "Offen" } as Assignment;
   },
 
   async getNextInvoiceNumber(): Promise<string> {
@@ -193,8 +191,8 @@ export const AssignmentService = {
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, preparation_time, evaluation_time, writing_characters, 
-        printing_pages, km_count, shipping_fee, printing_date, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        printing_pages, km_count, shipping_fee, printing_date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -202,8 +200,7 @@ export const AssignmentService = {
         assignment.travelTime || 0, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
-        assignment.printingDate || null,
-        assignment.status || "Offen"
+        assignment.printingDate || null
       ]
     );
     return result.lastInsertId!;
@@ -217,7 +214,7 @@ export const AssignmentService = {
         court_id = ?, remuneration_group_id = ?,
         travel_time = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
-        shipping_fee = ?, printing_date = ?, status = ?
+        shipping_fee = ?, printing_date = ?
       WHERE id = ?`,
       [
         assignment.invoiceNumber || null,
@@ -227,7 +224,6 @@ export const AssignmentService = {
         assignment.writingCharacters, assignment.printingPages, 
         assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
-        assignment.status,
         assignment.id
       ]
     );

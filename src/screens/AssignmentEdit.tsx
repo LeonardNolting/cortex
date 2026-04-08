@@ -10,7 +10,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Save, FileText } from "lucide-react";
+import { Badge } from "../components/ui/badge";
+import { Save } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
 import { Court, RemunerationGroup } from "../types";
@@ -38,7 +39,6 @@ export function AssignmentEdit() {
     kmCount: 0,
     shippingFee: 0,
     invoiceNumber: "",
-    status: "Offen" as const,
     printingDate: ""
   });
 
@@ -84,21 +84,6 @@ export function AssignmentEdit() {
     }));
   };
 
-  const handleGenerateInvoiceNumber = async () => {
-    try {
-      const nextNumber = await AssignmentService.getNextInvoiceNumber();
-      setFormData(prev => ({
-        ...prev,
-        invoiceNumber: nextNumber,
-        status: "Abgeschlossen",
-        printingDate: new Date().toISOString().split('T')[0]
-      }));
-    } catch (error) {
-      console.error("Failed to generate invoice number:", error);
-      alert("Fehler beim Generieren der Rechnungsnummer.");
-    }
-  };
-
   const handleSave = async () => {
     if (!formData.patientName || formData.patientName.trim() === "") {
       alert("Bitte geben Sie einen Patientenname ein.");
@@ -133,12 +118,6 @@ export function AssignmentEdit() {
 
   const actions = (
     <div className="flex gap-2">
-      {!formData.invoiceNumber && !isNew && (
-        <Button variant="outline" onClick={handleGenerateInvoiceNumber}>
-          <FileText className="mr-2 h-4 w-4" />
-          Rechnung generieren
-        </Button>
-      )}
       <Button onClick={handleSave}>
         <Save className="mr-2 h-4 w-4" />
         Speichern
@@ -230,17 +209,9 @@ export function AssignmentEdit() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Offen">Offen</option>
-                  <option value="In Bearbeitung">In Bearbeitung</option>
-                  <option value="Abgeschlossen">Abgeschlossen</option>
-                </select>
+                <Badge variant="outline" className="h-10 w-full justify-center text-sm font-normal">
+                  Offen
+                </Badge>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="invoiceNumber">Rechnungsnummer</Label>

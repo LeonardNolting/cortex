@@ -15,8 +15,18 @@ import {
   CardHeader, 
   CardTitle 
 } from "../components/ui/card";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { PlusCircle, Settings, FileText, Trash2 } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
@@ -27,6 +37,14 @@ export function AssignmentList() {
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Invoice Dialog State
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [invoiceForm, setInvoiceForm] = useState({
+    invoiceNumber: "",
+    printingDate: new Date().toISOString().split('T')[0]
+  });
 
   useEffect(() => {
     loadAssignments();
@@ -52,6 +70,29 @@ export function AssignmentList() {
         console.error("Failed to delete assignment:", error);
       }
     }
+  };
+
+  const handleOpenInvoiceDialog = async (assignment: Assignment) => {
+    try {
+      const nextNumber = await AssignmentService.getNextInvoiceNumber();
+      setSelectedAssignment(assignment);
+      setInvoiceForm({
+        invoiceNumber: nextNumber,
+        printingDate: new Date().toISOString().split('T')[0]
+      });
+      setIsInvoiceDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to get next invoice number:", error);
+    }
+  };
+
+  const handleConfirmInvoice = () => {
+    // CALLBACK: This is where the invoice generation logic will be implemented
+    console.log("Confirming invoice for assignment:", selectedAssignment?.id);
+    console.log("Invoice Details:", invoiceForm);
+    
+    // For now, we just close the dialog as requested
+    setIsInvoiceDialogOpen(false);
   };
 
   const actions = (
@@ -129,9 +170,10 @@ export function AssignmentList() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
+                          title="Rechnung generieren"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/edit/${assignment.id}`);
+                            handleOpenInvoiceDialog(assignment);
                           }}
                         >
                           <FileText className="h-4 w-4" />
@@ -156,6 +198,50 @@ export function AssignmentList() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Rechnung generieren</DialogTitle>
+            <DialogDescription>
+              Geben Sie das Rechnungsdatum und die Rechnungsnummer für {selectedAssignment?.patientName} an.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="printingDate" className="text-right">
+                Datum
+              </Label>
+              <Input
+                id="printingDate"
+                type="date"
+                value={invoiceForm.printingDate}
+                onChange={(e) => setInvoiceForm(prev => ({ ...prev, printingDate: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="invoiceNumber" className="text-right">
+                Nummer
+              </Label>
+              <Input
+                id="invoiceNumber"
+                value={invoiceForm.invoiceNumber}
+                onChange={(e) => setInvoiceForm(prev => ({ ...prev, invoiceNumber: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button type="button" onClick={handleConfirmInvoice}>
+              Bestätigen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
