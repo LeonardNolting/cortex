@@ -41,17 +41,17 @@ export const RemunerationGroupService = {
     return db.select<RemunerationGroup[]>("SELECT * FROM remuneration_groups ORDER BY name ASC");
   },
 
-  async getById(id: string): Promise<RemunerationGroup | null> {
+  async getById(id: number): Promise<RemunerationGroup | null> {
     const db = await getDb();
     const results = await db.select<RemunerationGroup[]>("SELECT * FROM remuneration_groups WHERE id = ?", [id]);
     return results.length > 0 ? results[0] : null;
   },
 
-  async create(group: RemunerationGroup): Promise<void> {
+  async create(group: Omit<RemunerationGroup, "id">): Promise<void> {
     const db = await getDb();
     await db.execute(
-      "INSERT INTO remuneration_groups (id, name, value) VALUES (?, ?, ?)",
-      [group.id, group.name, group.value]
+      "INSERT INTO remuneration_groups (name, value) VALUES (?, ?)",
+      [group.name, group.value]
     );
   },
 
@@ -63,7 +63,7 @@ export const RemunerationGroupService = {
     );
   },
 
-  async delete(id: string): Promise<void> {
+  async delete(id: number): Promise<void> {
     const db = await getDb();
     await db.execute("DELETE FROM remuneration_groups WHERE id = ?", [id]);
   }

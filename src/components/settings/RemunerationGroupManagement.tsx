@@ -27,8 +27,7 @@ export function RemunerationGroupManagement() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<RemunerationGroup | null>(null);
   
-  const [formData, setFormData] = useState<RemunerationGroup>({
-    id: "",
+  const [formData, setFormData] = useState<Omit<RemunerationGroup, "id">>({
     name: "",
     value: 0
   });
@@ -45,11 +44,13 @@ export function RemunerationGroupManagement() {
   function handleOpen(group?: RemunerationGroup) {
     if (group) {
       setEditingGroup(group);
-      setFormData(group);
+      setFormData({
+        name: group.name,
+        value: group.value
+      });
     } else {
       setEditingGroup(null);
       setFormData({
-        id: "",
         name: "",
         value: 0
       });
@@ -59,7 +60,7 @@ export function RemunerationGroupManagement() {
 
   async function handleSave() {
     if (editingGroup) {
-      await RemunerationGroupService.update(formData);
+      await RemunerationGroupService.update({ ...formData, id: editingGroup.id });
     } else {
       await RemunerationGroupService.create(formData);
     }
@@ -67,7 +68,7 @@ export function RemunerationGroupManagement() {
     loadGroups();
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: number) {
     if (confirm("Möchten Sie diese Vergütungsgruppe wirklich löschen?")) {
       await RemunerationGroupService.delete(id);
       loadGroups();
@@ -91,15 +92,6 @@ export function RemunerationGroupManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="id">ID (z.B. m1)</Label>
-                <Input 
-                  id="id" 
-                  value={formData.id} 
-                  disabled={!!editingGroup}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })} 
-                />
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="name">Name (z.B. M1)</Label>
                 <Input 
@@ -130,7 +122,6 @@ export function RemunerationGroupManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Stundensatz</TableHead>
               <TableHead className="text-right">Aktionen</TableHead>
@@ -139,7 +130,6 @@ export function RemunerationGroupManagement() {
           <TableBody>
             {groups.map((group) => (
               <TableRow key={group.id}>
-                <TableCell className="font-mono">{group.id}</TableCell>
                 <TableCell className="font-medium">{group.name}</TableCell>
                 <TableCell>{group.value.toFixed(2)} €</TableCell>
                 <TableCell className="text-right">

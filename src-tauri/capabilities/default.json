@@ -8,6 +8,9 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "sql:allow-execute",
+    "sql:allow-select",
+    "sql:allow-load",
     "sql:default",
     "fs:default"
   ]

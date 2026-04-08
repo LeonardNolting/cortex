@@ -24,7 +24,7 @@ async function runMigrations(db: Database) {
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS remuneration_groups (
-      id TEXT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       value REAL NOT NULL
     )
@@ -43,8 +43,8 @@ async function runMigrations(db: Database) {
   const remCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM remuneration_groups");
   if (remCount[0].count === 0) {
     await db.execute(`
-      INSERT INTO remuneration_groups (id, name, value)
-      VALUES ('m1', 'M1', 80), ('m2', 'M2', 90), ('m3', 'M3', 120)
+      INSERT INTO remuneration_groups (name, value)
+      VALUES ('M1', 80), ('M2', 90), ('M3', 120)
     `);
   }
 }

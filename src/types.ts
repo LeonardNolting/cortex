@@ -24,7 +24,7 @@ export interface Court {
 }
 
 export interface RemunerationGroup {
-  id: string; // Using string as requested by defaults (m1, m2, m3) or number if auto-gen
+  id: number;
   name: string;
   value: number;
 }
