@@ -6,8 +6,25 @@ export interface Assignment {
   patientName: string;
   patientBirthdate: string;
   fileNumber: string;
-  court: string;
-  remunerationGroup: string;
+  courtId: string;
+  remunerationGroupId: string;
+  court?: string; // For UI display
+  remunerationGroup?: string; // For UI display
   status: "Offen" | "In Bearbeitung" | "Abgeschlossen";
   createdAt: string;
+}
+
+export interface Court {
+  id: number;
+  name: string;
+  department: string;
+  street: string;
+  zip: string;
+  city: string;
+}
+
+export interface RemunerationGroup {
+  id: string; // Using string as requested by defaults (m1, m2, m3) or number if auto-gen
+  name: string;
+  value: number;
 }

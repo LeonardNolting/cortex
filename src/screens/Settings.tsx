@@ -9,6 +9,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Save } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
+import { CourtManagement } from "../components/settings/CourtManagement";
+import { RemunerationGroupManagement } from "../components/settings/RemunerationGroupManagement";
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ export function SettingsScreen() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Benutzerdaten</CardTitle>
             <CardDescription>Name, Adresse und Steuernummer des Gutachters.</CardDescription>
@@ -40,13 +42,14 @@ export function SettingsScreen() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Gerichte & Sätze</CardTitle>
             <CardDescription>Verwalten Sie Gerichte und Honorargruppen.</CardDescription>
           </CardHeader>
-          <CardContent className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
-            [Platzhalter: Gerichte / Honorare]
+          <CardContent className="space-y-8">
+            <CourtManagement />
+            <RemunerationGroupManagement />
           </CardContent>
         </Card>
 
