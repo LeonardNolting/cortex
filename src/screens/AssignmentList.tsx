@@ -35,7 +35,7 @@ import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { generateInvoiceDocx } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
-import { open } from "@tauri-apps/plugin-opener";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { documentDir, join } from "@tauri-apps/api/path";
 
 export function AssignmentList() {
@@ -118,7 +118,7 @@ export function AssignmentList() {
       const docPath = await join(await documentDir(), fileName);
       
       await writeFile(docPath, docxBuffer);
-      await open(docPath);
+      await openPath(docPath);
 
       await AssignmentService.update({
         ...selectedAssignment,

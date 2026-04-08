@@ -14,7 +14,7 @@ import { Badge } from "../components/ui/badge";
 import { Save } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
-import { Court, RemunerationGroup } from "../types";
+import { Assignment, Court, RemunerationGroup } from "../types";
 
 export function AssignmentEdit() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export function AssignmentEdit() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [remGroups, setRemGroups] = useState<RemunerationGroup[]>([]);
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<Partial<Assignment>>({
     patientName: "",
     patientBirthdate: "",
     fileNumber: "",
@@ -39,7 +39,8 @@ export function AssignmentEdit() {
     kmCount: 0,
     shippingFee: 0,
     invoiceNumber: "",
-    printingDate: ""
+    printingDate: "",
+    status: "Offen"
   });
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export function AssignmentEdit() {
       if (isNew) {
         await AssignmentService.create(formData);
       } else {
-        await AssignmentService.update(formData);
+        await AssignmentService.update(formData as Assignment);
       }
       navigate("/");
     } catch (error) {
