@@ -39,6 +39,15 @@ export function UserManagement() {
     return <div>Lädt...</div>;
   }
 
+  const updateNumericSetting = (key: keyof Settings, value: string) => {
+    if (!settings) return;
+    const numericValue = parseFloat(value.replace(",", "."));
+    setSettings({
+      ...settings,
+      [key]: isNaN(numericValue) ? 0 : numericValue
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -46,7 +55,7 @@ export function UserManagement() {
           <Label htmlFor="userName">Name</Label>
           <Input 
             id="userName" 
-            value={settings.userName} 
+            value={settings.userName || ""} 
             onChange={(e) => setSettings({ ...settings, userName: e.target.value })} 
           />
         </div>
@@ -54,7 +63,7 @@ export function UserManagement() {
           <Label htmlFor="userBirthday">Geburtsdatum</Label>
           <Input 
             id="userBirthday" 
-            value={settings.userBirthday} 
+            value={settings.userBirthday || ""} 
             onChange={(e) => setSettings({ ...settings, userBirthday: e.target.value })} 
           />
         </div>
@@ -64,7 +73,7 @@ export function UserManagement() {
         <Label htmlFor="userStreet">Straße & Hausnummer</Label>
         <Input 
           id="userStreet" 
-          value={settings.userStreet} 
+          value={settings.userStreet || ""} 
           onChange={(e) => setSettings({ ...settings, userStreet: e.target.value })} 
         />
       </div>
@@ -74,7 +83,7 @@ export function UserManagement() {
           <Label htmlFor="userZip">PLZ</Label>
           <Input 
             id="userZip" 
-            value={settings.userZip} 
+            value={settings.userZip || ""} 
             onChange={(e) => setSettings({ ...settings, userZip: e.target.value })} 
           />
         </div>
@@ -82,7 +91,7 @@ export function UserManagement() {
           <Label htmlFor="userCity">Ort</Label>
           <Input 
             id="userCity" 
-            value={settings.userCity} 
+            value={settings.userCity || ""} 
             onChange={(e) => setSettings({ ...settings, userCity: e.target.value })} 
           />
         </div>
@@ -92,7 +101,7 @@ export function UserManagement() {
         <Label htmlFor="userTaxId">Steuernummer</Label>
         <Input 
           id="userTaxId" 
-          value={settings.userTaxId} 
+          value={settings.userTaxId || ""} 
           onChange={(e) => setSettings({ ...settings, userTaxId: e.target.value })} 
         />
       </div>
@@ -105,8 +114,9 @@ export function UserManagement() {
             <Input 
               id="taxRate" 
               type="number"
-              value={settings.taxRate} 
-              onChange={(e) => setSettings({ ...settings, taxRate: parseFloat(e.target.value) })} 
+              step="any"
+              value={settings.taxRate ?? 0} 
+              onChange={(e) => updateNumericSetting("taxRate", e.target.value)} 
             />
           </div>
           <div className="space-y-2">
@@ -114,9 +124,9 @@ export function UserManagement() {
             <Input 
               id="kmFee" 
               type="number"
-              step="0.01"
-              value={settings.kmFee} 
-              onChange={(e) => setSettings({ ...settings, kmFee: parseFloat(e.target.value) })} 
+              step="any"
+              value={settings.kmFee ?? 0} 
+              onChange={(e) => updateNumericSetting("kmFee", e.target.value)} 
             />
           </div>
           <div className="space-y-2">
@@ -124,9 +134,9 @@ export function UserManagement() {
             <Input 
               id="writingFee" 
               type="number"
-              step="0.01"
-              value={settings.writingFee} 
-              onChange={(e) => setSettings({ ...settings, writingFee: parseFloat(e.target.value) })} 
+              step="any"
+              value={settings.writingFee ?? 0} 
+              onChange={(e) => updateNumericSetting("writingFee", e.target.value)} 
             />
           </div>
           <div className="space-y-2">
@@ -134,9 +144,9 @@ export function UserManagement() {
             <Input 
               id="printingFee" 
               type="number"
-              step="0.01"
-              value={settings.printingFee} 
-              onChange={(e) => setSettings({ ...settings, printingFee: parseFloat(e.target.value) })} 
+              step="any"
+              value={settings.printingFee ?? 0} 
+              onChange={(e) => updateNumericSetting("printingFee", e.target.value)} 
             />
           </div>
         </div>

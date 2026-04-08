@@ -9,7 +9,8 @@ export const SettingsService = {
     const settings: Partial<Settings> = {};
     for (const row of rows) {
       if (['taxRate', 'kmFee', 'writingFee', 'printingFee'].includes(row.key)) {
-        settings[row.key as keyof Settings] = parseFloat(row.value) as any;
+        const val = parseFloat(row.value);
+        settings[row.key as keyof Settings] = (isNaN(val) ? 0 : val) as any;
       } else {
         settings[row.key as keyof Settings] = row.value as any;
       }

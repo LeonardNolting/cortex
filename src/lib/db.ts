@@ -56,21 +56,22 @@ async function runMigrations(db: Database) {
   }
 
   // Default entries for settings
-  const settingsCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM settings");
-  if (settingsCount[0].count === 0) {
-    const defaultSettings = [
-      ['userName', 'Dr. Max Mustermann'],
-      ['userBirthday', '01.01.1970'],
-      ['userStreet', 'Musterstraße 123'],
-      ['userZip', '12345'],
-      ['userCity', 'Musterstadt'],
-      ['userTaxId', 'DE 123 456 789'],
-      ['taxRate', '19'],
-      ['kmFee', '0.42'],
-      ['writingFee', '1.5'],
-      ['printingFee', '0.5']
-    ];
-    for (const [key, value] of defaultSettings) {
+  const defaultSettings = [
+    ['userName', 'Dr. Max Mustermann'],
+    ['userBirthday', '01.01.1970'],
+    ['userStreet', 'Musterstraße 123'],
+    ['userZip', '12345'],
+    ['userCity', 'Musterstadt'],
+    ['userTaxId', 'DE 123 456 789'],
+    ['taxRate', '19'],
+    ['kmFee', '0.42'],
+    ['writingFee', '1.5'],
+    ['printingFee', '0.5']
+  ];
+
+  for (const [key, value] of defaultSettings) {
+    const exists = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM settings WHERE key = ?", [key]);
+    if (exists[0].count === 0) {
       await db.execute("INSERT INTO settings (key, value) VALUES (?, ?)", [key, value]);
     }
   }
