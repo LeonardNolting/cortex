@@ -18,7 +18,6 @@ export interface Assignment {
   shippingFee?: number;
   court?: string; // For UI display
   remunerationGroup?: string; // For UI display
-  status: "Offen" | "In Bearbeitung" | "Abgeschlossen";
   createdAt: string;
   printingDate?: string;
   paidAt?: string;

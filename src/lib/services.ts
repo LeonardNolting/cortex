@@ -138,7 +138,7 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       ORDER BY a.created_at DESC
     `);
-    return rows.map(r => ({ ...r, status: r.invoiceNumber ? "Abgeschlossen" : "Offen" }));
+    return rows;
   },
 
   async getById(id: number): Promise<Assignment | null> {
@@ -181,7 +181,7 @@ export const AssignmentService = {
       WHERE a.id = ?
     `, [id]);
     if (results.length === 0) return null;
-    return { ...results[0], status: results[0].invoiceNumber ? "Abgeschlossen" : "Offen" } as Assignment;
+    return results[0] as Assignment;
   },
 
   async getNextInvoiceNumber(): Promise<string> {
@@ -317,6 +317,6 @@ export const AssignmentService = {
       ORDER BY a.paid_at ASC
     `, [pattern]);
     
-    return rows.map(r => ({ ...r, status: "Abgeschlossen" }));
+    return rows;
   }
 };

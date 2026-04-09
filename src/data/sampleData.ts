@@ -12,7 +12,6 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     travelCount: 1,
     court: "Landgericht Berlin",
     remunerationGroup: "M2",
-    status: "Offen",
     createdAt: "2026-04-01",
     printingPages: 10,
   },
@@ -26,7 +25,6 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     remunerationGroupId: 3, // Assuming M3
     court: "Amtsgericht München",
     remunerationGroup: "M3",
-    status: "In Bearbeitung",
     createdAt: "2026-04-02",
     printingPages: 25,
   },
@@ -40,7 +38,6 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     remunerationGroupId: 2, // Assuming M2
     court: "Landgericht Hamburg",
     remunerationGroup: "M2",
-    status: "Abgeschlossen",
     createdAt: "2026-03-15",
     printingPages: 5,
   },

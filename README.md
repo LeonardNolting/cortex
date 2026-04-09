@@ -16,7 +16,7 @@ This template should help get you started developing with Tauri, React and Types
 - Code aufräumen
 - Assignment edit: Bezahlt am sollte nichts anzeigen, wenn da kein Wert drinnen ist
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
-- Updates fragen?
+- ✅ Updates fragen?
 - Assignment löschen sollte fragen (genauso wie Gerichte)
 - Werte sind nicht ganz stimmig, TypeScript Fehler? <any> casts?
 - Erinnerungen wenn Rechnung verschickt aber noch nicht gezahlt
@@ -24,7 +24,8 @@ This template should help get you started developing with Tauri, React and Types
 - Sicherstellen, dass alle Einstellungen und Werte überhaupt durch handlebar templates genutzt werden können
 - Kommazahlen können nicht richtig eingegeben werden
 - Auf 1. oder 2. Stelle runden?
-- Automatisch vergrößert starten
+- ✅ Automatisch vergrößert starten
+- Text neben Einstellungsknopf und Einnahmenlisteknopf zeigen
 - Assignments in 4 Listen teilen:
   1. Aktuelle Assignments
   2. Fertige Assignments, aber noch nicht bezahlt

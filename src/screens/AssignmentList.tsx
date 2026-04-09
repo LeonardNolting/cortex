@@ -23,6 +23,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
@@ -30,7 +40,6 @@ import { Label } from "../components/ui/label";
 import { PlusCircle, Settings, FileText, Trash2, Calculator } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
-import { getStatusVariant } from "../lib/status";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx } from "../lib/invoice";
@@ -57,6 +66,10 @@ export function AssignmentList() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear()
   });
+
+  // Delete Dialog State
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     loadAssignments();
@@ -86,10 +99,17 @@ export function AssignmentList() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Möchten Sie diesen Auftrag wirklich löschen?")) {
+  const handleDeleteClick = (id: number) => {
+    setAssignmentToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (assignmentToDelete !== null) {
       try {
-        await AssignmentService.delete(id);
+        await AssignmentService.delete(assignmentToDelete);
+        setAssignmentToDelete(null);
+        setIsDeleteDialogOpen(false);
         await loadAssignments();
       } catch (error) {
         console.error("Failed to delete assignment:", error);
@@ -149,8 +169,7 @@ export function AssignmentList() {
         ...selectedAssignment,
         ...values,
         invoiceNumber: invoiceForm.invoiceNumber,
-        printingDate: invoiceForm.printingDate,
-        status: "Abgeschlossen"
+        printingDate: invoiceForm.printingDate
       });
 
       await loadAssignments();
@@ -232,7 +251,6 @@ export function AssignmentList() {
                 <TableHead>Aktenzeichen</TableHead>
                 <TableHead>Gericht</TableHead>
                 <TableHead>Gruppe</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Bezahlt</TableHead>
                 <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
@@ -240,11 +258,11 @@ export function AssignmentList() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10">Lade Aufträge...</TableCell>
+                  <TableCell colSpan={8} className="text-center py-10">Lade Aufträge...</TableCell>
                 </TableRow>
               ) : assignments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
+                  <TableCell colSpan={8} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
                 </TableRow>
               ) : (
                 assignments.map((assignment) => (
@@ -260,11 +278,6 @@ export function AssignmentList() {
                     <TableCell>{assignment.court}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(assignment.status)}>
-                        {assignment.status}
-                      </Badge>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center space-x-2">
@@ -296,7 +309,7 @@ export function AssignmentList() {
                           className="text-destructive hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(assignment.id);
+                            handleDeleteClick(assignment.id);
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -310,6 +323,23 @@ export function AssignmentList() {
           </Table>
         </CardContent>
       </Card>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Möchten Sie diesen Auftrag wirklich löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Der Auftrag wird dauerhaft aus der Datenbank entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">

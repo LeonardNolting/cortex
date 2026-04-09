@@ -92,8 +92,6 @@ The data stored for each assignment is:
 - Amount of trips ("Anzahl Anfahrten" to let user charge for multiple trips, even at fractions (e.g. 1.5))
 - Paid date ("Bezahlt am", optional)
 
-The UI shows a `status` field for assignments, but that is intentionally only in the UI, not in the database and logic.
-
 # UI
 
 There are mainly three screens:
