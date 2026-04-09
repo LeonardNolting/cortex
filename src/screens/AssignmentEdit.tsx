@@ -24,20 +24,29 @@ export function AssignmentEdit() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [remGroups, setRemGroups] = useState<RemunerationGroup[]>([]);
 
-  const [formData, setFormData] = useState<Partial<Assignment>>({
+  const [formData, setFormData] = useState<Omit<Partial<Assignment>, 'travelTime' | 'travelCount' | 'preparationTime' | 'evaluationTime' | 'writingCharacters' | 'printingPages' | 'kmCount' | 'shippingFee'> & {
+    travelTime: string;
+    travelCount: string;
+    preparationTime: string;
+    evaluationTime: string;
+    writingCharacters: string;
+    printingPages: string;
+    kmCount: string;
+    shippingFee: string;
+  }>({
     patientName: "",
     patientBirthdate: "",
     fileNumber: "",
     courtId: 0,
     remunerationGroupId: 0,
-    travelTime: 0,
-    travelCount: 1,
-    preparationTime: 0,
-    evaluationTime: 0,
-    writingCharacters: 0,
-    printingPages: 0,
-    kmCount: 0,
-    shippingFee: 0,
+    travelTime: "0",
+    travelCount: "1",
+    preparationTime: "0",
+    evaluationTime: "0",
+    writingCharacters: "0",
+    printingPages: "0",
+    kmCount: "0",
+    shippingFee: "0",
     invoiceNumber: "",
     printingDate: "",
     paidAt: ""
@@ -65,6 +74,14 @@ export function AssignmentEdit() {
             const paidAt = (assignment.paidAt && assignment.paidAt !== "null") ? assignment.paidAt : "";
             setFormData({
               ...assignment,
+              travelTime: String(assignment.travelTime || '0').replace('.', ','),
+              travelCount: String(assignment.travelCount || '1').replace('.', ','),
+              preparationTime: String(assignment.preparationTime || '0').replace('.', ','),
+              evaluationTime: String(assignment.evaluationTime || '0').replace('.', ','),
+              writingCharacters: String(assignment.writingCharacters || '0').replace('.', ','),
+              printingPages: String(assignment.printingPages || '0').replace('.', ','),
+              kmCount: String(assignment.kmCount || '0').replace('.', ','),
+              shippingFee: String(assignment.shippingFee || '0').replace('.', ','),
               invoiceNumber: assignment.invoiceNumber || "",
               printingDate: assignment.printingDate || "",
               paidAt: paidAt
@@ -82,11 +99,19 @@ export function AssignmentEdit() {
   }, [id, isNew]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "number" ? (value === "" ? 0 : parseFloat(value)) : (value === null ? "" : value)
-    }));
+    const { name, value } = e.target;
+    
+    const numericFields = ["travelTime", "travelCount", "preparationTime", "evaluationTime", "writingCharacters", "printingPages", "kmCount", "shippingFee"];
+
+    if (numericFields.includes(name)) {
+      const sanitizedValue = value.replace('.',',');
+      // Allow empty string, or a string that is a valid decimal number with a comma
+      if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
+        setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     
     // Clear error for the field being edited
     if (errors[name]) {
@@ -126,11 +151,28 @@ export function AssignmentEdit() {
       return;
     }
 
+    const parseGermanNumber = (str: string) => {
+      const value = parseFloat(str.replace(',', '.'));
+      return isNaN(value) ? 0 : value;
+    }
+
+    const dataToSave = {
+      ...formData,
+      travelTime: parseGermanNumber(formData.travelTime),
+      travelCount: parseGermanNumber(formData.travelCount),
+      preparationTime: parseGermanNumber(formData.preparationTime),
+      evaluationTime: parseGermanNumber(formData.evaluationTime),
+      writingCharacters: parseGermanNumber(formData.writingCharacters),
+      printingPages: parseGermanNumber(formData.printingPages),
+      kmCount: parseGermanNumber(formData.kmCount),
+      shippingFee: parseGermanNumber(formData.shippingFee),
+    };
+
     try {
       if (isNew) {
-        await AssignmentService.create(formData);
+        await AssignmentService.create(dataToSave);
       } else {
-        await AssignmentService.update(formData as Assignment);
+        await AssignmentService.update(dataToSave as Assignment);
       }
       navigate("/");
     } catch (error) {
@@ -316,7 +358,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="travelTime" 
                   name="travelTime" 
-                  type="number" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.travelTime} 
                   onChange={handleChange} 
                 />
@@ -326,8 +369,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="travelCount" 
                   name="travelCount" 
-                  type="number" 
-                  step="0.1" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.travelCount} 
                   onChange={handleChange} 
                 />
@@ -339,7 +382,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="preparationTime" 
                   name="preparationTime" 
-                  type="number" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.preparationTime} 
                   onChange={handleChange} 
                 />
@@ -349,7 +393,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="evaluationTime" 
                   name="evaluationTime" 
-                  type="number" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.evaluationTime} 
                   onChange={handleChange} 
                 />
@@ -361,7 +406,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="writingCharacters" 
                   name="writingCharacters" 
-                  type="number" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.writingCharacters} 
                   onChange={handleChange} 
                 />
@@ -371,7 +417,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="printingPages" 
                   name="printingPages" 
-                  type="number" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.printingPages} 
                   onChange={handleChange} 
                 />
@@ -383,8 +430,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="kmCount" 
                   name="kmCount" 
-                  type="number" 
-                  step="0.1" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.kmCount} 
                   onChange={handleChange} 
                 />
@@ -394,8 +441,8 @@ export function AssignmentEdit() {
                 <Input 
                   id="shippingFee" 
                   name="shippingFee" 
-                  type="number" 
-                  step="0.01" 
+                  type="text" 
+                  inputMode="decimal"
                   value={formData.shippingFee} 
                   onChange={handleChange} 
                 />

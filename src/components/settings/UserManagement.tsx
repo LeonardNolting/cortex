@@ -181,6 +181,16 @@ export function UserManagement() {
               onChange={(e) => updateNumericSetting("printingFee", e.target.value)} 
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="paymentDeadlineDays">Zahlungsfrist (Tage)</Label>
+            <Input 
+              id="paymentDeadlineDays" 
+              type="number"
+              step="1"
+              value={settings.paymentDeadlineDays ?? 14} 
+              onChange={(e) => updateNumericSetting("paymentDeadlineDays", e.target.value)} 
+            />
+          </div>
         </div>
       </div>
 

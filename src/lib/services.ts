@@ -6,13 +6,13 @@ export const SettingsService = {
     const db = await getDb();
     const rows = await db.select<{ key: string; value: string }[]>("SELECT * FROM settings");
     
-    const settings: Partial<Settings> = {};
+    const settings: any = {};
     for (const row of rows) {
-      if (['taxRate', 'kmFee', 'writingFee', 'printingFee'].includes(row.key)) {
+      if (['taxRate', 'kmFee', 'writingFee', 'printingFee', 'paymentDeadlineDays'].includes(row.key)) {
         const val = parseFloat(row.value);
-        settings[row.key as keyof Settings] = (isNaN(val) ? 0 : val) as any;
+        settings[row.key] = isNaN(val) ? 0 : val;
       } else {
-        settings[row.key as keyof Settings] = row.value as any;
+        settings[row.key] = row.value;
       }
     }
     

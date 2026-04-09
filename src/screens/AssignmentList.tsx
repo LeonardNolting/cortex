@@ -56,6 +56,7 @@ import { documentDir, join } from "@tauri-apps/api/path";
 export function AssignmentList() {
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Invoice Dialog State
@@ -83,10 +84,14 @@ export function AssignmentList() {
 
   const loadAssignments = async () => {
     try {
-      const data = await AssignmentService.getAll();
+      const [data, settingsData] = await Promise.all([
+        AssignmentService.getAll(),
+        SettingsService.getSettings()
+      ]);
       setAssignments(data);
+      setSettings(settingsData);
     } catch (error) {
-      console.error("Failed to load assignments:", error);
+      console.error("Failed to load assignments or settings:", error);
     } finally {
       setLoading(false);
     }
@@ -258,36 +263,56 @@ export function AssignmentList() {
     return { inProgress, ready, paidThisMonth, archive };
   }, [assignments]);
 
-  const AssignmentTable = ({ list }: { list: Assignment[] }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
-          <TableHead>Patient</TableHead>
-          <TableHead>Geburtsdatum</TableHead>
-          <TableHead>Aktenzeichen</TableHead>
-          <TableHead>Gericht</TableHead>
-          <TableHead>Gruppe</TableHead>
-          <TableHead>Bezahlt</TableHead>
-          <TableHead className="text-right">Aktionen</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {list.length === 0 ? (
+  const AssignmentTable = ({ list }: { list: Assignment[] }) => {
+    const isOverdue = (assignment: Assignment) => {
+      if (!assignment.invoiceNumber || !assignment.printingDate || assignment.paidAt || !settings) return false;
+      const printDate = new Date(assignment.printingDate);
+      const deadlineDate = new Date(printDate);
+      deadlineDate.setDate(deadlineDate.getDate() + (settings.paymentDeadlineDays || 14));
+      return new Date() > deadlineDate;
+    };
+
+    return (
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
-              Keine Aufträge in dieser Kategorie.
-            </TableCell>
+            <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
+            <TableHead>Patient</TableHead>
+            <TableHead>Geburtsdatum</TableHead>
+            <TableHead>Aktenzeichen</TableHead>
+            <TableHead>Gericht</TableHead>
+            <TableHead>Gruppe</TableHead>
+            <TableHead>Bezahlt</TableHead>
+            <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
-        ) : (
-          list.map((assignment) => (
-            <TableRow 
-              key={assignment.id} 
-              className="cursor-pointer"
-              onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
-            >
-              <TableCell className="font-medium">{assignment.invoiceNumber || "-"}</TableCell>
-              <TableCell>{assignment.patientName}</TableCell>
+        </TableHeader>
+        <TableBody>
+          {list.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                Keine Aufträge in dieser Kategorie.
+              </TableCell>
+            </TableRow>
+          ) : (
+            list.map((assignment) => {
+              const overdue = isOverdue(assignment);
+              return (
+                <TableRow 
+                  key={assignment.id} 
+                  className={`cursor-pointer ${overdue ? "bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30" : ""}`}
+                  onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
+                >
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col gap-1">
+                      {assignment.invoiceNumber || "-"}
+                      {overdue && (
+                        <Badge variant="destructive" className="w-fit text-[10px] px-1 py-0 h-4">
+                          Überfällig
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>{assignment.patientName}</TableCell>
               <TableCell>{assignment.patientBirthdate}</TableCell>
               <TableCell>{assignment.fileNumber}</TableCell>
               <TableCell>{assignment.court}</TableCell>
@@ -332,11 +357,13 @@ export function AssignmentList() {
                 </div>
               </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
-  );
+          );
+        })
+      )}
+    </TableBody>
+  </Table>
+);
+};
 
   const actions = (
     <>
