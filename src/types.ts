@@ -53,4 +53,19 @@ export interface Settings {
   writingFee: number;
   printingFee: number;
   invoiceIntro: string;
+  invoiceSubject: string;
+  invoiceTitle: string;
+  invoiceLabelTravelSingle: string;
+  invoiceLabelTravelMultiple: string;
+  invoiceLabelPreparation: string;
+  invoiceLabelEvaluation: string;
+  invoiceLabelTotalTime: string;
+  invoiceLabelWriting: string;
+  invoiceLabelKm: string;
+  invoiceLabelPrinting: string;
+  invoiceLabelShipping: string;
+  invoiceLabelNet: string;
+  invoiceLabelTax: string;
+  invoiceLabelGross: string;
+  invoiceFooter: string;
 }

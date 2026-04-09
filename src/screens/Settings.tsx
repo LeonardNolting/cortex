@@ -12,6 +12,7 @@ import { PageHeader } from "../components/PageHeader";
 import { CourtManagement } from "../components/settings/CourtManagement";
 import { RemunerationGroupManagement } from "../components/settings/RemunerationGroupManagement";
 import { UserManagement } from "../components/settings/UserManagement";
+import { InvoiceTextManagement } from "../components/settings/InvoiceTextManagement";
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -59,8 +60,8 @@ export function SettingsScreen() {
             <CardTitle>Rechnungstexte</CardTitle>
             <CardDescription>Standardformulierungen für die DOCX-Erstellung.</CardDescription>
           </CardHeader>
-          <CardContent className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
-            [Platzhalter: Rechnungsvorlagen / Texte]
+          <CardContent>
+            <InvoiceTextManagement />
           </CardContent>
         </Card>
       </div>

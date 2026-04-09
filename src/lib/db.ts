@@ -101,7 +101,22 @@ async function runMigrations(db: Database) {
     ['kmFee', '0.42'],
     ['writingFee', '1.5'],
     ['printingFee', '0.5'],
-    ['invoiceIntro', 'Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe {{remunerationGroup.name}} zu berechnen:']
+    ['invoiceIntro', 'Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe {{remunerationGroup.name}} zu berechnen:'],
+    ['invoiceSubject', '{{assignment.patientName}}, geb. am {{assignment.patientBirthdate}}, Aktenzeichen: {{assignment.fileNumber}}'],
+    ['invoiceTitle', 'Vergütungsantrag'],
+    ['invoiceLabelTravelSingle', 'Anfahrt:'],
+    ['invoiceLabelTravelMultiple', 'Anfahrten:'],
+    ['invoiceLabelPreparation', 'Exploration, Fremdanamnese\nund Durchsicht der Unterlagen:'],
+    ['invoiceLabelEvaluation', 'Auswertung der Untersuchung und\nder neuropsycholog. Testung,\nVerfassen des Gutachtens:'],
+    ['invoiceLabelTotalTime', 'Gesamtzeit:'],
+    ['invoiceLabelWriting', 'Schreibgebühr:'],
+    ['invoiceLabelKm', 'Kilometerpauschale:'],
+    ['invoiceLabelPrinting', 'Kopierkosten:'],
+    ['invoiceLabelShipping', 'Versandkosten:'],
+    ['invoiceLabelNet', 'Gesamt (Netto):'],
+    ['invoiceLabelTax', 'Umsatzsteuer {{settings.taxRate}}%:'],
+    ['invoiceLabelGross', 'Gesamt (Brutto):'],
+    ['invoiceFooter', 'Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:\n\n{{settings.userName}}, {{settings.userBank}},\n\nIBAN: {{settings.userIban}}, BIC: {{settings.userBic}}']
   ];
 
   for (const [key, value] of defaultSettings) {

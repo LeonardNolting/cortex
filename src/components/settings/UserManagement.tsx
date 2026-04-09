@@ -139,22 +139,6 @@ export function UserManagement() {
       </div>
 
       <div className="pt-4">
-        <h4 className="text-sm font-medium mb-4">Rechnungsvorlage</h4>
-        <div className="space-y-2">
-          <Label htmlFor="invoiceIntro">Einleitungstext</Label>
-          <textarea 
-            id="invoiceIntro" 
-            className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            value={settings.invoiceIntro || ""} 
-            onChange={(e) => setSettings({ ...settings, invoiceIntro: e.target.value })} 
-          />
-          <p className="text-xs text-muted-foreground">
-            Verwenden Sie Handlebars-Platzhalter wie <code>{"{{remunerationGroup.name}}"}</code>.
-          </p>
-        </div>
-      </div>
-
-      <div className="pt-4">
         <h4 className="text-sm font-medium mb-4">Gebühren & Sätze</h4>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
