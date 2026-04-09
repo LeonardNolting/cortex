@@ -237,9 +237,9 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
           },
           rows: [
             row(
-              travelCount === 1 ? (settings.invoiceLabelTravelSingle || "Anfahrt:") : (settings.invoiceLabelTravelMultiple || "Anfahrten:"), 
-              `${((assignment.travelTime || 0) * travelCount).toLocaleString("de-DE")} Minuten`, 
-              travelCount !== 1 ? `(${travelCount.toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "", 
+              assignment.travelCount === 1 ? (settings.invoiceLabelTravelSingle || "Anfahrt:") : (settings.invoiceLabelTravelMultiple || "Anfahrten:"),
+              `${((assignment.travelTime || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} Minuten`,
+              assignment.travelCount !== 1 ? `(${(assignment.travelCount || 1).toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "",
               ""
             ),
             rowMulti(
@@ -252,7 +252,7 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
             ),
             row(settings.invoiceLabelTotalTime || "Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
             row(settings.invoiceLabelWriting || "Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
-            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * travelCount).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
+            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
             ...(assignment.printingPages ? [row(settings.invoiceLabelPrinting || "Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(settings.printingFee || 0.5)}/Seite`, formatEuro(values.printingEuro))] : []),
             row(settings.invoiceLabelShipping || "Versandkosten:", "", "", formatEuro(values.shippingEuro)),
             row(settings.invoiceLabelNet || "Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),
