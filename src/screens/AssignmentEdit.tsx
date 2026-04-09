@@ -10,7 +10,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Save, X } from "lucide-react";
+import { AlertTriangle, Save, X } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
 import { Assignment, Court, RemunerationGroup } from "../types";
@@ -165,6 +165,15 @@ export function AssignmentEdit() {
         showBack={true}
       />
 
+      {!isNew && formData.invoiceNumber && (
+        <div className="text-amber-600 font-medium bg-amber-50 p-3 rounded border border-amber-200 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+          <p className="text-sm">
+            Hinweis: Für diesen Auftrag wurde bereits eine Rechnung generiert.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -278,12 +287,13 @@ export function AssignmentEdit() {
                   </Button>
                 )}
               </div>
-              <Input 
-                id="paidAt" 
-                name="paidAt" 
+              <input
+                id="paidAt"
+                name="paidAt"
                 type="date"
-                value={formData.paidAt ? formData.paidAt.substring(0, 10) : ""} 
-                onChange={handleChange} 
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.paidAt ? formData.paidAt.substring(0, 10) : ""}
+                onChange={handleChange}
               />
               <p className="text-xs text-muted-foreground">
                 Datum an dem die Rechnung beglichen wurde.

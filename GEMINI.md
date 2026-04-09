@@ -95,7 +95,11 @@ The data stored for each assignment is:
 # UI
 
 There are mainly three screens:
-1. List of assignments
+1. List of assignments (Home): Split into four categories:
+   - **In Progress**: Not paid and invoice not yet generated.
+   - **Ready for Billing**: Invoice generated but not yet paid.
+   - **Paid This Month**: Assignments paid in the current kalendar month.
+   - **Archive**: Paid assignments from previous months (collapsed by default).
 2. Edit individual assignment
 3. Settings where global data can be edited (single values and strings for the invoice and courts and remuneration groups)
 

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Table, 
   TableBody, 
@@ -33,6 +33,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../components/ui/accordion";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
@@ -211,6 +217,108 @@ export function AssignmentList() {
     }
   };
 
+  // Categorize assignments
+  const categorizedAssignments = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return {
+      inProgress: assignments.filter(a => !a.paidAt && !a.invoiceNumber),
+      ready: assignments.filter(a => !a.paidAt && !!a.invoiceNumber),
+      paidThisMonth: assignments.filter(a => {
+        if (!a.paidAt) return false;
+        const paidDate = new Date(a.paidAt);
+        return paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear;
+      }),
+      archive: assignments.filter(a => {
+        if (!a.paidAt) return false;
+        const paidDate = new Date(a.paidAt);
+        return !(paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear);
+      })
+    };
+  }, [assignments]);
+
+  const AssignmentTable = ({ list }: { list: Assignment[] }) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
+          <TableHead>Patient</TableHead>
+          <TableHead>Geburtsdatum</TableHead>
+          <TableHead>Aktenzeichen</TableHead>
+          <TableHead>Gericht</TableHead>
+          <TableHead>Gruppe</TableHead>
+          <TableHead>Bezahlt</TableHead>
+          <TableHead className="text-right">Aktionen</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {list.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+              Keine Aufträge in dieser Kategorie.
+            </TableCell>
+          </TableRow>
+        ) : (
+          list.map((assignment) => (
+            <TableRow 
+              key={assignment.id} 
+              className="cursor-pointer"
+              onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
+            >
+              <TableCell className="font-medium">{assignment.invoiceNumber || "-"}</TableCell>
+              <TableCell>{assignment.patientName}</TableCell>
+              <TableCell>{assignment.patientBirthdate}</TableCell>
+              <TableCell>{assignment.fileNumber}</TableCell>
+              <TableCell>{assignment.court}</TableCell>
+              <TableCell>
+                <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
+              </TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    checked={!!assignment.paidAt} 
+                    onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                    title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
+                  />
+                </div>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    title="Rechnung generieren"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenInvoiceDialog(assignment);
+                    }}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(assignment.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  );
+
   const actions = (
     <>
       <Button variant="outline" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
@@ -229,102 +337,79 @@ export function AssignmentList() {
   );
 
   return (
-    <>
+    <div className="space-y-6">
       <PageHeader 
         title="Cortex" 
         description="Auftragsverwaltung für psychiatrische Gutachter"
         actions={actions}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Aufträge</CardTitle>
-          <CardDescription>
-            Übersicht aller aktuellen psychiatrischen Gutachtenaufträge.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
-                <TableHead>Patient</TableHead>
-                <TableHead>Geburtsdatum</TableHead>
-                <TableHead>Aktenzeichen</TableHead>
-                <TableHead>Gericht</TableHead>
-                <TableHead>Gruppe</TableHead>
-                <TableHead>Bezahlt</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10">Lade Aufträge...</TableCell>
-                </TableRow>
-              ) : assignments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
-                </TableRow>
-              ) : (
-                assignments.map((assignment) => (
-                  <TableRow 
-                    key={assignment.id} 
-                    className="cursor-pointer"
-                    onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
-                  >
-                    <TableCell className="font-medium">{assignment.invoiceNumber || "-"}</TableCell>
-                    <TableCell>{assignment.patientName}</TableCell>
-                    <TableCell>{assignment.patientBirthdate}</TableCell>
-                    <TableCell>{assignment.fileNumber}</TableCell>
-                    <TableCell>{assignment.court}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={!!assignment.paidAt} 
-                          onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                          title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          title="Rechnung generieren"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenInvoiceDialog(assignment);
-                          }}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(assignment.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {loading ? (
+        <Card>
+          <CardContent className="py-10 text-center">Lade Aufträge...</CardContent>
+        </Card>
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>In Bearbeitung</CardTitle>
+              <CardDescription>
+                Laufende Gutachten, für die noch keine Rechnung erstellt wurde.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AssignmentTable list={categorizedAssignments.inProgress} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Bereit zur Abrechnung / Offen</CardTitle>
+              <CardDescription>
+                Gutachten mit erstellter Rechnung, die noch nicht als bezahlt markiert wurden.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AssignmentTable list={categorizedAssignments.ready} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Diesen Monat bezahlt</CardTitle>
+              <CardDescription>
+                Gutachten, die im aktuellen Kalendermonat bezahlt wurden.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AssignmentTable list={categorizedAssignments.paidThisMonth} />
+            </CardContent>
+          </Card>
+
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="archive">
+              <AccordionTrigger className="hover:no-underline px-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-semibold">Archiv</span>
+                  <Badge variant="secondary">{categorizedAssignments.archive.length}</Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4">
+                <Card>
+                  <CardHeader>
+                    <CardDescription>
+                      Alle bereits bezahlten Gutachten aus vergangenen Monaten.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AssignmentTable list={categorizedAssignments.archive} />
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </>
+      )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -441,6 +526,6 @@ export function AssignmentList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
