@@ -110,3 +110,9 @@ The original version of this project is in legacy.html. It does _not_ manage ass
 ## Docx generation draft
 
 A proof-of-concept docx generation file can be found in print.ts. It was tested in a node environment and thus may not work here, but the code creates a docx file exactly how I want the app to produce them.
+
+# Extra features
+
+## Income tax listing
+
+This is a general feature of the app. When pressing the button, the user be able to select the month and year in a dialog, preset to the current month/year. Then, all assignments that were paid in that month (according to their paid date) are collected and a docx table should be generated with two columns: date and sum (including tax). The document should have a header with two lines. The first line is the examiner's/user's name and address, the second line reads "Einnahmen inkl. Mwst. [month and year in German]".
