@@ -213,11 +213,13 @@ export function AssignmentList() {
 
   const actions = (
     <>
-      <Button variant="outline" size="icon" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
-        <Calculator className="h-4 w-4" />
+      <Button variant="outline" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
+        <Calculator className="mr-2 h-4 w-4" />
+        Einnahmen
       </Button>
-      <Button variant="outline" size="icon" onClick={() => navigate("/settings")}>
-        <Settings className="h-4 w-4" />
+      <Button variant="outline" onClick={() => navigate("/settings")}>
+        <Settings className="mr-2 h-4 w-4" />
+        Einstellungen
       </Button>
       <Button onClick={() => navigate("/edit/new")}>
         <PlusCircle className="mr-2 h-4 w-4" />
