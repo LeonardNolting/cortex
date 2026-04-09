@@ -10,6 +10,7 @@ This template should help get you started developing with Tauri, React and Types
 - Neuer Auftrag: Zeigen, welche Felder verpflichtend sind (Patientname und Gericht)
 - Vergütungsgruppen parsen
 - Datenbank woanders abspeichern können
+- Datenbank backups (jeden Tag, für die letzten 30 Tage)
 - Icon ändern
 - Code aufräumen
 - Assignment edit: Bezahlt am sollte nichts anzeigen, wenn da kein Wert drinnen ist
