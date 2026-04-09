@@ -277,7 +277,9 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
           children: [
             run("Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:"),
             run("", { break: 1.5 }),
-            run(`${settings.userName || ""}, ${settings.userBank || "Bank"}, IBAN: ${settings.userIban || ""}, BIC: ${settings.userBic || ""}`),
+            run(`${settings.userName || ""}, ${settings.userBank || "Bank"},`),
+            run("", { break: 1.5 }),
+            run(`IBAN: ${settings.userIban || ""}, BIC: ${settings.userBic || ""}`)
           ],
         }),
       ]
