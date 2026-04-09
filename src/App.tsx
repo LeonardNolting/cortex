@@ -4,6 +4,9 @@ import { AssignmentList } from "./screens/AssignmentList";
 import { AssignmentEdit } from "./screens/AssignmentEdit";
 import { SettingsScreen } from "./screens/Settings";
 import { PageLayout } from "./components/PageLayout";
+import {checkForUpdates} from "@/lib/update.ts";
+
+await checkForUpdates()
 
 function App() {
   return (
