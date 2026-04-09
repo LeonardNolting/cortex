@@ -38,7 +38,7 @@
       "endpoints": [
         "https://github.com/LeonardNolting/cortex/releases/latest/download/updater.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ2MTZFQ0UwNTExMUY0QzUKUldURjlCRlI0T3dXMXY2bmtlWVczNHNhOEVXSTIrOWRzeGtTbkJXTHk5YjlMMmFmR2ozZmhzdjQK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhGRjk4NUNBODZCMTMyMUMKUldRY01yR0d5b1g1ajk3N1BwSUgzR3N4Qk44WXEycHNLUytxWTZQcy9xaGdOckRnUUZ1NHpPSnQK"
     }
   }
 }
