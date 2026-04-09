@@ -14,6 +14,19 @@ import { AlertTriangle, Save, X } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
 import { Assignment, Court, RemunerationGroup } from "../types";
+import { formatToGermanString, parseGermanNumber } from "../lib/number-format";
+import { NumericInput } from "../components/ui/numeric-input";
+
+type AssignmentFormData = Omit<Partial<Assignment>, 'travelTime' | 'travelCount' | 'preparationTime' | 'evaluationTime' | 'writingCharacters' | 'printingPages' | 'kmCount' | 'shippingFee'> & {
+  travelTime: string;
+  travelCount: string;
+  preparationTime: string;
+  evaluationTime: string;
+  writingCharacters: string;
+  printingPages: string;
+  kmCount: string;
+  shippingFee: string;
+};
 
 export function AssignmentEdit() {
   const navigate = useNavigate();
@@ -24,16 +37,7 @@ export function AssignmentEdit() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [remGroups, setRemGroups] = useState<RemunerationGroup[]>([]);
 
-  const [formData, setFormData] = useState<Omit<Partial<Assignment>, 'travelTime' | 'travelCount' | 'preparationTime' | 'evaluationTime' | 'writingCharacters' | 'printingPages' | 'kmCount' | 'shippingFee'> & {
-    travelTime: string;
-    travelCount: string;
-    preparationTime: string;
-    evaluationTime: string;
-    writingCharacters: string;
-    printingPages: string;
-    kmCount: string;
-    shippingFee: string;
-  }>({
+  const [formData, setFormData] = useState<AssignmentFormData>({
     patientName: "",
     patientBirthdate: "",
     fileNumber: "",
@@ -74,14 +78,14 @@ export function AssignmentEdit() {
             const paidAt = (assignment.paidAt && assignment.paidAt !== "null") ? assignment.paidAt : "";
             setFormData({
               ...assignment,
-              travelTime: String(assignment.travelTime || '0').replace('.', ','),
-              travelCount: String(assignment.travelCount || '1').replace('.', ','),
-              preparationTime: String(assignment.preparationTime || '0').replace('.', ','),
-              evaluationTime: String(assignment.evaluationTime || '0').replace('.', ','),
-              writingCharacters: String(assignment.writingCharacters || '0').replace('.', ','),
-              printingPages: String(assignment.printingPages || '0').replace('.', ','),
-              kmCount: String(assignment.kmCount || '0').replace('.', ','),
-              shippingFee: String(assignment.shippingFee || '0').replace('.', ','),
+              travelTime: formatToGermanString(assignment.travelTime),
+              travelCount: formatToGermanString(assignment.travelCount),
+              preparationTime: formatToGermanString(assignment.preparationTime),
+              evaluationTime: formatToGermanString(assignment.evaluationTime),
+              writingCharacters: formatToGermanString(assignment.writingCharacters),
+              printingPages: formatToGermanString(assignment.printingPages),
+              kmCount: formatToGermanString(assignment.kmCount),
+              shippingFee: formatToGermanString(assignment.shippingFee),
               invoiceNumber: assignment.invoiceNumber || "",
               printingDate: assignment.printingDate || "",
               paidAt: paidAt
@@ -100,18 +104,7 @@ export function AssignmentEdit() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    const numericFields = ["travelTime", "travelCount", "preparationTime", "evaluationTime", "writingCharacters", "printingPages", "kmCount", "shippingFee"];
-
-    if (numericFields.includes(name)) {
-      const sanitizedValue = value.replace('.',',');
-      // Allow empty string, or a string that is a valid decimal number with a comma
-      if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
-        setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
-      }
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error for the field being edited
     if (errors[name]) {
@@ -121,6 +114,10 @@ export function AssignmentEdit() {
         return next;
       });
     }
+  };
+
+  const handleNumericChange = (name: keyof AssignmentFormData) => (value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const clearPaidAt = () => {
@@ -151,11 +148,6 @@ export function AssignmentEdit() {
       return;
     }
 
-    const parseGermanNumber = (str: string) => {
-      const value = parseFloat(str.replace(',', '.'));
-      return isNaN(value) ? 0 : value;
-    }
-
     const dataToSave = {
       ...formData,
       travelTime: parseGermanNumber(formData.travelTime),
@@ -170,9 +162,9 @@ export function AssignmentEdit() {
 
     try {
       if (isNew) {
-        await AssignmentService.create(dataToSave);
+        await AssignmentService.create(dataToSave as any);
       } else {
-        await AssignmentService.update(dataToSave as Assignment);
+        await AssignmentService.update(dataToSave as any);
       }
       navigate("/");
     } catch (error) {
@@ -355,96 +347,80 @@ export function AssignmentEdit() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="travelTime">Anfahrt (Minuten)</Label>
-                <Input 
+                <NumericInput 
                   id="travelTime" 
                   name="travelTime" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.travelTime} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("travelTime")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="travelCount">Anzahl Anfahrten</Label>
-                <Input 
+                <NumericInput 
                   id="travelCount" 
                   name="travelCount" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.travelCount} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("travelCount")}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="preparationTime">Vorbereitung (Minuten)</Label>
-                <Input 
+                <NumericInput 
                   id="preparationTime" 
                   name="preparationTime" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.preparationTime} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("preparationTime")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="evaluationTime">Auswertung (Minuten)</Label>
-                <Input 
+                <NumericInput 
                   id="evaluationTime" 
                   name="evaluationTime" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.evaluationTime} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("evaluationTime")}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="writingCharacters">Schreibgebühr (Zeichen)</Label>
-                <Input 
+                <NumericInput 
                   id="writingCharacters" 
                   name="writingCharacters" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.writingCharacters} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("writingCharacters")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="printingPages">Kopierkosten (Seiten)</Label>
-                <Input 
+                <NumericInput 
                   id="printingPages" 
                   name="printingPages" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.printingPages} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("printingPages")}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="kmCount">Kilometer (1 Weg)</Label>
-                <Input 
+                <NumericInput 
                   id="kmCount" 
                   name="kmCount" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.kmCount} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("kmCount")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="shippingFee">Versandkosten (€)</Label>
-                <Input 
+                <NumericInput 
                   id="shippingFee" 
                   name="shippingFee" 
-                  type="text" 
-                  inputMode="decimal"
                   value={formData.shippingFee} 
-                  onChange={handleChange} 
+                  onValueChange={handleNumericChange("shippingFee")}
                 />
               </div>
             </div>

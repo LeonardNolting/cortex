@@ -5,6 +5,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Save } from "lucide-react";
+import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
+import { NumericInput } from "../ui/numeric-input";
 
 type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentDeadlineDays'> & {
   taxRate: string;
@@ -27,11 +29,11 @@ export function UserManagement() {
       const data = await SettingsService.getSettings();
       setSettings({
         ...data,
-        taxRate: String(data.taxRate || '0').replace('.', ','),
-        kmFee: String(data.kmFee || '0').replace('.', ','),
-        writingFee: String(data.writingFee || '0').replace('.', ','),
-        printingFee: String(data.printingFee || '0').replace('.', ','),
-        paymentDeadlineDays: String(data.paymentDeadlineDays || '14').replace('.', ','),
+        taxRate: formatToGermanString(data.taxRate),
+        kmFee: formatToGermanString(data.kmFee),
+        writingFee: formatToGermanString(data.writingFee),
+        printingFee: formatToGermanString(data.printingFee),
+        paymentDeadlineDays: formatToGermanString(data.paymentDeadlineDays),
       });
     } catch (error) {
       console.error("Failed to load settings", error);
@@ -42,11 +44,6 @@ export function UserManagement() {
 
   async function handleSave() {
     if (!settings) return;
-
-    const parseGermanNumber = (str: string) => {
-      const value = parseFloat(str.replace(',', '.'));
-      return isNaN(value) ? 0 : value;
-    }
 
     const settingsToSave: Settings = {
       ...settings,
@@ -59,7 +56,6 @@ export function UserManagement() {
 
     try {
       await SettingsService.updateSettings(settingsToSave);
-      // Optional: Show success message
     } catch (error) {
       console.error("Failed to save settings", error);
     }
@@ -68,17 +64,11 @@ export function UserManagement() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!settings) return;
     const { name, value } = e.target;
-    
-    const numericFields = ["taxRate", "kmFee", "writingFee", "printingFee", "paymentDeadlineDays"];
+    setSettings(prev => ({ ...prev!, [name]: value }));
+  };
 
-    if (numericFields.includes(name)) {
-      const sanitizedValue = value.replace('.',',');
-      if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
-        setSettings(prev => ({ ...prev!, [name]: sanitizedValue }));
-      }
-    } else {
-      setSettings(prev => ({ ...prev!, [name]: value }));
-    }
+  const handleNumericChange = (name: keyof UserSettingsFormData) => (value: string) => {
+    setSettings(prev => ({ ...prev!, [name]: value }));
   };
 
 
@@ -190,57 +180,47 @@ export function UserManagement() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="taxRate">Umsatzsteuer (%)</Label>
-            <Input 
+            <NumericInput 
               id="taxRate" 
               name="taxRate"
-              type="text"
-              inputMode="decimal"
               value={settings.taxRate} 
-              onChange={handleChange}
+              onValueChange={handleNumericChange("taxRate")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="kmFee">Kilometergeld (€/km)</Label>
-            <Input 
+            <NumericInput 
               id="kmFee"
               name="kmFee" 
-              type="text"
-              inputMode="decimal"
               value={settings.kmFee} 
-              onChange={handleChange}
+              onValueChange={handleNumericChange("kmFee")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="writingFee">Schreibgebühr (€/1000 Zeichen)</Label>
-            <Input 
+            <NumericInput 
               id="writingFee" 
               name="writingFee"
-              type="text"
-              inputMode="decimal"
               value={settings.writingFee} 
-              onChange={handleChange}
+              onValueChange={handleNumericChange("writingFee")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="printingFee">Kopierkosten (€/Seite)</Label>
-            <Input 
+            <NumericInput 
               id="printingFee" 
               name="printingFee"
-              type="text"
-              inputMode="decimal"
               value={settings.printingFee} 
-              onChange={handleChange}
+              onValueChange={handleNumericChange("printingFee")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="paymentDeadlineDays">Zahlungsfrist (Tage)</Label>
-            <Input 
+            <NumericInput 
               id="paymentDeadlineDays" 
               name="paymentDeadlineDays"
-              type="text"
-              inputMode="decimal"
               value={settings.paymentDeadlineDays} 
-              onChange={handleChange}
+              onValueChange={handleNumericChange("paymentDeadlineDays")}
             />
           </div>
         </div>

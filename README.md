@@ -7,9 +7,6 @@ This template should help get you started developing with Tauri, React and Types
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 ## TODO
-- Kommazahlen können nicht richtig eingegeben werden
-- Auf 1. oder 2. Stelle runden?
-- Erinnerungen wenn Rechnung verschickt aber noch nicht gezahlt
 ### Später
 - Deadlines erstellen können für Assignments?
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
@@ -21,6 +18,9 @@ This template should help get you started developing with Tauri, React and Types
 - Werte sind nicht ganz stimmig, TypeScript Fehler? <any> casts?
 - Sicherstellen, dass alle Einstellungen und Werte überhaupt durch handlebar templates genutzt werden können
 ### Erledigt
+- ✅ Kommazahlen können nicht richtig eingegeben werden
+- ✅ Auf 1. oder 2. Stelle runden?
+- ✅ Erinnerungen wenn Rechnung verschickt aber noch nicht gezahlt
 - ✅ Automatisch vergrößert starten
 - ✅ Text neben Einstellungsknopf und Einnahmenlisteknopf zeigen
 - ✅ Einnahmenliste Header auf jeder Seite zeigen

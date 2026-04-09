@@ -31,6 +31,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { RemunerationGroupService } from "../../lib/services";
 import { RemunerationGroup } from "../../types";
+import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
+import { NumericInput } from "../ui/numeric-input";
 
 export function RemunerationGroupManagement() {
   const [groups, setGroups] = useState<RemunerationGroup[]>([]);
@@ -58,7 +60,7 @@ export function RemunerationGroupManagement() {
       setEditingGroup(group);
       setFormData({
         name: group.name,
-        value: group.value.toFixed(2).replace('.', ',')
+        value: formatToGermanString(group.value)
       });
     } else {
       setEditingGroup(null);
@@ -73,7 +75,7 @@ export function RemunerationGroupManagement() {
   async function handleSave() {
     const dataToSave = {
       name: formData.name,
-      value: parseFloat(formData.value.replace(',', '.')) || 0
+      value: parseGermanNumber(formData.value)
     };
 
     if (editingGroup) {
@@ -96,14 +98,6 @@ export function RemunerationGroupManagement() {
       setGroupIdToDelete(null);
       setIsDeleteDialogOpen(false);
       loadGroups();
-    }
-  }
-
-  function handleValueChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = e.target;
-    const sanitizedValue = value.replace('.',',');
-    if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
-      setFormData(prev => ({ ...prev, value: sanitizedValue }));
     }
   }
 
@@ -134,12 +128,10 @@ export function RemunerationGroupManagement() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="value">Stundensatz (€)</Label>
-                <Input 
+                <NumericInput 
                   id="value" 
-                  type="text"
-                  inputMode="decimal"
                   value={formData.value} 
-                  onChange={handleValueChange}
+                  onValueChange={(val) => setFormData({ ...formData, value: val })}
                 />
               </div>
             </div>
@@ -200,4 +192,3 @@ export function RemunerationGroupManagement() {
     </div>
   );
 }
-
