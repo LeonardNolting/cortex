@@ -79,11 +79,13 @@ export function AssignmentList() {
 
   const handleOpenInvoiceDialog = async (assignment: Assignment) => {
     try {
-      const nextNumber = await AssignmentService.getNextInvoiceNumber();
+      // Use existing invoice number if available, otherwise get next one
+      const invoiceNumber = assignment.invoiceNumber || await AssignmentService.getNextInvoiceNumber();
+      
       setSelectedAssignment(assignment);
       setInvoiceForm({
-        invoiceNumber: nextNumber,
-        printingDate: new Date().toISOString().split('T')[0]
+        invoiceNumber,
+        printingDate: assignment.printingDate || new Date().toISOString().split('T')[0]
       });
       setIsInvoiceDialogOpen(true);
     } catch (error) {

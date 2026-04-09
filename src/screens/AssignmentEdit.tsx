@@ -13,6 +13,7 @@ import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Save } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
+import { getStatusVariant } from "../lib/status";
 import { PageHeader } from "../components/PageHeader";
 import { Assignment, Court, RemunerationGroup } from "../types";
 
@@ -211,8 +212,11 @@ export function AssignmentEdit() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Badge variant="outline" className="h-10 w-full justify-center text-sm font-normal">
-                  Offen
+                <Badge 
+                  variant={getStatusVariant(formData.status || "Offen")} 
+                  className="h-10 w-full justify-center text-sm font-normal"
+                >
+                  {formData.status || "Offen"}
                 </Badge>
               </div>
               <div className="space-y-2">
