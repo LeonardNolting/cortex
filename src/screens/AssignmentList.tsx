@@ -217,26 +217,45 @@ export function AssignmentList() {
     }
   };
 
-  // Categorize assignments
+  // Categorize and sort assignments
   const categorizedAssignments = useMemo(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    return {
-      inProgress: assignments.filter(a => !a.paidAt && !a.invoiceNumber),
-      ready: assignments.filter(a => !a.paidAt && !!a.invoiceNumber),
-      paidThisMonth: assignments.filter(a => {
+    const inProgress = assignments
+      .filter(a => !a.paidAt && !a.invoiceNumber)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const ready = assignments
+      .filter(a => !a.paidAt && !!a.invoiceNumber)
+      .sort((a, b) => {
+        const dateA = a.printingDate ? new Date(a.printingDate).getTime() : 0;
+        const dateB = b.printingDate ? new Date(b.printingDate).getTime() : 0;
+        return dateA - dateB;
+      });
+
+    const paidThisMonth = assignments
+      .filter(a => {
         if (!a.paidAt) return false;
         const paidDate = new Date(a.paidAt);
         return paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear;
-      }),
-      archive: assignments.filter(a => {
+      })
+      .sort((a, b) => {
+        const dateA = a.paidAt ? new Date(a.paidAt).getTime() : 0;
+        const dateB = b.paidAt ? new Date(b.paidAt).getTime() : 0;
+        return dateB - dateA;
+      });
+
+    const archive = assignments
+      .filter(a => {
         if (!a.paidAt) return false;
         const paidDate = new Date(a.paidAt);
         return !(paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear);
       })
-    };
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return { inProgress, ready, paidThisMonth, archive };
   }, [assignments]);
 
   const AssignmentTable = ({ list }: { list: Assignment[] }) => (
