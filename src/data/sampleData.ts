@@ -9,6 +9,7 @@ export const SAMPLE_ASSIGNMENTS: Assignment[] = [
     fileNumber: "123 Js 456/26",
     courtId: 1,
     remunerationGroupId: 2, // Assuming M2
+    travelCount: 1,
     court: "Landgericht Berlin",
     remunerationGroup: "M2",
     status: "Offen",

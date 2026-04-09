@@ -44,8 +44,9 @@ export interface CalculatedValues {
 
 export function calculateInvoiceValues(data: InvoiceData): CalculatedValues {
   const { assignment, remunerationGroup, settings } = data;
+  const travelCount = assignment.travelCount || 1;
   
-  const totalMinutes = (assignment.travelTime || 0) + 
+  const totalMinutes = ((assignment.travelTime || 0) * travelCount) + 
                        (assignment.preparationTime || 0) + 
                        (assignment.evaluationTime || 0);
   
@@ -54,7 +55,7 @@ export function calculateInvoiceValues(data: InvoiceData): CalculatedValues {
   
   const writingEuro = Math.ceil((assignment.writingCharacters || 0) / 1000) * (settings.writingFee || 1.5);
   const printingEuro = (assignment.printingPages || 0) * (settings.printingFee || 0.5);
-  const kmEuro = (assignment.kmCount || 0) * (settings.kmFee || 0.42);
+  const kmEuro = (assignment.kmCount || 0) * travelCount * (settings.kmFee || 0.42);
   const shippingEuro = assignment.shippingFee || 0;
   
   const netEuro = timeEuro + writingEuro + printingEuro + kmEuro + shippingEuro;
@@ -233,7 +234,7 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
             insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
           },
           rows: [
-            row("Anfahrt:", `${assignment.travelTime || 0} Minuten`, "", ""),
+            row(travelCount === 1 ? "Anfahrt:" : "Anfahrten:", `${((assignment.travelTime || 0) * travelCount).toLocaleString("de-DE")} Minuten`, travelCount !== 1 ? `(${travelCount.toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "", ""),
             rowMulti(
               [
                 "Exploration, Fremdanamnese",
@@ -251,7 +252,7 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
             ),
             row("Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
             row("Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
-            row("Kilometerpauschale:", `${assignment.kmCount || 0} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
+            row("Kilometerpauschale:", `${((assignment.kmCount || 0) * travelCount).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
             ...(assignment.printingPages ? [row("Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(settings.printingFee || 0.5)}/Seite`, formatEuro(values.printingEuro))] : []),
             row("Versandkosten:", "", "", formatEuro(values.shippingEuro)),
             row("Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),

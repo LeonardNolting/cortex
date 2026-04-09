@@ -32,6 +32,7 @@ export function AssignmentEdit() {
     courtId: 0,
     remunerationGroupId: 0,
     travelTime: 0,
+    travelCount: 1,
     preparationTime: 0,
     evaluationTime: 0,
     writingCharacters: 0,
@@ -248,9 +249,9 @@ export function AssignmentEdit() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="travelTime">Anfahrt (Min)</Label>
+                <Label htmlFor="travelTime">Anfahrt (Minuten)</Label>
                 <Input 
                   id="travelTime" 
                   name="travelTime" 
@@ -260,7 +261,20 @@ export function AssignmentEdit() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="preparationTime">Vorbereitung (Min)</Label>
+                <Label htmlFor="travelCount">Anzahl Anfahrten</Label>
+                <Input 
+                  id="travelCount" 
+                  name="travelCount" 
+                  type="number" 
+                  step="0.1" 
+                  value={formData.travelCount} 
+                  onChange={handleChange} 
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="preparationTime">Vorbereitung (Minuten)</Label>
                 <Input 
                   id="preparationTime" 
                   name="preparationTime" 
@@ -270,7 +284,7 @@ export function AssignmentEdit() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="evaluationTime">Auswertung (Min)</Label>
+                <Label htmlFor="evaluationTime">Auswertung (Minuten)</Label>
                 <Input 
                   id="evaluationTime" 
                   name="evaluationTime" 
@@ -304,7 +318,7 @@ export function AssignmentEdit() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="kmCount">Kilometer</Label>
+                <Label htmlFor="kmCount">Kilometer (1 Weg)</Label>
                 <Input 
                   id="kmCount" 
                   name="kmCount" 

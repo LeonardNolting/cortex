@@ -47,6 +47,7 @@ async function runMigrations(db: Database) {
       court_id INTEGER NOT NULL,
       remuneration_group_id INTEGER NOT NULL,
       travel_time INTEGER DEFAULT 0,
+      travel_count REAL DEFAULT 1,
       preparation_time INTEGER DEFAULT 0,
       evaluation_time INTEGER DEFAULT 0,
       writing_characters INTEGER DEFAULT 0,
@@ -59,6 +60,13 @@ async function runMigrations(db: Database) {
       FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
     )
   `);
+
+  // Migrations for existing tables
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN travel_count REAL DEFAULT 1");
+  } catch (e) {
+    // Column might already exist
+  }
 
   // Default entries for courts
   const courtsCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM courts");

@@ -111,6 +111,7 @@ export const AssignmentService = {
         a.court_id as courtId, 
         a.remuneration_group_id as remunerationGroupId, 
         a.travel_time as travelTime, 
+        a.travel_count as travelCount,
         a.preparation_time as preparationTime, 
         a.evaluation_time as evaluationTime, 
         a.writing_characters as writingCharacters, 
@@ -141,6 +142,7 @@ export const AssignmentService = {
         a.court_id as courtId, 
         a.remuneration_group_id as remunerationGroupId, 
         a.travel_time as travelTime, 
+        a.travel_count as travelCount,
         a.preparation_time as preparationTime, 
         a.evaluation_time as evaluationTime, 
         a.writing_characters as writingCharacters, 
@@ -190,14 +192,14 @@ export const AssignmentService = {
     const result = await db.execute(
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
-        travel_time, preparation_time, evaluation_time, writing_characters, 
+        travel_time, travel_count, preparation_time, evaluation_time, writing_characters, 
         printing_pages, km_count, shipping_fee, printing_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
         assignment.courtId, assignment.remunerationGroupId,
-        assignment.travelTime || 0, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
+        assignment.travelTime || 0, assignment.travelCount || 1, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
         assignment.printingDate || null
@@ -212,20 +214,20 @@ export const AssignmentService = {
       `UPDATE assignments SET 
         invoice_number = ?, patient_name = ?, patient_birthdate = ?, file_number = ?, 
         court_id = ?, remuneration_group_id = ?,
-        travel_time = ?, preparation_time = ?, evaluation_time = ?, 
+        travel_time = ?, travel_count = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
         shipping_fee = ?, printing_date = ?
-      WHERE id = ?`,
-      [
+        WHERE id = ?`,
+        [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
         assignment.courtId, assignment.remunerationGroupId,
-        assignment.travelTime, assignment.preparationTime, assignment.evaluationTime, 
+        assignment.travelTime, assignment.travelCount || 1, assignment.preparationTime, assignment.evaluationTime, 
         assignment.writingCharacters, assignment.printingPages, 
         assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
         assignment.id
-      ]
+        ]
     );
   },
 

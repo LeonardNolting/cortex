@@ -9,6 +9,7 @@ export interface Assignment {
   courtId: number;
   remunerationGroupId: number;
   travelTime?: number; // minutes
+  travelCount?: number; // number of trips
   preparationTime?: number; // minutes
   evaluationTime?: number; // minutes
   writingCharacters?: number;
