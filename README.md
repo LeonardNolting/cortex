@@ -22,6 +22,7 @@ This template should help get you started developing with Tauri, React and Types
 - Deadlines erstellen können für Assignments?
 - Sicherstellen, dass alle Einstellungen und Werte überhaupt durch handlebar templates genutzt werden können
 - Kommazahlen können nicht richtig eingegeben werden
+- Auf 1. oder 2. Stelle runden?
 - Assignments in 4 Listen teilen:
   1. Aktuelle Assignments
   2. Fertige Assignments, aber noch nicht bezahlt
