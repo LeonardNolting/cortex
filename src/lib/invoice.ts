@@ -54,20 +54,18 @@ export function calculateInvoiceValues(data: InvoiceData): CalculatedValues {
   const roundedMinutes = Math.ceil(totalMinutes / 30) * 30;
   const timeEuro = (roundedMinutes / 60) * remunerationGroup.value;
   
-  const writingEuro = Math.ceil((assignment.writingCharacters || 0) / 1000) * (settings.writingFee || 1.5);
-  const printingEuro = (assignment.printingPages || 0) * (settings.printingFee || 0.5);
-  const kmEuro = (assignment.kmCount || 0) * travelCount * (settings.kmFee || 0.42);
-  const shippingEuro = assignment.shippingFee || 0;
+  const writingEuro = Math.round(Math.ceil((assignment.writingCharacters || 0) / 1000) * (settings.writingFee || 1.5) * 100) / 100;
+  const printingEuro = Math.round((assignment.printingPages || 0) * (settings.printingFee || 0.5) * 100) / 100;
+  const kmEuro = Math.round((assignment.kmCount || 0) * travelCount * (settings.kmFee || 0.42) * 100) / 100;
+  const shippingEuro = Math.round((assignment.shippingFee || 0) * 100) / 100;
   
-  const netEuro = timeEuro + writingEuro + printingEuro + kmEuro + shippingEuro;
+  const netEuro = Math.round((timeEuro + writingEuro + printingEuro + kmEuro + shippingEuro) * 100) / 100;
   
-  // Tax rounding: JVEG often uses rounding to 1 decimal place or similar, 
-  // but let's stick to standard 2 decimal places unless specific logic is required.
-  // Legacy.html had: Math.round(val * 10) / 10
+  // Tax rounding: Using standard 2 decimal places precision for better accuracy.
   const taxRate = (settings.taxRate || 19) / 100;
-  const taxEuro = Math.round(netEuro * taxRate * 10) / 10;
+  const taxEuro = Math.round(netEuro * taxRate * 100) / 100;
   
-  const grossEuro = netEuro + taxEuro;
+  const grossEuro = Math.round((netEuro + taxEuro) * 100) / 100;
   
   return {
     totalMinutes,
@@ -319,7 +317,7 @@ export async function generateIncomeTaxDocx(
     });
   });
 
-  const totalAmount = assignments.reduce((sum, a) => sum + (a.grossEuro || 0), 0);
+  const totalAmount = Math.round(assignments.reduce((sum, a) => sum + (a.grossEuro || 0), 0) * 100) / 100;
   const totalRow = new TableRow({
     children: [
       new TableCell({
