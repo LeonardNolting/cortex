@@ -7,6 +7,7 @@ This template should help get you started developing with Tauri, React and Types
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 ## TODO
+- ✅ Einnahmenliste Header auf jeder Seite zeigen
 - Neuer Auftrag: Zeigen, welche Felder verpflichtend sind (Patientname und Gericht)
 - Vergütungsgruppen parsen
 - Datenbank woanders abspeichern können

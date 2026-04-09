@@ -10,6 +10,7 @@ import {
   Table, 
   TableRow, 
   TableCell, 
+  Header,
   VerticalAlign, 
   WidthType, 
   BorderStyle,
@@ -351,21 +352,26 @@ export async function generateIncomeTaxDocx(
           margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
         }
       },
-      children: [
-        // Header Line 1: Examiner's name and address
-        new Paragraph({ 
+      headers: {
+        default: new Header({
           children: [
-            run(`${settings.userName}, ${settings.userStreet}, ${settings.userZip} ${settings.userCity}`)
-          ] 
-        }),
-        // Header Line 2: Einnahmen inkl. Mwst. [month and year in German]
-        new Paragraph({ 
-          children: [
-            run(`Einnahmen inkl. Mwst. ${monthName} ${year}`, { bold: true })
+            // Header Line 1: Examiner's name and address
+            new Paragraph({ 
+              children: [
+                run(`${settings.userName}, ${settings.userStreet}, ${settings.userZip} ${settings.userCity}`)
+              ] 
+            }),
+            // Header Line 2: Einnahmen inkl. Mwst. [month and year in German]
+            new Paragraph({ 
+              children: [
+                run(`Einnahmen inkl. Mwst. ${monthName} ${year}`, { bold: true })
+              ],
+              spacing: { before: 240, after: 480 }
+            }),
           ],
-          spacing: { before: 240, after: 480 }
         }),
-
+      },
+      children: [
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
