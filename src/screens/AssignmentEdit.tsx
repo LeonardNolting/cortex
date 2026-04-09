@@ -42,6 +42,9 @@ export function AssignmentEdit() {
     printingDate: "",
     paidAt: ""
   });
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -83,16 +86,38 @@ export function AssignmentEdit() {
       ...prev,
       [name]: type === "number" ? (value === "" ? 0 : parseFloat(value)) : value
     }));
+    
+    // Clear error for the field being edited
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSave = async () => {
+    const newErrors: { [key: string]: string } = {};
+
     if (!formData.patientName || formData.patientName.trim() === "") {
-      alert("Bitte geben Sie einen Patientenname ein.");
-      return;
+      newErrors.patientName = "Bitte geben Sie einen Patientenname ein.";
     }
 
     if (!formData.courtId || formData.courtId === 0) {
-      alert("Bitte wählen Sie ein Gericht aus.");
+      newErrors.courtId = "Bitte wählen Sie ein Gericht aus.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      
+      // Focus first error field
+      const firstError = Object.keys(newErrors)[0];
+      const element = document.getElementById(firstError);
+      if (element) {
+        element.focus();
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
@@ -146,14 +171,16 @@ export function AssignmentEdit() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="patientName">Patientenname</Label>
+                <Label htmlFor="patientName">Patientenname <span className="text-destructive">*</span></Label>
                 <Input 
                   id="patientName" 
                   name="patientName" 
                   value={formData.patientName} 
                   onChange={handleChange} 
                   placeholder="Max Mustermann"
+                  aria-invalid={!!errors.patientName}
                 />
+                {errors.patientName && <p className="text-xs text-destructive">{errors.patientName}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -179,19 +206,21 @@ export function AssignmentEdit() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="courtId">Gericht</Label>
+              <Label htmlFor="courtId">Gericht <span className="text-destructive">*</span></Label>
               <select
                 id="courtId"
                 name="courtId"
                 value={formData.courtId}
                 onChange={handleChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-invalid={!!errors.courtId}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
               >
                 <option value={0} disabled>-- Bitte wählen --</option>
                 {courts.map(court => (
                   <option key={court.id} value={court.id}>{court.name}</option>
                 ))}
               </select>
+              {errors.courtId && <p className="text-xs text-destructive">{errors.courtId}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="remunerationGroupId">Vergütungsgruppe</Label>
