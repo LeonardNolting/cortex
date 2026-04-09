@@ -90,7 +90,7 @@ export function AssignmentList() {
     try {
       const updatedAssignment = {
         ...assignment,
-        paidAt: isPaid ? new Date().toISOString().split('T')[0] : undefined
+        paidAt: isPaid ? new Date().toISOString().split('T')[0] : ""
       };
       await AssignmentService.update(updatedAssignment);
       await loadAssignments();

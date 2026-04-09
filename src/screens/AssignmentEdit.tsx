@@ -10,7 +10,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Save } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { AssignmentService, CourtService, RemunerationGroupService } from "../lib/services";
 import { PageHeader } from "../components/PageHeader";
 import { Assignment, Court, RemunerationGroup } from "../types";
@@ -62,11 +62,12 @@ export function AssignmentEdit() {
         if (!isNew) {
           const assignment = await AssignmentService.getById(Number(id));
           if (assignment) {
+            const paidAt = (assignment.paidAt && assignment.paidAt !== "null") ? assignment.paidAt : "";
             setFormData({
               ...assignment,
               invoiceNumber: assignment.invoiceNumber || "",
               printingDate: assignment.printingDate || "",
-              paidAt: assignment.paidAt || ""
+              paidAt: paidAt
             });
           }
         }
@@ -84,7 +85,7 @@ export function AssignmentEdit() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === "number" ? (value === "" ? 0 : parseFloat(value)) : value
+      [name]: type === "number" ? (value === "" ? 0 : parseFloat(value)) : (value === null ? "" : value)
     }));
     
     // Clear error for the field being edited
@@ -95,6 +96,10 @@ export function AssignmentEdit() {
         return next;
       });
     }
+  };
+
+  const clearPaidAt = () => {
+    setFormData(prev => ({ ...prev, paidAt: "" }));
   };
 
   const handleSave = async () => {
@@ -259,12 +264,25 @@ export function AssignmentEdit() {
               </div>
             )}
             <div className="space-y-2 pt-2 border-t">
-              <Label htmlFor="paidAt">Bezahlt am</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="paidAt">Bezahlt am</Label>
+                {formData.paidAt && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={clearPaidAt}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Leeren
+                  </Button>
+                )}
+              </div>
               <Input 
                 id="paidAt" 
                 name="paidAt" 
                 type="date"
-                value={formData.paidAt || ""} 
+                value={formData.paidAt ? formData.paidAt.substring(0, 10) : ""} 
                 onChange={handleChange} 
               />
               <p className="text-xs text-muted-foreground">
