@@ -11,8 +11,8 @@ export async function checkForUpdates() {
             console.log(`Found update ${update.version} from ${update.date}`);
 
             // Ask the user if they want to install it
-            const yes = await ask(`Update to ${update.version} is available! Do you want to install it?`, {
-                title: 'Update Available',
+            const yes = await ask(`Update auf Version ${update.version} ist verfügbar! Möchten Sie es jetzt installieren?`, {
+                title: 'Update verfügbar',
                 kind: 'info'
             });
 
@@ -24,7 +24,7 @@ export async function checkForUpdates() {
             }
         } else {
             // No update available
-            await message('You are on the latest version.', { title: 'Up to Date' });
+            // await message('Sie verwenden die aktuellste Version.', { title: 'Aktuell' }); // Don't show a message everytime
         }
     } catch (error) {
         console.error('Failed to check for updates:', error);
