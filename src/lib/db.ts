@@ -57,22 +57,43 @@ async function runMigrations(db: Database) {
       created_at TEXT DEFAULT (datetime('now')),
       printing_date TEXT,
       paid_at TEXT,
+      total_minutes INTEGER,
+      rounded_minutes INTEGER,
+      time_euro REAL,
+      writing_euro REAL,
+      printing_euro REAL,
+      km_euro REAL,
+      shipping_euro REAL,
+      net_euro REAL,
+      tax_euro REAL,
+      gross_euro REAL,
       FOREIGN KEY (court_id) REFERENCES courts(id),
       FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
     )
   `);
 
   // Migrations for existing tables
-  try {
-    await db.execute("ALTER TABLE assignments ADD COLUMN travel_count REAL DEFAULT 1");
-  } catch (e) {
-    // Column might already exist
-  }
+  const migrationColumns = [
+    ["travel_count", "REAL DEFAULT 1"],
+    ["paid_at", "TEXT"],
+    ["total_minutes", "INTEGER"],
+    ["rounded_minutes", "INTEGER"],
+    ["time_euro", "REAL"],
+    ["writing_euro", "REAL"],
+    ["printing_euro", "REAL"],
+    ["km_euro", "REAL"],
+    ["shipping_euro", "REAL"],
+    ["net_euro", "REAL"],
+    ["tax_euro", "REAL"],
+    ["gross_euro", "REAL"]
+  ];
 
-  try {
-    await db.execute("ALTER TABLE assignments ADD COLUMN paid_at TEXT");
-  } catch (e) {
-    // Column might already exist
+  for (const [col, type] of migrationColumns) {
+    try {
+      await db.execute(`ALTER TABLE assignments ADD COLUMN ${col} ${type}`);
+    } catch (e) {
+      // Column might already exist
+    }
   }
 
   // Default entries for courts

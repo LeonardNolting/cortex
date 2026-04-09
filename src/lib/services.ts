@@ -121,6 +121,16 @@ export const AssignmentService = {
         a.created_at as createdAt,
         a.printing_date as printingDate,
         a.paid_at as paidAt,
+        a.total_minutes as totalMinutes,
+        a.rounded_minutes as roundedMinutes,
+        a.time_euro as timeEuro,
+        a.writing_euro as writingEuro,
+        a.printing_euro as printingEuro,
+        a.km_euro as kmEuro,
+        a.shipping_euro as shippingEuro,
+        a.net_euro as netEuro,
+        a.tax_euro as taxEuro,
+        a.gross_euro as grossEuro,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -153,6 +163,16 @@ export const AssignmentService = {
         a.created_at as createdAt,
         a.printing_date as printingDate,
         a.paid_at as paidAt,
+        a.total_minutes as totalMinutes,
+        a.rounded_minutes as roundedMinutes,
+        a.time_euro as timeEuro,
+        a.writing_euro as writingEuro,
+        a.printing_euro as printingEuro,
+        a.km_euro as kmEuro,
+        a.shipping_euro as shippingEuro,
+        a.net_euro as netEuro,
+        a.tax_euro as taxEuro,
+        a.gross_euro as grossEuro,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -195,8 +215,10 @@ export const AssignmentService = {
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, travel_count, preparation_time, evaluation_time, writing_characters, 
-        printing_pages, km_count, shipping_fee, printing_date, paid_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        printing_pages, km_count, shipping_fee, printing_date, paid_at,
+        total_minutes, rounded_minutes, time_euro, writing_euro, printing_euro,
+        km_euro, shipping_euro, net_euro, tax_euro, gross_euro
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -205,7 +227,11 @@ export const AssignmentService = {
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
         assignment.printingDate || null,
-        assignment.paidAt || null
+        assignment.paidAt || null,
+        assignment.totalMinutes || null, assignment.roundedMinutes || null, assignment.timeEuro || null, 
+        assignment.writingEuro || null, assignment.printingEuro || null,
+        assignment.kmEuro || null, assignment.shippingEuro || null, assignment.netEuro || null, 
+        assignment.taxEuro || null, assignment.grossEuro || null
       ]
     );
     return result.lastInsertId!;
@@ -219,7 +245,9 @@ export const AssignmentService = {
         court_id = ?, remuneration_group_id = ?,
         travel_time = ?, travel_count = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
-        shipping_fee = ?, printing_date = ?, paid_at = ?
+        shipping_fee = ?, printing_date = ?, paid_at = ?,
+        total_minutes = ?, rounded_minutes = ?, time_euro = ?, writing_euro = ?, printing_euro = ?,
+        km_euro = ?, shipping_euro = ?, net_euro = ?, tax_euro = ?, gross_euro = ?
         WHERE id = ?`,
         [
         assignment.invoiceNumber || null,
@@ -230,6 +258,10 @@ export const AssignmentService = {
         assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
         assignment.paidAt || null,
+        assignment.totalMinutes ?? null, assignment.roundedMinutes ?? null, assignment.timeEuro ?? null, 
+        assignment.writingEuro ?? null, assignment.printingEuro ?? null,
+        assignment.kmEuro ?? null, assignment.shippingEuro ?? null, assignment.netEuro ?? null, 
+        assignment.taxEuro ?? null, assignment.grossEuro ?? null,
         assignment.id
         ]
     );
@@ -238,5 +270,53 @@ export const AssignmentService = {
   async delete(id: number): Promise<void> {
     const db = await getDb();
     await db.execute("DELETE FROM assignments WHERE id = ?", [id]);
+  },
+
+  async getPaidByMonth(month: number, year: number): Promise<Assignment[]> {
+    const db = await getDb();
+    const monthStr = month.toString().padStart(2, '0');
+    const yearStr = year.toString();
+    const pattern = `${yearStr}-${monthStr}-%`;
+    
+    const rows = await db.select<any[]>(`
+      SELECT 
+        a.id, 
+        a.invoice_number as invoiceNumber, 
+        a.patient_name as patientName, 
+        a.patient_birthdate as patientBirthdate, 
+        a.file_number as fileNumber, 
+        a.court_id as courtId, 
+        a.remuneration_group_id as remunerationGroupId, 
+        a.travel_time as travelTime, 
+        a.travel_count as travelCount,
+        a.preparation_time as preparationTime, 
+        a.evaluation_time as evaluationTime, 
+        a.writing_characters as writingCharacters, 
+        a.printing_pages as printingPages, 
+        a.km_count as kmCount, 
+        a.shipping_fee as shippingFee, 
+        a.created_at as createdAt,
+        a.printing_date as printingDate,
+        a.paid_at as paidAt,
+        a.total_minutes as totalMinutes,
+        a.rounded_minutes as roundedMinutes,
+        a.time_euro as timeEuro,
+        a.writing_euro as writingEuro,
+        a.printing_euro as printingEuro,
+        a.km_euro as kmEuro,
+        a.shipping_euro as shippingEuro,
+        a.net_euro as netEuro,
+        a.tax_euro as taxEuro,
+        a.gross_euro as grossEuro,
+        c.name as court,
+        rg.name as remunerationGroup
+      FROM assignments a
+      JOIN courts c ON a.court_id = c.id
+      JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
+      WHERE a.paid_at LIKE ?
+      ORDER BY a.paid_at ASC
+    `, [pattern]);
+    
+    return rows.map(r => ({ ...r, status: "Abgeschlossen" }));
   }
 };

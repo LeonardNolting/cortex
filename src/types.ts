@@ -22,6 +22,17 @@ export interface Assignment {
   createdAt: string;
   printingDate?: string;
   paidAt?: string;
+  // Calculated values stored at the time of invoicing
+  totalMinutes?: number;
+  roundedMinutes?: number;
+  timeEuro?: number;
+  writingEuro?: number;
+  printingEuro?: number;
+  kmEuro?: number;
+  shippingEuro?: number;
+  netEuro?: number;
+  taxEuro?: number;
+  grossEuro?: number;
 }
 
 export interface Court {

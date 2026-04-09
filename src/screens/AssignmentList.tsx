@@ -27,13 +27,13 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { PlusCircle, Settings, FileText, Trash2 } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { getStatusVariant } from "../lib/status";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
-import { generateInvoiceDocx } from "../lib/invoice";
+import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { documentDir, join } from "@tauri-apps/api/path";
@@ -49,6 +49,13 @@ export function AssignmentList() {
   const [invoiceForm, setInvoiceForm] = useState({
     invoiceNumber: "",
     printingDate: new Date().toISOString().split('T')[0]
+  });
+
+  // Income Tax Dialog State
+  const [isTaxDialogOpen, setIsTaxDialogOpen] = useState(false);
+  const [taxForm, setTaxForm] = useState({
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear()
   });
 
   useEffect(() => {
@@ -120,14 +127,17 @@ export function AssignmentList() {
         throw new Error("Gericht oder Vergütungsgruppe nicht gefunden");
       }
 
-      const docxArray = await generateInvoiceDocx({
+      const invoiceData = {
         assignment: selectedAssignment,
         court,
         remunerationGroup,
         settings,
         invoiceNumber: invoiceForm.invoiceNumber,
         printingDate: invoiceForm.printingDate
-      });
+      };
+
+      const docxArray = await generateInvoiceDocx(invoiceData);
+      const values = calculateInvoiceValues(invoiceData);
 
       const fileName = `Rechnung_${invoiceForm.invoiceNumber}_${selectedAssignment.patientName.replace(/\s+/g, '_')}.docx`;
       const docPath = await join(await documentDir(), fileName);
@@ -137,6 +147,7 @@ export function AssignmentList() {
 
       await AssignmentService.update({
         ...selectedAssignment,
+        ...values,
         invoiceNumber: invoiceForm.invoiceNumber,
         printingDate: invoiceForm.printingDate,
         status: "Abgeschlossen"
@@ -150,8 +161,42 @@ export function AssignmentList() {
     }
   };
 
+  const handleGenerateTaxListing = async () => {
+    try {
+      const paidAssignments = await AssignmentService.getPaidByMonth(taxForm.month, taxForm.year);
+      
+      if (paidAssignments.length === 0) {
+        alert("Keine bezahlten Aufträge für diesen Zeitraum gefunden.");
+        return;
+      }
+
+      const settings = await SettingsService.getSettings();
+      const docxArray = await generateIncomeTaxDocx(
+        paidAssignments,
+        settings,
+        taxForm.month,
+        taxForm.year
+      );
+
+      const monthStr = taxForm.month.toString().padStart(2, '0');
+      const fileName = `Einnahmen_${taxForm.year}_${monthStr}.docx`;
+      const docPath = await join(await documentDir(), fileName);
+      
+      await writeFile(docPath, docxArray);
+      await openPath(docPath);
+      
+      setIsTaxDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to generate tax listing:", error);
+      alert("Fehler beim Generieren der Einnahmenübersicht.");
+    }
+  };
+
   const actions = (
     <>
+      <Button variant="outline" size="icon" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
+        <Calculator className="h-4 w-4" />
+      </Button>
       <Button variant="outline" size="icon" onClick={() => navigate("/settings")}>
         <Settings className="h-4 w-4" />
       </Button>
@@ -272,6 +317,11 @@ export function AssignmentList() {
             <DialogTitle>Rechnung generieren</DialogTitle>
             <DialogDescription>
               Geben Sie das Rechnungsdatum und die Rechnungsnummer für {selectedAssignment?.patientName} an.
+              {selectedAssignment?.invoiceNumber && (
+                <div className="mt-2 text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-200">
+                  Hinweis: Eine Rechnung wurde bereits erstellt. Die gespeicherten Beträge werden überschrieben.
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -305,6 +355,56 @@ export function AssignmentList() {
             </Button>
             <Button type="button" onClick={handleConfirmInvoice}>
               Bestätigen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isTaxDialogOpen} onOpenChange={setIsTaxDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Einnahmenübersicht generieren</DialogTitle>
+            <DialogDescription>
+              Wählen Sie den Monat und das Jahr für die Übersicht der bezahlten Aufträge.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="month" className="text-right">
+                Monat
+              </Label>
+              <select
+                id="month"
+                value={taxForm.month}
+                onChange={(e) => setTaxForm(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {[...Array(12)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {new Date(2000, i).toLocaleString('de-DE', { month: 'long' })}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="year" className="text-right">
+                Jahr
+              </Label>
+              <Input
+                id="year"
+                type="number"
+                value={taxForm.year}
+                onChange={(e) => setTaxForm(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsTaxDialogOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button type="button" onClick={handleGenerateTaxListing}>
+              Generieren
             </Button>
           </DialogFooter>
         </DialogContent>

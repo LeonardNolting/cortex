@@ -285,3 +285,113 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
 
   return new Uint8Array(await Packer.toArrayBuffer(doc));
 }
+
+export async function generateIncomeTaxDocx(
+  assignments: Assignment[],
+  settings: Settings,
+  month: number,
+  year: number
+): Promise<Uint8Array> {
+  const monthNames = [
+    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember"
+  ];
+  const monthName = monthNames[month - 1];
+
+  const tableRows = assignments.map(a => {
+    const dateStr = a.paidAt ? new Date(a.paidAt).toLocaleDateString("de-DE") : "-";
+    const amountStr = formatEuro(a.grossEuro || 0);
+    
+    return new TableRow({
+      children: [
+        new TableCell({
+          width: { size: 50, type: WidthType.PERCENTAGE },
+          children: [new Paragraph({ children: [run(dateStr)] })],
+          margins: { top: 120, bottom: 120, left: 120, right: 120 },
+        }),
+        new TableCell({
+          width: { size: 50, type: WidthType.PERCENTAGE },
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [run(amountStr)] })],
+          margins: { top: 120, bottom: 120, left: 120, right: 120 },
+        }),
+      ]
+    });
+  });
+
+  const totalAmount = assignments.reduce((sum, a) => sum + (a.grossEuro || 0), 0);
+  const totalRow = new TableRow({
+    children: [
+      new TableCell({
+        width: { size: 50, type: WidthType.PERCENTAGE },
+        children: [new Paragraph({ children: [run("Gesamt", { bold: true })] })],
+        margins: { top: 120, bottom: 120, left: 120, right: 120 },
+        borders: { top: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+      }),
+      new TableCell({
+        width: { size: 50, type: WidthType.PERCENTAGE },
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [run(formatEuro(totalAmount), { bold: true })] })],
+        margins: { top: 120, bottom: 120, left: 120, right: 120 },
+        borders: { top: { style: BorderStyle.SINGLE, size: 6, color: "000000" } },
+      }),
+    ]
+  });
+
+  const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: { font: "Arial", size: 22 }
+        }
+      }
+    },
+    sections: [{
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
+        }
+      },
+      children: [
+        // Header Line 1: Examiner's name and address
+        new Paragraph({ 
+          children: [
+            run(`${settings.userName}, ${settings.userStreet}, ${settings.userZip} ${settings.userCity}`)
+          ] 
+        }),
+        // Header Line 2: Einnahmen inkl. Mwst. [month and year in German]
+        new Paragraph({ 
+          children: [
+            run(`Einnahmen inkl. Mwst. ${monthName} ${year}`, { bold: true })
+          ],
+          spacing: { before: 240, after: 480 }
+        }),
+
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ children: [run("Datum", { bold: true })] })],
+                  margins: { top: 120, bottom: 120, left: 120, right: 120 },
+                  shading: { fill: "F0F0F0" },
+                }),
+                new TableCell({
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [run("Betrag", { bold: true })] })],
+                  margins: { top: 120, bottom: 120, left: 120, right: 120 },
+                  shading: { fill: "F0F0F0" },
+                }),
+              ]
+            }),
+            ...tableRows,
+            totalRow
+          ]
+        })
+      ]
+    }]
+  });
+
+  return new Uint8Array(await Packer.toArrayBuffer(doc));
+}
