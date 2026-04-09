@@ -152,10 +152,12 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
     printingDate: new Date(printingDate).toLocaleDateString("de-DE")
   };
 
-  const compile = (template: string) => Handlebars.compile(template)(context);
+  const compile = (template: string) => Handlebars.compile(template || "")(context);
 
-  const introTemplate = settings.invoiceIntro || "Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe {{remunerationGroup.name}} zu berechnen:";
-  const subjectTemplate = "{{assignment.patientName}}, geb. am {{assignment.patientBirthdate}}, Aktenzeichen: {{assignment.fileNumber}}";
+  const introText = compile(settings.invoiceIntro);
+  const subjectText = compile(settings.invoiceSubject);
+  const titleText = compile(settings.invoiceTitle);
+  const footerText = compile(settings.invoiceFooter);
   
   const doc = new Document({
     styles: {
@@ -203,14 +205,14 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
         // Subject
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          children: [run(compile(subjectTemplate), { bold: true })]
+          children: [run(subjectText, { bold: true })]
         }),
         new Paragraph({ children: [] }),
 
         // Title
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          children: [run("Vergütungsantrag", { bold: true })]
+          children: [run(titleText, { bold: true })]
         }),
         new Paragraph({ children: [] }),
         new Paragraph({ children: [] }),
@@ -218,7 +220,7 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
         // Intro
         new Paragraph({
           alignment: AlignmentType.BOTH,
-          children: [run(compile(introTemplate))]
+          children: [run(introText)]
         }),
         new Paragraph({ children: [] }),
 
@@ -234,30 +236,28 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
             insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
           },
           rows: [
-            row(travelCount === 1 ? "Anfahrt:" : "Anfahrten:", `${((assignment.travelTime || 0) * travelCount).toLocaleString("de-DE")} Minuten`, travelCount !== 1 ? `(${travelCount.toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "", ""),
+            row(
+              travelCount === 1 ? (settings.invoiceLabelTravelSingle || "Anfahrt:") : (settings.invoiceLabelTravelMultiple || "Anfahrten:"), 
+              `${((assignment.travelTime || 0) * travelCount).toLocaleString("de-DE")} Minuten`, 
+              travelCount !== 1 ? `(${travelCount.toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "", 
+              ""
+            ),
             rowMulti(
-              [
-                "Exploration, Fremdanamnese",
-                "und Durchsicht der Unterlagen:",
-              ],
+              (settings.invoiceLabelPreparation || "Exploration, Fremdanamnese\nund Durchsicht der Unterlagen:").split("\n"),
               `${assignment.preparationTime || 0} Minuten`
             ),
             rowMulti(
-              [
-                "Auswertung der Untersuchung und",
-                "der neuropsycholog. Testung,",
-                "Verfassen des Gutachtens:",
-              ],
+              (settings.invoiceLabelEvaluation || "Auswertung der Untersuchung und\nder neuropsycholog. Testung,\nVerfassen des Gutachtens:").split("\n"),
               `${assignment.evaluationTime || 0} Minuten`
             ),
-            row("Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
-            row("Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
-            row("Kilometerpauschale:", `${((assignment.kmCount || 0) * travelCount).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
-            ...(assignment.printingPages ? [row("Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(settings.printingFee || 0.5)}/Seite`, formatEuro(values.printingEuro))] : []),
-            row("Versandkosten:", "", "", formatEuro(values.shippingEuro)),
-            row("Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),
-            row(`Umsatzsteuer ${settings.taxRate || 19}%:`, "", "", formatEuro(values.taxEuro)),
-            row("Gesamt (Brutto):", "", "", formatEuro(values.grossEuro), true),
+            row(settings.invoiceLabelTotalTime || "Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
+            row(settings.invoiceLabelWriting || "Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
+            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * travelCount).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
+            ...(assignment.printingPages ? [row(settings.invoiceLabelPrinting || "Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(settings.printingFee || 0.5)}/Seite`, formatEuro(values.printingEuro))] : []),
+            row(settings.invoiceLabelShipping || "Versandkosten:", "", "", formatEuro(values.shippingEuro)),
+            row(settings.invoiceLabelNet || "Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),
+            row(compile(settings.invoiceLabelTax || "Umsatzsteuer {{settings.taxRate}}%:"), "", "", formatEuro(values.taxEuro)),
+            row(settings.invoiceLabelGross || "Gesamt (Brutto):", "", "", formatEuro(values.grossEuro), true),
           ],
         }),
 
@@ -275,13 +275,9 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
             width: CONTENT_WIDTH,
             height: 10,
           },
-          children: [
-            run("Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:"),
-            run("", { break: 1.5 }),
-            run(`${settings.userName || ""}, ${settings.userBank || "Bank"},`),
-            run("", { break: 1.5 }),
-            run(`IBAN: ${settings.userIban || ""}, BIC: ${settings.userBic || ""}`)
-          ],
+          children: footerText.split("\n").flatMap((line, i) => {
+            return [run(line, { break: i > 0 ? 1 : 0 })];
+          }),
         }),
       ]
     }]
