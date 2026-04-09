@@ -299,14 +299,14 @@ export function AssignmentList() {
               return (
                 <TableRow 
                   key={assignment.id} 
-                  className={`cursor-pointer ${overdue ? "bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30" : ""}`}
+                  className={`cursor-pointer ${overdue ? "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/10 dark:hover:bg-amber-950/20" : ""}`}
                   onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
                 >
                   <TableCell className="font-medium">
                     <div className="flex flex-col gap-1">
                       {assignment.invoiceNumber || "-"}
                       {overdue && (
-                        <Badge variant="destructive" className="w-fit text-[10px] px-1 py-0 h-4">
+                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400">
                           Überfällig
                         </Badge>
                       )}
