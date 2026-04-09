@@ -21,6 +21,7 @@ export interface Assignment {
   status: "Offen" | "In Bearbeitung" | "Abgeschlossen";
   createdAt: string;
   printingDate?: string;
+  paidAt?: string;
 }
 
 export interface Court {

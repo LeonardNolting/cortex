@@ -66,6 +66,19 @@ export function AssignmentList() {
     }
   };
 
+  const handleTogglePaid = async (assignment: Assignment, isPaid: boolean) => {
+    try {
+      const updatedAssignment = {
+        ...assignment,
+        paidAt: isPaid ? new Date().toISOString().split('T')[0] : undefined
+      };
+      await AssignmentService.update(updatedAssignment);
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to toggle paid status:", error);
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (window.confirm("Möchten Sie diesen Auftrag wirklich löschen?")) {
       try {
@@ -175,17 +188,18 @@ export function AssignmentList() {
                 <TableHead>Gericht</TableHead>
                 <TableHead>Gruppe</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Bezahlt</TableHead>
                 <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10">Lade Aufträge...</TableCell>
+                  <TableCell colSpan={9} className="text-center py-10">Lade Aufträge...</TableCell>
                 </TableRow>
               ) : assignments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
+                  <TableCell colSpan={9} className="text-center py-10">Keine Aufträge gefunden.</TableCell>
                 </TableRow>
               ) : (
                 assignments.map((assignment) => (
@@ -206,6 +220,17 @@ export function AssignmentList() {
                       <Badge variant={getStatusVariant(assignment.status)}>
                         {assignment.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={!!assignment.paidAt} 
+                          onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                          title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

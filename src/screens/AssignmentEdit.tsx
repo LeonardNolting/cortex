@@ -42,6 +42,7 @@ export function AssignmentEdit() {
     shippingFee: 0,
     invoiceNumber: "",
     printingDate: "",
+    paidAt: "",
     status: "Offen"
   });
 
@@ -65,7 +66,8 @@ export function AssignmentEdit() {
             setFormData({
               ...assignment,
               invoiceNumber: assignment.invoiceNumber || "",
-              printingDate: assignment.printingDate || ""
+              printingDate: assignment.printingDate || "",
+              paidAt: assignment.paidAt || ""
             });
           }
         }
@@ -242,6 +244,19 @@ export function AssignmentEdit() {
                 />
               </div>
             )}
+            <div className="space-y-2 pt-2 border-t">
+              <Label htmlFor="paidAt">Bezahlt am</Label>
+              <Input 
+                id="paidAt" 
+                name="paidAt" 
+                type="date"
+                value={formData.paidAt || ""} 
+                onChange={handleChange} 
+              />
+              <p className="text-xs text-muted-foreground">
+                Datum an dem die Rechnung beglichen wurde.
+              </p>
+            </div>
           </CardContent>
         </Card>
 

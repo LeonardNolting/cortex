@@ -120,6 +120,7 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
+        a.paid_at as paidAt,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -151,6 +152,7 @@ export const AssignmentService = {
         a.shipping_fee as shippingFee, 
         a.created_at as createdAt,
         a.printing_date as printingDate,
+        a.paid_at as paidAt,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -193,8 +195,8 @@ export const AssignmentService = {
       `INSERT INTO assignments (
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, travel_count, preparation_time, evaluation_time, writing_characters, 
-        printing_pages, km_count, shipping_fee, printing_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        printing_pages, km_count, shipping_fee, printing_date, paid_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -202,7 +204,8 @@ export const AssignmentService = {
         assignment.travelTime || 0, assignment.travelCount || 1, assignment.preparationTime || 0, assignment.evaluationTime || 0, 
         assignment.writingCharacters || 0, assignment.printingPages || 0, 
         assignment.kmCount || 0, assignment.shippingFee || 0, 
-        assignment.printingDate || null
+        assignment.printingDate || null,
+        assignment.paidAt || null
       ]
     );
     return result.lastInsertId!;
@@ -216,7 +219,7 @@ export const AssignmentService = {
         court_id = ?, remuneration_group_id = ?,
         travel_time = ?, travel_count = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
-        shipping_fee = ?, printing_date = ?
+        shipping_fee = ?, printing_date = ?, paid_at = ?
         WHERE id = ?`,
         [
         assignment.invoiceNumber || null,
@@ -226,6 +229,7 @@ export const AssignmentService = {
         assignment.writingCharacters, assignment.printingPages, 
         assignment.kmCount, assignment.shippingFee, 
         assignment.printingDate || null,
+        assignment.paidAt || null,
         assignment.id
         ]
     );

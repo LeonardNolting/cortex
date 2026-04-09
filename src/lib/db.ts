@@ -56,6 +56,7 @@ async function runMigrations(db: Database) {
       shipping_fee REAL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       printing_date TEXT,
+      paid_at TEXT,
       FOREIGN KEY (court_id) REFERENCES courts(id),
       FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
     )
@@ -64,6 +65,12 @@ async function runMigrations(db: Database) {
   // Migrations for existing tables
   try {
     await db.execute("ALTER TABLE assignments ADD COLUMN travel_count REAL DEFAULT 1");
+  } catch (e) {
+    // Column might already exist
+  }
+
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN paid_at TEXT");
   } catch (e) {
     // Column might already exist
   }
