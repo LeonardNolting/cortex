@@ -6,8 +6,16 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Save } from "lucide-react";
 
+type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentDeadlineDays'> & {
+  taxRate: string;
+  kmFee: string;
+  writingFee: string;
+  printingFee: string;
+  paymentDeadlineDays: string;
+};
+
 export function UserManagement() {
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<UserSettingsFormData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +25,14 @@ export function UserManagement() {
   async function loadSettings() {
     try {
       const data = await SettingsService.getSettings();
-      setSettings(data);
+      setSettings({
+        ...data,
+        taxRate: String(data.taxRate || '0').replace('.', ','),
+        kmFee: String(data.kmFee || '0').replace('.', ','),
+        writingFee: String(data.writingFee || '0').replace('.', ','),
+        printingFee: String(data.printingFee || '0').replace('.', ','),
+        paymentDeadlineDays: String(data.paymentDeadlineDays || '14').replace('.', ','),
+      });
     } catch (error) {
       console.error("Failed to load settings", error);
     } finally {
@@ -27,26 +42,49 @@ export function UserManagement() {
 
   async function handleSave() {
     if (!settings) return;
+
+    const parseGermanNumber = (str: string) => {
+      const value = parseFloat(str.replace(',', '.'));
+      return isNaN(value) ? 0 : value;
+    }
+
+    const settingsToSave: Settings = {
+      ...settings,
+      taxRate: parseGermanNumber(settings.taxRate),
+      kmFee: parseGermanNumber(settings.kmFee),
+      writingFee: parseGermanNumber(settings.writingFee),
+      printingFee: parseGermanNumber(settings.printingFee),
+      paymentDeadlineDays: parseGermanNumber(settings.paymentDeadlineDays),
+    };
+
     try {
-      await SettingsService.updateSettings(settings);
+      await SettingsService.updateSettings(settingsToSave);
       // Optional: Show success message
     } catch (error) {
       console.error("Failed to save settings", error);
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!settings) return;
+    const { name, value } = e.target;
+    
+    const numericFields = ["taxRate", "kmFee", "writingFee", "printingFee", "paymentDeadlineDays"];
+
+    if (numericFields.includes(name)) {
+      const sanitizedValue = value.replace('.',',');
+      if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
+        setSettings(prev => ({ ...prev!, [name]: sanitizedValue }));
+      }
+    } else {
+      setSettings(prev => ({ ...prev!, [name]: value }));
+    }
+  };
+
+
   if (isLoading || !settings) {
     return <div>Lädt...</div>;
   }
-
-  const updateNumericSetting = (key: keyof Settings, value: string) => {
-    if (!settings) return;
-    const numericValue = parseFloat(value.replace(",", "."));
-    setSettings({
-      ...settings,
-      [key]: isNaN(numericValue) ? 0 : numericValue
-    });
-  };
 
   return (
     <div className="space-y-4">
@@ -55,16 +93,18 @@ export function UserManagement() {
           <Label htmlFor="userName">Name</Label>
           <Input 
             id="userName" 
+            name="userName"
             value={settings.userName || ""} 
-            onChange={(e) => setSettings({ ...settings, userName: e.target.value })} 
+            onChange={handleChange} 
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="userBirthday">Geburtsdatum</Label>
           <Input 
             id="userBirthday" 
+            name="userBirthday"
             value={settings.userBirthday || ""} 
-            onChange={(e) => setSettings({ ...settings, userBirthday: e.target.value })} 
+            onChange={handleChange} 
           />
         </div>
       </div>
@@ -73,8 +113,9 @@ export function UserManagement() {
         <Label htmlFor="userStreet">Straße & Hausnummer</Label>
         <Input 
           id="userStreet" 
+          name="userStreet"
           value={settings.userStreet || ""} 
-          onChange={(e) => setSettings({ ...settings, userStreet: e.target.value })} 
+          onChange={handleChange} 
         />
       </div>
 
@@ -83,16 +124,18 @@ export function UserManagement() {
           <Label htmlFor="userZip">PLZ</Label>
           <Input 
             id="userZip" 
+            name="userZip"
             value={settings.userZip || ""} 
-            onChange={(e) => setSettings({ ...settings, userZip: e.target.value })} 
+            onChange={handleChange} 
           />
         </div>
         <div className="col-span-2 space-y-2">
           <Label htmlFor="userCity">Ort</Label>
           <Input 
             id="userCity" 
+            name="userCity"
             value={settings.userCity || ""} 
-            onChange={(e) => setSettings({ ...settings, userCity: e.target.value })} 
+            onChange={handleChange} 
           />
         </div>
       </div>
@@ -101,8 +144,9 @@ export function UserManagement() {
         <Label htmlFor="userTaxId">Steuernummer</Label>
         <Input 
           id="userTaxId" 
+          name="userTaxId"
           value={settings.userTaxId || ""} 
-          onChange={(e) => setSettings({ ...settings, userTaxId: e.target.value })} 
+          onChange={handleChange} 
         />
       </div>
 
@@ -113,8 +157,9 @@ export function UserManagement() {
             <Label htmlFor="userBank">Bank</Label>
             <Input 
               id="userBank" 
+              name="userBank"
               value={settings.userBank || ""} 
-              onChange={(e) => setSettings({ ...settings, userBank: e.target.value })} 
+              onChange={handleChange} 
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -122,16 +167,18 @@ export function UserManagement() {
               <Label htmlFor="userIban">IBAN</Label>
               <Input 
                 id="userIban" 
+                name="userIban"
                 value={settings.userIban || ""} 
-                onChange={(e) => setSettings({ ...settings, userIban: e.target.value })} 
+                onChange={handleChange} 
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="userBic">BIC</Label>
               <Input 
                 id="userBic" 
+                name="userBic"
                 value={settings.userBic || ""} 
-                onChange={(e) => setSettings({ ...settings, userBic: e.target.value })} 
+                onChange={handleChange} 
               />
             </div>
           </div>
@@ -145,50 +192,55 @@ export function UserManagement() {
             <Label htmlFor="taxRate">Umsatzsteuer (%)</Label>
             <Input 
               id="taxRate" 
-              type="number"
-              step="any"
-              value={settings.taxRate ?? 0} 
-              onChange={(e) => updateNumericSetting("taxRate", e.target.value)} 
+              name="taxRate"
+              type="text"
+              inputMode="decimal"
+              value={settings.taxRate} 
+              onChange={handleChange}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="kmFee">Kilometergeld (€/km)</Label>
             <Input 
-              id="kmFee" 
-              type="number"
-              step="any"
-              value={settings.kmFee ?? 0} 
-              onChange={(e) => updateNumericSetting("kmFee", e.target.value)} 
+              id="kmFee"
+              name="kmFee" 
+              type="text"
+              inputMode="decimal"
+              value={settings.kmFee} 
+              onChange={handleChange}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="writingFee">Schreibgebühr (€/1000 Zeichen)</Label>
             <Input 
               id="writingFee" 
-              type="number"
-              step="any"
-              value={settings.writingFee ?? 0} 
-              onChange={(e) => updateNumericSetting("writingFee", e.target.value)} 
+              name="writingFee"
+              type="text"
+              inputMode="decimal"
+              value={settings.writingFee} 
+              onChange={handleChange}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="printingFee">Kopierkosten (€/Seite)</Label>
             <Input 
               id="printingFee" 
-              type="number"
-              step="any"
-              value={settings.printingFee ?? 0} 
-              onChange={(e) => updateNumericSetting("printingFee", e.target.value)} 
+              name="printingFee"
+              type="text"
+              inputMode="decimal"
+              value={settings.printingFee} 
+              onChange={handleChange}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="paymentDeadlineDays">Zahlungsfrist (Tage)</Label>
             <Input 
               id="paymentDeadlineDays" 
-              type="number"
-              step="1"
-              value={settings.paymentDeadlineDays ?? 14} 
-              onChange={(e) => updateNumericSetting("paymentDeadlineDays", e.target.value)} 
+              name="paymentDeadlineDays"
+              type="text"
+              inputMode="decimal"
+              value={settings.paymentDeadlineDays} 
+              onChange={handleChange}
             />
           </div>
         </div>

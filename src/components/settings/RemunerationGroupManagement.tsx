@@ -39,9 +39,9 @@ export function RemunerationGroupManagement() {
   const [editingGroup, setEditingGroup] = useState<RemunerationGroup | null>(null);
   const [groupIdToDelete, setGroupIdToDelete] = useState<number | null>(null);
   
-  const [formData, setFormData] = useState<Omit<RemunerationGroup, "id">>({
+  const [formData, setFormData] = useState({
     name: "",
-    value: 0
+    value: "0,00"
   });
 
   useEffect(() => {
@@ -58,23 +58,28 @@ export function RemunerationGroupManagement() {
       setEditingGroup(group);
       setFormData({
         name: group.name,
-        value: group.value
+        value: group.value.toFixed(2).replace('.', ',')
       });
     } else {
       setEditingGroup(null);
       setFormData({
         name: "",
-        value: 0
+        value: "0,00"
       });
     }
     setIsOpen(true);
   }
 
   async function handleSave() {
+    const dataToSave = {
+      name: formData.name,
+      value: parseFloat(formData.value.replace(',', '.')) || 0
+    };
+
     if (editingGroup) {
-      await RemunerationGroupService.update({ ...formData, id: editingGroup.id });
+      await RemunerationGroupService.update({ ...dataToSave, id: editingGroup.id });
     } else {
-      await RemunerationGroupService.create(formData);
+      await RemunerationGroupService.create(dataToSave);
     }
     setIsOpen(false);
     loadGroups();
@@ -91,6 +96,14 @@ export function RemunerationGroupManagement() {
       setGroupIdToDelete(null);
       setIsDeleteDialogOpen(false);
       loadGroups();
+    }
+  }
+
+  function handleValueChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = e.target;
+    const sanitizedValue = value.replace('.',',');
+    if (sanitizedValue === "" || /^[0-9]*\,?[0-9]*$/.test(sanitizedValue)) {
+      setFormData(prev => ({ ...prev, value: sanitizedValue }));
     }
   }
 
@@ -123,9 +136,10 @@ export function RemunerationGroupManagement() {
                 <Label htmlFor="value">Stundensatz (€)</Label>
                 <Input 
                   id="value" 
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.value} 
-                  onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })} 
+                  onChange={handleValueChange}
                 />
               </div>
             </div>
