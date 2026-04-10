@@ -405,7 +405,20 @@ export function AssignmentList() {
       if (assignment.paidAt || assignment.invoiceNumber || assignment.startedWorkingDate || !assignment.submissionDate) return false;
       const twoWeeksFromNow = new Date();
       twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-      return new Date(assignment.submissionDate) <= twoWeeksFromNow;
+      const submissionDate = new Date(assignment.submissionDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      submissionDate.setHours(0, 0, 0, 0);
+      return submissionDate >= today && submissionDate <= twoWeeksFromNow;
+    };
+
+    const isSubmissionOverdue = (assignment: Assignment) => {
+      if (assignment.paidAt || assignment.invoiceNumber || assignment.startedWorkingDate || !assignment.submissionDate) return false;
+      const submissionDate = new Date(assignment.submissionDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      submissionDate.setHours(0, 0, 0, 0);
+      return submissionDate < today;
     };
 
     const getDaysDiff = (dateStr: string) => {
@@ -461,6 +474,7 @@ export function AssignmentList() {
       const overdue = isOverdue(assignment);
       const workingOn = isWorkingOn(assignment);
       const urgent = isUrgentOpen(assignment);
+      const submissionOverdue = isSubmissionOverdue(assignment);
 
       const statusText = getStatusText(assignment);
 
@@ -470,6 +484,8 @@ export function AssignmentList() {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-50 dark:bg-blue-950 dark:text-blue-400";
       } else if (workingOn) {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-green-600 text-green-700 bg-green-50 hover:bg-green-50 dark:bg-green-950 dark:text-green-400";
+      } else if (submissionOverdue) {
+        badgeClass = "w-fit text-sm px-2 py-0.5 border-red-600 text-red-700 bg-red-50 hover:bg-red-50 dark:bg-red-950 dark:text-red-400";
       } else if (overdue || urgent) {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400";
       } else {
@@ -511,10 +527,13 @@ export function AssignmentList() {
               const overdue = isOverdue(assignment);
               const workingOn = isWorkingOn(assignment);
               const urgent = isUrgentOpen(assignment);
+              const submissionOverdue = isSubmissionOverdue(assignment);
 
               let rowClass = "";
               if (workingOn) {
                 rowClass = "bg-green-50/50 hover:bg-green-100/50 dark:bg-green-950/10 dark:hover:bg-green-950/20";
+              } else if (submissionOverdue) {
+                rowClass = "bg-red-50/50 hover:bg-red-100/50 dark:bg-red-950/10 dark:hover:bg-red-950/20";
               } else if (overdue || urgent) {
                 rowClass = "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/10 dark:hover:bg-amber-950/20";
               }
