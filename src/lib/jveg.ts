@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { SettingsService, RemunerationGroupService } from "./services";
 import { parseHtmlForRates, hashString, ParsedRates } from "./jveg-parser";
 
@@ -10,12 +11,7 @@ export const JvegService = {
     const settings = await SettingsService.getSettings();
     
     try {
-      const response = await fetch("https://gadi.netlify.app/laws/jveg.json");
-      if (!response.ok) {
-        throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-      }
-      
-      const jsonString = await response.text();
+      const jsonString = await invoke<string>("fetch_jveg");
       const hash = await this.hashString(jsonString);
       
       // Reset failed state if it was true
@@ -36,7 +32,7 @@ export const JvegService = {
       if (settings.jvegLastCheckFailed !== 'true') {
         // First time failing
         await SettingsService.updateSettings({ ...settings, jvegLastCheckFailed: 'true' });
-        return { hasUpdates: false, error: "Fehler beim Prüfen auf JVEG-Updates: " + error.message };
+        return { hasUpdates: false, error: "Fehler beim Prüfen auf JVEG-Updates: " + error.toString() };
       }
       // Already failed before, don't show error again
       return { hasUpdates: false };

@@ -1,13 +1,19 @@
 import Database from "@tauri-apps/plugin-sql";
+import { invoke } from "@tauri-apps/api/core";
 import { parseHtmlForRates, hashString } from "./jveg-parser";
 
-let db: Database | null = null;
+let dbPromise: Promise<Database> | null = null;
 
 export async function getDb(): Promise<Database> {
-  if (db) return db;
-  db = await Database.load("sqlite:cortex.db");
-  await runMigrations(db);
-  return db;
+  if (dbPromise) return dbPromise;
+  
+  dbPromise = (async () => {
+    const db = await Database.load("sqlite:cortex.db");
+    await runMigrations(db);
+    return db;
+  })();
+  
+  return dbPromise;
 }
 
 async function runMigrations(db: Database) {
@@ -94,21 +100,18 @@ async function runMigrations(db: Database) {
     let jvegHash = "";
     
     try {
-      const response = await fetch("https://gadi.netlify.app/laws/jveg.json");
-      if (response.ok) {
-        const jsonString = await response.text();
-        const parsed = parseHtmlForRates(jsonString);
-        if (parsed) {
-          initialRates = {
-            'M1': parsed['M1'] || initialRates['M1'],
-            'M2': parsed['M2'] || initialRates['M2'],
-            'M3': parsed['M3'] || initialRates['M3']
-          };
-          jvegHash = await hashString(jsonString);
-        }
+      const jsonString = await invoke<string>("fetch_jveg");
+      const parsed = parseHtmlForRates(jsonString);
+      if (parsed) {
+        initialRates = {
+          'M1': parsed['M1'] || initialRates['M1'],
+          'M2': parsed['M2'] || initialRates['M2'],
+          'M3': parsed['M3'] || initialRates['M3']
+        };
+        jvegHash = await hashString(jsonString);
       }
     } catch (error) {
-      console.warn("Could not fetch initial JVEG rates, using defaults.", error);
+      console.warn("Could not fetch initial JVEG rates via Rust, using defaults.", error);
     }
 
     await db.execute(`
