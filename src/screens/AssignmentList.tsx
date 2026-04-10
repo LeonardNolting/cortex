@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2 } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -245,6 +245,18 @@ export function AssignmentList() {
       await loadAssignments();
     } catch (error) {
       console.error("Failed to reset payment status:", error);
+    }
+  };
+
+  const handleOpenExistingInvoice = async (assignment: Assignment) => {
+    if (!assignment.invoiceNumber) return;
+    try {
+      const fileName = `Rechnung_${assignment.invoiceNumber}_${assignment.patientName.replace(/\s+/g, '_')}.docx`;
+      const docPath = await join(await documentDir(), fileName);
+      await openPath(docPath);
+    } catch (error) {
+      console.error("Failed to open existing invoice:", error);
+      alert("Fehler beim Öffnen der Rechnung. Wurde sie bereits generiert?");
     }
   };
 
@@ -734,18 +746,20 @@ export function AssignmentList() {
                       +1 Woche
                     </Button>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    title="Rechnung generieren"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenInvoiceDialog(assignment);
-                    }}
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    Rechnung
-                  </Button>
+                  {!assignment.invoiceNumber && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      title="Rechnung generieren"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenInvoiceDialog(assignment);
+                      }}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Rechnung
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -758,7 +772,7 @@ export function AssignmentList() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
 
-                  {(assignment.paidAt || (assignment.invoiceNumber && !assignment.paidAt)) && (
+                  {(assignment.paidAt || assignment.invoiceNumber) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
@@ -766,6 +780,24 @@ export function AssignmentList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        {assignment.invoiceNumber && (
+                          <>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenExistingInvoice(assignment);
+                            }}>
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              <span>Bestehende Rechnung öffnen</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenInvoiceDialog(assignment);
+                            }}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              <span>Neue Rechnung drucken</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
                         {assignment.invoiceNumber && !assignment.paidAt && (
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
