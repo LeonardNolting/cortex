@@ -551,7 +551,7 @@ export function AssignmentList() {
           <TableRow>
             <TableHead>Status</TableHead>
             {showInvoiceDateColumn && <TableHead>Rechnungsdatum</TableHead>}
-            {showPaidColumn && <TableHead>Bezahlt</TableHead>}
+            {showPaidColumn && usePaidActionButton && <TableHead>Bezahlt</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
             <TableHead>Patient</TableHead>
             <TableHead>Geburtsdatum</TableHead>
@@ -566,7 +566,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
+                colSpan={7 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn && usePaidActionButton ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -604,31 +604,19 @@ export function AssignmentList() {
                         : "-"}
                     </TableCell>
                   )}
-                  {showPaidColumn && (
+                  {showPaidColumn && usePaidActionButton && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      {usePaidActionButton ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTogglePaid(assignment, true);
-                          }}
-                          title="Als bezahlt markieren"
-                        >
-                          Als bezahlt markieren
-                        </Button>
-                      ) : (
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={!!assignment.paidAt}
-                            onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                            title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
-                          />
-                        </div>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTogglePaid(assignment, true);
+                        }}
+                        title="Als bezahlt markieren"
+                      >
+                        Als bezahlt markieren
+                      </Button>
                     </TableCell>
                   )}
                   {showInvoiceNumberColumn && (
