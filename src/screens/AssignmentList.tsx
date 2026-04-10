@@ -44,7 +44,13 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2 } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { PageHeader } from "../components/PageHeader";
@@ -198,6 +204,48 @@ export function AssignmentList() {
   const handleDeleteClick = (id: number) => {
     setAssignmentToDelete(id);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleResetInvoice = async (assignment: Assignment) => {
+    try {
+      const updatedAssignment = {
+        ...assignment,
+        invoiceNumber: "",
+        printingDate: "",
+        totalMinutes: undefined,
+        roundedMinutes: undefined,
+        timeEuro: undefined,
+        writingEuro: undefined,
+        printingEuro: undefined,
+        kmEuro: undefined,
+        shippingEuro: undefined,
+        netEuro: undefined,
+        taxEuro: undefined,
+        grossEuro: undefined,
+        remunerationGroupValue: undefined,
+        writingFeeRate: undefined,
+        printingFeeRate: undefined,
+        kmFeeRate: undefined,
+        taxRate: undefined,
+      };
+      await AssignmentService.update(updatedAssignment);
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to reset invoice:", error);
+    }
+  };
+
+  const handleResetPayment = async (assignment: Assignment) => {
+    try {
+      const updatedAssignment = {
+        ...assignment,
+        paidAt: ""
+      };
+      await AssignmentService.update(updatedAssignment);
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to reset payment status:", error);
+    }
   };
 
   const confirmDelete = async () => {
@@ -709,6 +757,36 @@ export function AssignmentList() {
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
+
+                  {(assignment.paidAt || (assignment.invoiceNumber && !assignment.paidAt)) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        {assignment.invoiceNumber && !assignment.paidAt && (
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            handleResetInvoice(assignment);
+                          }}>
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            <span>Rechnung zurücksetzen</span>
+                          </DropdownMenuItem>
+                        )}
+                        {assignment.paidAt && (
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            handleResetPayment(assignment);
+                          }}>
+                            <Undo2 className="mr-2 h-4 w-4" />
+                            <span>Zahlungsstatus zurücksetzen</span>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
