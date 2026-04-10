@@ -65,8 +65,6 @@ export function AssignmentList() {
   // Invoice Dialog State
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [missingInvoiceFields, setMissingInvoiceFields] = useState<string[]>([]);
-  const [isMissingInvoiceFieldsDialogOpen, setIsMissingInvoiceFieldsDialogOpen] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState({
     invoiceNumber: "",
     printingDate: new Date().toISOString().split('T')[0],
@@ -210,20 +208,8 @@ export function AssignmentList() {
     return missing;
   };
 
-  const showMissingInvoiceFieldsWarning = (assignment: Assignment, missing: string[]) => {
-    setSelectedAssignment(assignment);
-    setMissingInvoiceFields(missing);
-    setIsMissingInvoiceFieldsDialogOpen(true);
-  };
-
   const handleOpenInvoiceDialog = async (assignment: Assignment) => {
     try {
-      const missing = getMissingInvoiceFields(assignment);
-      if (missing.length > 0) {
-        showMissingInvoiceFieldsWarning(assignment, missing);
-        return;
-      }
-
       // Use existing invoice number if available, otherwise get next one
       const invoiceNumber = assignment.invoiceNumber || await AssignmentService.getNextInvoiceNumber();
       
@@ -243,13 +229,6 @@ export function AssignmentList() {
     if (!selectedAssignment) return;
 
     try {
-      const missing = getMissingInvoiceFields(selectedAssignment);
-      if (missing.length > 0) {
-        showMissingInvoiceFieldsWarning(selectedAssignment, missing);
-        setIsInvoiceDialogOpen(false);
-        return;
-      }
-
       const [court, remunerationGroup, settings] = await Promise.all([
         CourtService.getById(selectedAssignment.courtId),
         RemunerationGroupService.getById(selectedAssignment.remunerationGroupId),
@@ -761,34 +740,6 @@ export function AssignmentList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={isMissingInvoiceFieldsDialogOpen} onOpenChange={setIsMissingInvoiceFieldsDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Rechnung kann noch nicht generiert werden</AlertDialogTitle>
-            <AlertDialogDescription>
-              Für diesen Auftrag fehlen noch Pflichtangaben:
-              <ul className="mt-2 list-disc pl-5 space-y-1">
-                {missingInvoiceFields.map((field) => (
-                  <li key={field}>{field}</li>
-                ))}
-              </ul>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Zurück</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (!selectedAssignment) return;
-                setIsMissingInvoiceFieldsDialogOpen(false);
-                navigate(`/edit/${selectedAssignment.id}`);
-              }}
-            >
-              Auftrag bearbeiten
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -798,6 +749,32 @@ export function AssignmentList() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {selectedAssignment && getMissingInvoiceFields(selectedAssignment).length > 0 && (
+              <div className="text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-200 text-xs space-y-2">
+                <div>
+                  Hinweis: Für diesen Auftrag fehlen noch Pflichtangaben. Die Rechnung kann trotzdem generiert werden, kann aber unvollständig sein:
+                  <ul className="mt-2 list-disc pl-5 space-y-1 font-normal">
+                    {getMissingInvoiceFields(selectedAssignment).map((field) => (
+                      <li key={field}>{field}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="border-amber-300 hover:bg-amber-100"
+                    onClick={() => {
+                      setIsInvoiceDialogOpen(false);
+                      navigate(`/edit/${selectedAssignment.id}`);
+                    }}
+                  >
+                    Auftrag bearbeiten
+                  </Button>
+                </div>
+              </div>
+            )}
             {selectedAssignment?.invoiceNumber && (
               <div className="space-y-3">
                 <div className="space-y-1">
