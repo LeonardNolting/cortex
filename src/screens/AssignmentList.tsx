@@ -409,12 +409,14 @@ export function AssignmentList() {
     list,
     showInvoiceNumberColumn = true,
     showPaidColumn = true,
+    showInvoiceDateColumn = false,
     showSubmissionDateColumn = false,
     usePaidActionButton = false,
   }: {
     list: Assignment[];
     showInvoiceNumberColumn?: boolean;
     showPaidColumn?: boolean;
+    showInvoiceDateColumn?: boolean;
     showSubmissionDateColumn?: boolean;
     usePaidActionButton?: boolean;
   }) => {
@@ -548,6 +550,7 @@ export function AssignmentList() {
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
+            {showInvoiceDateColumn && <TableHead>Rechnungsdatum</TableHead>}
             {showPaidColumn && <TableHead>Bezahlt</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
             <TableHead>Patient</TableHead>
@@ -563,7 +566,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
+                colSpan={7 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -594,6 +597,13 @@ export function AssignmentList() {
                   <TableCell>
                     {getStatusBadge(assignment)}
                   </TableCell>
+                  {showInvoiceDateColumn && (
+                    <TableCell>
+                      {assignment.printingDate
+                        ? new Date(assignment.printingDate).toLocaleDateString("de-DE")
+                        : "-"}
+                    </TableCell>
+                  )}
                   {showPaidColumn && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       {usePaidActionButton ? (
@@ -809,7 +819,7 @@ export function AssignmentList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.ready} usePaidActionButton />
+              <AssignmentTable list={categorizedAssignments.ready} usePaidActionButton showInvoiceDateColumn />
             </CardContent>
           </Card>
 
