@@ -10,6 +10,8 @@ This template should help get you started developing with Tauri, React and Types
 - Knopf um deadline 1 Woche zurückzustellen (sowohl für submission als auch für Zahldatum?) - wenn Deadline nah kommt
 - Knopf um Bearbeitung anzufangen
 - Knopf um Deadline zu setzen
+- Abgabe überfällig = rot
+- Reset datepicker knopf wird verdrängt
 ### Später
 - Deadlines erstellen können für Assignments?
   - Vielleicht drei Gruppen innerhalb der ersten Liste: 1. Als "Werden gerade bearbeitet" markierte Aufträge (grün), 2. Aufträge, deren Wiedervorlagedatum näher rückt (gelb), 3. die restlichen Aufträge, also deren Wiedervorlagedatum noch lange hin ist, die noch nicht aktiv bearbeitet werden

@@ -173,6 +173,18 @@ export function AssignmentList() {
     }
   };
 
+  const handleUpdateSubmissionDate = async (assignment: Assignment, submissionDate?: string) => {
+    try {
+      await AssignmentService.update({
+        ...assignment,
+        submissionDate: submissionDate || "",
+      });
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to update submission date:", error);
+    }
+  };
+
   const handleDeleteClick = (id: number) => {
     setAssignmentToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -482,6 +494,7 @@ export function AssignmentList() {
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
             <TableHead>Gruppe</TableHead>
+            <TableHead className="w-[210px]">Abgabe</TableHead>
             <TableHead>Bezahlt</TableHead>
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
@@ -489,7 +502,7 @@ export function AssignmentList() {
         <TableBody>
           {list.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
+              <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
                 Keine Aufträge in dieser Kategorie.
               </TableCell>
             </TableRow>
@@ -524,6 +537,15 @@ export function AssignmentList() {
                   <TableCell>{assignment.court}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <DatePicker
+                      date={assignment.submissionDate || ""}
+                      setDate={(date) => handleUpdateSubmissionDate(assignment, date)}
+                      placeholder="Abgabedatum"
+                      clearable
+                      className="h-9"
+                    />
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
