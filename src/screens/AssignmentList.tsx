@@ -862,11 +862,12 @@ export function AssignmentList() {
               <Label htmlFor="printingDate" className="text-right">
                 Datum
               </Label>
-              <DatePicker
-                date={invoiceForm.printingDate}
-                setDate={(date) => setInvoiceForm(prev => ({ ...prev, printingDate: date || "" }))}
-                className="col-span-3"
-              />
+              <div className="col-span-3">
+                <DatePicker
+                  date={invoiceForm.printingDate}
+                  setDate={(date) => setInvoiceForm(prev => ({ ...prev, printingDate: date || "" }))}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="invoiceNumber" className="text-right">
