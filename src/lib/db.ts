@@ -166,4 +166,17 @@ async function runMigrations(db: Database) {
       await db.execute("INSERT INTO settings (key, value) VALUES (?, ?)", [key, value]);
     }
   }
+
+  // Add new columns if they don't exist
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN submission_date TEXT");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+  
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN started_working_date TEXT");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
 }

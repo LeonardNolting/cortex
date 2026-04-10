@@ -53,7 +53,9 @@ export function AssignmentEdit() {
     shippingFee: "0",
     invoiceNumber: "",
     printingDate: "",
-    paidAt: ""
+    paidAt: "",
+    submissionDate: "",
+    startedWorkingDate: ""
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -88,7 +90,9 @@ export function AssignmentEdit() {
               shippingFee: formatToGermanString(assignment.shippingFee),
               invoiceNumber: assignment.invoiceNumber || "",
               printingDate: assignment.printingDate || "",
-              paidAt: paidAt
+              paidAt: paidAt,
+              submissionDate: assignment.submissionDate || "",
+              startedWorkingDate: assignment.startedWorkingDate || ""
             });
           }
         }
@@ -132,6 +136,14 @@ export function AssignmentEdit() {
 
   const clearPaidAt = () => {
     setFormData(prev => ({ ...prev, paidAt: "" }));
+  };
+
+  const clearSubmissionDate = () => {
+    setFormData(prev => ({ ...prev, submissionDate: "" }));
+  };
+
+  const clearStartedWorkingDate = () => {
+    setFormData(prev => ({ ...prev, startedWorkingDate: "" }));
   };
 
   const handleSave = async () => {
@@ -293,6 +305,54 @@ export function AssignmentEdit() {
                   <option key={group.id} value={group.id}>{group.name} ({group.value}€/h)</option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="startedWorkingDate">In Bearbeitung seit</Label>
+                {formData.startedWorkingDate && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={clearStartedWorkingDate}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Leeren
+                  </Button>
+                )}
+              </div>
+              <input
+                id="startedWorkingDate"
+                name="startedWorkingDate"
+                type="date"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.startedWorkingDate ? formData.startedWorkingDate.substring(0, 10) : ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="submissionDate">Abgabedatum</Label>
+                {formData.submissionDate && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={clearSubmissionDate}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Leeren
+                  </Button>
+                )}
+              </div>
+              <input
+                id="submissionDate"
+                name="submissionDate"
+                type="date"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.submissionDate ? formData.submissionDate.substring(0, 10) : ""}
+                onChange={handleChange}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="invoiceNumber">Rechnungsnummer</Label>

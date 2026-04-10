@@ -276,9 +276,30 @@ export function AssignmentList() {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    const inProgress = assignments
-      .filter(a => !a.paidAt && !a.invoiceNumber)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const openAssignments = assignments.filter(a => !a.paidAt && !a.invoiceNumber);
+    const twoWeeksFromNow = new Date();
+    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+
+    const workingOn = openAssignments
+      .filter(a => a.startedWorkingDate)
+      .sort((a, b) => new Date(b.startedWorkingDate!).getTime() - new Date(a.startedWorkingDate!).getTime());
+
+    const urgent = openAssignments
+      .filter(a => !a.startedWorkingDate && a.submissionDate && new Date(a.submissionDate) <= twoWeeksFromNow)
+      .sort((a, b) => new Date(a.submissionDate!).getTime() - new Date(b.submissionDate!).getTime());
+
+    const othersOpen = openAssignments
+      .filter(a => !a.startedWorkingDate && (!a.submissionDate || new Date(a.submissionDate) > twoWeeksFromNow))
+      .sort((a, b) => {
+        if (a.submissionDate && b.submissionDate) {
+          return new Date(a.submissionDate).getTime() - new Date(b.submissionDate).getTime();
+        }
+        if (a.submissionDate) return -1;
+        if (b.submissionDate) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+    const openList = [...workingOn, ...urgent, ...othersOpen];
 
     const ready = assignments
       .filter(a => !a.paidAt && !!a.invoiceNumber)
@@ -308,7 +329,7 @@ export function AssignmentList() {
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return { inProgress, ready, paidThisMonth, archive };
+    return { openList, ready, paidThisMonth, archive };
   }, [assignments]);
 
   const AssignmentTable = ({ list }: { list: Assignment[] }) => {
@@ -318,6 +339,17 @@ export function AssignmentList() {
       const deadlineDate = new Date(printDate);
       deadlineDate.setDate(deadlineDate.getDate() + (settings.paymentDeadlineDays || 14));
       return new Date() > deadlineDate;
+    };
+
+    const isWorkingOn = (assignment: Assignment) => {
+      return !assignment.paidAt && !assignment.invoiceNumber && !!assignment.startedWorkingDate;
+    };
+
+    const isUrgentOpen = (assignment: Assignment) => {
+      if (assignment.paidAt || assignment.invoiceNumber || assignment.startedWorkingDate || !assignment.submissionDate) return false;
+      const twoWeeksFromNow = new Date();
+      twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+      return new Date(assignment.submissionDate) <= twoWeeksFromNow;
     };
 
     return (
@@ -344,10 +376,20 @@ export function AssignmentList() {
           ) : (
             list.map((assignment) => {
               const overdue = isOverdue(assignment);
+              const workingOn = isWorkingOn(assignment);
+              const urgent = isUrgentOpen(assignment);
+
+              let rowClass = "";
+              if (workingOn) {
+                rowClass = "bg-green-50/50 hover:bg-green-100/50 dark:bg-green-950/10 dark:hover:bg-green-950/20";
+              } else if (overdue || urgent) {
+                rowClass = "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/10 dark:hover:bg-amber-950/20";
+              }
+
               return (
-                <TableRow 
-                  key={assignment.id} 
-                  className={`cursor-pointer ${overdue ? "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/10 dark:hover:bg-amber-950/20" : ""}`}
+                <TableRow
+                  key={assignment.id}
+                  className={`cursor-pointer ${rowClass}`}
                   onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
                 >
                   <TableCell className="font-medium">
@@ -358,9 +400,18 @@ export function AssignmentList() {
                           Überfällig
                         </Badge>
                       )}
+                      {workingOn && (
+                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-green-600 text-green-700 bg-green-50 hover:bg-green-50 dark:bg-green-950 dark:text-green-400">
+                          In Bearbeitung
+                        </Badge>
+                      )}
+                      {urgent && (
+                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400">
+                          Dringend
+                        </Badge>
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell>{assignment.patientName}</TableCell>
+                  </TableCell>                  <TableCell>{assignment.patientName}</TableCell>
               <TableCell>{assignment.patientBirthdate}</TableCell>
               <TableCell>{assignment.fileNumber}</TableCell>
               <TableCell>{assignment.court}</TableCell>
@@ -477,13 +528,13 @@ export function AssignmentList() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>In Bearbeitung</CardTitle>
+              <CardTitle>Offen</CardTitle>
               <CardDescription>
-                Laufende Gutachten, für die noch keine Rechnung erstellt wurde.
+                Offene Aufträge, für die noch keine Rechnung erstellt wurde.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.inProgress} />
+              <AssignmentTable list={categorizedAssignments.openList} />
             </CardContent>
           </Card>
 

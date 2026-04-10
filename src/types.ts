@@ -38,6 +38,8 @@ export interface Assignment {
   printingFeeRate?: number;
   kmFeeRate?: number;
   taxRate?: number;
+  submissionDate?: string;
+  startedWorkingDate?: string;
 }
 
 export interface Court {
