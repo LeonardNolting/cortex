@@ -126,7 +126,9 @@ async function runMigrations(db: Database) {
     ['invoiceLabelNet', 'Gesamt (Netto):'],
     ['invoiceLabelTax', 'Umsatzsteuer {{settings.taxRate}}%:'],
     ['invoiceLabelGross', 'Gesamt (Brutto):'],
-    ['invoiceFooter', 'Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:\n\n{{settings.userName}}, {{settings.userBank}},\n\nIBAN: {{settings.userIban}}, BIC: {{settings.userBic}}']
+    ['invoiceFooter', 'Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:\n\n{{settings.userName}}, {{settings.userBank}},\n\nIBAN: {{settings.userIban}}, BIC: {{settings.userBic}}'],
+    ['jvegLastHash', ''],
+    ['jvegLastCheckFailed', 'false']
   ];
 
   for (const [key, value] of defaultSettings) {

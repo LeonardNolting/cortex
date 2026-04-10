@@ -43,11 +43,13 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { PlusCircle, Settings, FileText, Trash2, Calculator } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
+import { JvegService, ParsedRates } from "../lib/jveg";
+import { RemunerationUpdatePreviewDialog } from "../components/settings/RemunerationUpdatePreviewDialog";
 import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
@@ -79,9 +81,42 @@ export function AssignmentList() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<number | null>(null);
 
+  // JVEG Update State
+  const [jvegUpdates, setJvegUpdates] = useState<{ hasUpdates: boolean; jsonString?: string; error?: string }>({ hasUpdates: false });
+  const [jvegParsedRates, setJvegParsedRates] = useState<ParsedRates | null>(null);
+  const [isJvegPreviewOpen, setIsJvegPreviewOpen] = useState(false);
+
   useEffect(() => {
     loadAssignments();
+    checkJvegUpdates();
   }, []);
+
+  const checkJvegUpdates = async () => {
+    const result = await JvegService.checkForUpdates();
+    setJvegUpdates(result);
+  };
+
+  const handleParseRates = () => {
+    if (jvegUpdates.jsonString) {
+      const rates = JvegService.parseHtmlForRates(jvegUpdates.jsonString);
+      if (rates) {
+        setJvegParsedRates(rates);
+        setIsJvegPreviewOpen(true);
+      } else {
+        setJvegUpdates(prev => ({ ...prev, error: "Fehler beim Parsen der neuen Vergütungssätze (Format unerwartet)." }));
+      }
+    }
+  };
+
+  const handleApplyRates = async () => {
+    if (jvegParsedRates && jvegUpdates.jsonString) {
+      await JvegService.applyRates(jvegParsedRates, jvegUpdates.jsonString);
+      setIsJvegPreviewOpen(false);
+      setJvegUpdates({ hasUpdates: false });
+      // Reload assignments and settings
+      loadAssignments();
+    }
+  };
 
   const loadAssignments = async () => {
     try {
@@ -402,6 +437,37 @@ export function AssignmentList() {
         description="Auftragsverwaltung für psychiatrische Gutachter"
         actions={actions}
       />
+
+      {jvegUpdates.error && (
+        <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
+          <div className="flex-1 text-sm">{jvegUpdates.error}</div>
+          <button onClick={() => setJvegUpdates(prev => ({ ...prev, error: undefined }))} className="text-destructive hover:bg-destructive/20 rounded-sm p-1">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {jvegUpdates.hasUpdates && !jvegUpdates.error && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-blue-800 dark:text-blue-300 px-4 py-3 rounded-md flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Info className="h-5 w-5 shrink-0" />
+            <div className="text-sm font-medium">Änderungen im JVEG erkannt. Möchten Sie die neuen Vergütungssätze prüfen?</div>
+          </div>
+          <Button size="sm" variant="outline" className="border-blue-300 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900" onClick={handleParseRates}>
+            Prüfen & Übernehmen
+          </Button>
+        </div>
+      )}
+
+      {jvegParsedRates && (
+        <RemunerationUpdatePreviewDialog 
+          isOpen={isJvegPreviewOpen} 
+          onClose={() => setIsJvegPreviewOpen(false)}
+          parsedRates={jvegParsedRates}
+          onConfirm={handleApplyRates}
+        />
+      )}
 
       {loading ? (
         <Card>

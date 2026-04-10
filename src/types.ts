@@ -86,4 +86,6 @@ export interface Settings {
   invoiceLabelTax: string;
   invoiceLabelGross: string;
   invoiceFooter: string;
+  jvegLastHash: string;
+  jvegLastCheckFailed: string;
 }
