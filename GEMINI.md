@@ -94,6 +94,24 @@ The data stored for each assignment is:
 - Submission date ("Abgabedatum", optional)
 - Started working date ("In Bearbeitung seit", optional)
 
+### "Softly required" invoice fields
+
+Some fields are required for a meaningful invoice calculation (based on the `required` inputs in `legacy.html`), but the app treats them as **soft requirements**: invoice generation is still allowed, but the user is warned.
+
+The warning is shown in the **invoice generation dialog** (opened from the assignment list screen) and:
+- lists which fields are missing
+- offers a link/button to jump to the assignment edit screen (`/edit/:id`) to fill them in
+
+Softly required fields (warn if missing/empty, or \(≤ 0\) for numeric fields):
+- Patient name
+- Court
+- Remuneration group
+- Travel time (minutes)
+- Travel count (number of trips)
+- Preparation time (minutes)
+- Evaluation time (minutes)
+- Writing characters (for writing fee)
+
 # UI
 
 There are mainly three screens:
