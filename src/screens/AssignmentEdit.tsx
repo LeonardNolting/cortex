@@ -227,9 +227,9 @@ export function AssignmentEdit() {
               Allgemeine Informationen zum Gutachtenauftrag.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2 col-span-2">
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="patientName">Patientenname <span className="text-destructive">*</span></Label>
                 <Input 
                   id="patientName" 
@@ -241,8 +241,6 @@ export function AssignmentEdit() {
                 />
                 {errors.patientName && <p className="text-xs text-destructive">{errors.patientName}</p>}
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="patientBirthdate">Geburtsdatum</Label>
                 <DatePicker 
@@ -262,39 +260,38 @@ export function AssignmentEdit() {
                   placeholder="123 C 456/23"
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="courtId">Gericht <span className="text-destructive">*</span></Label>
-              <select
-                id="courtId"
-                name="courtId"
-                value={formData.courtId}
-                onChange={handleChange}
-                aria-invalid={!!errors.courtId}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
-              >
-                <option value={0} disabled>-- Bitte wählen --</option>
-                {courts.map(court => (
-                  <option key={court.id} value={court.id}>{court.name}</option>
-                ))}
-              </select>
-              {errors.courtId && <p className="text-xs text-destructive">{errors.courtId}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="remunerationGroupId">Vergütungsgruppe</Label>
-              <select
-                id="remunerationGroupId"
-                name="remunerationGroupId"
-                value={formData.remunerationGroupId}
-                onChange={handleChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {remGroups.map(group => (
-                  <option key={group.id} value={group.id}>{group.name} ({group.value}€/h)</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
+              <div className="space-y-2">
+                <Label htmlFor="courtId">Gericht <span className="text-destructive">*</span></Label>
+                <select
+                  id="courtId"
+                  name="courtId"
+                  value={formData.courtId}
+                  onChange={handleChange}
+                  aria-invalid={!!errors.courtId}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
+                >
+                  <option value={0} disabled>-- Bitte wählen --</option>
+                  {courts.map(court => (
+                    <option key={court.id} value={court.id}>{court.name}</option>
+                  ))}
+                </select>
+                {errors.courtId && <p className="text-xs text-destructive">{errors.courtId}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="remunerationGroupId">Vergütungsgruppe</Label>
+                <select
+                  id="remunerationGroupId"
+                  name="remunerationGroupId"
+                  value={formData.remunerationGroupId}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {remGroups.map(group => (
+                    <option key={group.id} value={group.id}>{group.name} ({group.value}€/h)</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
               <Label htmlFor="startedWorkingDate">In Bearbeitung seit</Label>
               <DatePicker 
                 date={formData.startedWorkingDate} 
@@ -302,46 +299,47 @@ export function AssignmentEdit() {
                 clearable
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="submissionDate">Abgabedatum</Label>
-              <DatePicker 
-                date={formData.submissionDate} 
-                setDate={(date) => setFormData(prev => ({ ...prev, submissionDate: date || "" }))}
-                clearable
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="invoiceNumber">Rechnungsnummer</Label>
-              <Input 
-                id="invoiceNumber" 
-                name="invoiceNumber" 
-                value={formData.invoiceNumber} 
-                onChange={handleChange} 
-                placeholder="Noch nicht generiert"
-                readOnly
-              />
-            </div>
-            {formData.printingDate && (
               <div className="space-y-2">
-                <Label htmlFor="printingDate">Rechnungsdatum</Label>
+                <Label htmlFor="submissionDate">Abgabedatum</Label>
+                <DatePicker 
+                  date={formData.submissionDate} 
+                  setDate={(date) => setFormData(prev => ({ ...prev, submissionDate: date || "" }))}
+                  clearable
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoiceNumber">Rechnungsnummer</Label>
                 <Input 
-                  id="printingDate" 
-                  name="printingDate" 
-                  value={formData.printingDate} 
+                  id="invoiceNumber" 
+                  name="invoiceNumber" 
+                  value={formData.invoiceNumber} 
+                  onChange={handleChange} 
+                  placeholder="Noch nicht generiert"
                   readOnly
                 />
               </div>
-            )}
-            <div className="space-y-2 pt-2 border-t">
-              <Label htmlFor="paidAt">Bezahlt am</Label>
-              <DatePicker 
-                date={formData.paidAt} 
-                setDate={(date) => setFormData(prev => ({ ...prev, paidAt: date || "" }))}
-                clearable
-              />
-              <p className="text-xs text-muted-foreground">
-                Datum an dem die Rechnung beglichen wurde.
-              </p>
+              {formData.printingDate && (
+                <div className="space-y-2">
+                  <Label htmlFor="printingDate">Rechnungsdatum</Label>
+                  <Input 
+                    id="printingDate" 
+                    name="printingDate" 
+                    value={formData.printingDate} 
+                    readOnly
+                  />
+                </div>
+              )}
+              <div className="space-y-2 pt-2 border-t sm:col-span-2">
+                <Label htmlFor="paidAt">Bezahlt am</Label>
+                <DatePicker 
+                  date={formData.paidAt} 
+                  setDate={(date) => setFormData(prev => ({ ...prev, paidAt: date || "" }))}
+                  clearable
+                />
+                <p className="text-xs text-muted-foreground">
+                  Datum an dem die Rechnung beglichen wurde.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
