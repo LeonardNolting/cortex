@@ -433,14 +433,18 @@ export function AssignmentList() {
       return submissionDate < today;
     };
 
-    const getDaysDiff = (dateStr: string) => {
+    const getDaysDiff = (dateInput: string | Date) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const target = new Date(dateStr);
+      const target = dateInput instanceof Date ? new Date(dateInput) : new Date(dateInput);
       target.setHours(0, 0, 0, 0);
       const diffTime = target.getTime() - today.getTime();
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
+
+    const formatDays = (days: number) => `${days} ${days === 1 ? "Tag" : "Tage"}`;
+    const formatInDays = (days: number) => `in ${days} ${days === 1 ? "Tag" : "Tagen"}`;
+    const formatAgoDays = (days: number) => `vor ${days} ${days === 1 ? "Tag" : "Tagen"}`;
 
     const getStatusText = (assignment: Assignment) => {
       if (assignment.paidAt) {
@@ -451,14 +455,14 @@ export function AssignmentList() {
         const printDate = new Date(assignment.printingDate);
         const deadlineDate = new Date(printDate);
         deadlineDate.setDate(deadlineDate.getDate() + (settings?.paymentDeadlineDays || 14));
-        const diff = getDaysDiff(deadlineDate.toISOString());
+        const diff = getDaysDiff(deadlineDate);
         
         if (diff < 0) {
-          return `Zahlung überfällig (${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'Tag' : 'Tage'})`;
+          return `Zahlung überfällig (${formatDays(Math.abs(diff))})`;
         } else if (diff === 0) {
           return "Zahlung heute fällig";
         } else {
-          return `Zahlung fällig in ${diff} ${diff === 1 ? 'Tag' : 'Tage'}`;
+          return `Zahlung fällig ${formatInDays(diff)}`;
         }
       }
 
@@ -470,11 +474,11 @@ export function AssignmentList() {
         const submissionWarningDays = settings?.submissionWarningDays || 14;
         const diff = getDaysDiff(assignment.submissionDate);
         if (diff < 0) {
-          return `Abgabe überfällig (vor ${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'Tag' : 'Tage'})`;
+          return `Abgabe überfällig (${formatAgoDays(Math.abs(diff))})`;
         } else if (diff === 0) {
           return "Abgabe heute fällig";
         } else if (diff <= submissionWarningDays) {
-          return `Abgabe in ${diff} ${diff === 1 ? 'Tag' : 'Tage'}`;
+          return `Abgabe ${formatInDays(diff)}`;
         } else {
           return `Abgabe am ${new Date(assignment.submissionDate).toLocaleDateString("de-DE")}`;
         }
