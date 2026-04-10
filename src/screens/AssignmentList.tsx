@@ -43,7 +43,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { PageHeader } from "../components/PageHeader";
@@ -143,6 +143,32 @@ export function AssignmentList() {
       await loadAssignments();
     } catch (error) {
       console.error("Failed to toggle paid status:", error);
+    }
+  };
+
+  const handleStartWorking = async (assignment: Assignment) => {
+    try {
+      const updatedAssignment = {
+        ...assignment,
+        startedWorkingDate: new Date().toISOString().split("T")[0],
+      };
+      await AssignmentService.update(updatedAssignment);
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to set started working date:", error);
+    }
+  };
+
+  const handleStopWorking = async (assignment: Assignment) => {
+    try {
+      const updatedAssignment = {
+        ...assignment,
+        startedWorkingDate: "",
+      };
+      await AssignmentService.update(updatedAssignment);
+      await loadAssignments();
+    } catch (error) {
+      console.error("Failed to clear started working date:", error);
     }
   };
 
@@ -493,7 +519,35 @@ export function AssignmentList() {
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
+                <div className="flex items-center justify-end gap-2">
+                  {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title="Bearbeitung starten"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartWorking(assignment);
+                      }}
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Anfangen
+                    </Button>
+                  )}
+                  {!assignment.paidAt && !assignment.invoiceNumber && !!assignment.startedWorkingDate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title="Bearbeitung stoppen"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStopWorking(assignment);
+                      }}
+                    >
+                      <Square className="mr-2 h-4 w-4" />
+                      Bearbeitung stoppen
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     size="icon" 
