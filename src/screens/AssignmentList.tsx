@@ -549,15 +549,16 @@ export function AssignmentList() {
                     </Button>
                   )}
                   <Button 
-                    variant="ghost" 
-                    size="icon" 
+                    variant="outline" 
+                    size="sm" 
                     title="Rechnung generieren"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleOpenInvoiceDialog(assignment);
                     }}
                   >
-                    <FileText className="h-4 w-4" />
+                    <FileText className="mr-2 h-4 w-4" />
+                    Rechnung
                   </Button>
                   <Button 
                     variant="ghost" 
