@@ -4,6 +4,7 @@ import { Settings } from "../../types";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
+import { DatePicker } from "../ui/date-picker";
 import { Save } from "lucide-react";
 import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
 import { NumericInput } from "../ui/numeric-input";
@@ -90,11 +91,11 @@ export function UserManagement() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="userBirthday">Geburtsdatum</Label>
-          <Input 
-            id="userBirthday" 
-            name="userBirthday"
-            value={settings.userBirthday || ""} 
-            onChange={handleChange} 
+          <DatePicker
+            date={settings.userBirthday || ""}
+            setDate={(date) => setSettings(prev => ({ ...prev!, userBirthday: date || "" }))}
+            placeholder="TT.MM.JJJJ"
+            clearable
           />
         </div>
       </div>
