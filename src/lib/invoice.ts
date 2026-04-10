@@ -321,7 +321,9 @@ export async function generateIncomeTaxDocx(
   ];
   const monthName = monthNames[month - 1];
 
-  const tableRows = assignments.map(a => {
+  const assignmentsWithAmount = assignments.filter((a) => (a.grossEuro || 0) !== 0);
+
+  const tableRows = assignmentsWithAmount.map(a => {
     const dateStr = a.paidAt ? new Date(a.paidAt).toLocaleDateString("de-DE") : "-";
     const amountStr = formatEuro(a.grossEuro || 0);
     
@@ -341,7 +343,7 @@ export async function generateIncomeTaxDocx(
     });
   });
 
-  const totalAmount = Math.round(assignments.reduce((sum, a) => sum + (a.grossEuro || 0), 0) * 100) / 100;
+  const totalAmount = Math.round(assignmentsWithAmount.reduce((sum, a) => sum + (a.grossEuro || 0), 0) * 100) / 100;
   const totalRow = new TableRow({
     children: [
       new TableCell({
