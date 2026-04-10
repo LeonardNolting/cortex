@@ -405,7 +405,15 @@ export function AssignmentList() {
     return { openList, ready, paidThisMonth, archive };
   }, [assignments, settings]);
 
-  const AssignmentTable = ({ list }: { list: Assignment[] }) => {
+  const AssignmentTable = ({
+    list,
+    showInvoiceNumberColumn = true,
+    showPaidColumn = true,
+  }: {
+    list: Assignment[];
+    showInvoiceNumberColumn?: boolean;
+    showPaidColumn?: boolean;
+  }) => {
     const isOverdue = (assignment: Assignment) => {
       if (!assignment.invoiceNumber || !assignment.printingDate || assignment.paidAt || !settings) return false;
       const printDate = new Date(assignment.printingDate);
@@ -527,21 +535,24 @@ export function AssignmentList() {
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
-            <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
+            {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
             <TableHead>Patient</TableHead>
             <TableHead>Geburtsdatum</TableHead>
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
             <TableHead>Gruppe</TableHead>
             <TableHead className="w-[210px]">Abgabe</TableHead>
-            <TableHead>Bezahlt</TableHead>
+            {showPaidColumn && <TableHead>Bezahlt</TableHead>}
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {list.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
+              <TableCell
+                colSpan={8 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn ? 1 : 0)}
+                className="text-center py-6 text-muted-foreground"
+              >
                 Keine Aufträge in dieser Kategorie.
               </TableCell>
             </TableRow>
@@ -570,9 +581,11 @@ export function AssignmentList() {
                   <TableCell>
                     {getStatusBadge(assignment)}
                   </TableCell>
-                  <TableCell className="font-medium">
-                    {assignment.invoiceNumber || "-"}
-                  </TableCell>
+                  {showInvoiceNumberColumn && (
+                    <TableCell className="font-medium">
+                      {assignment.invoiceNumber || "-"}
+                    </TableCell>
+                  )}
                   <TableCell>{assignment.patientName}</TableCell>
                   <TableCell>{assignment.patientBirthdate}</TableCell>
                   <TableCell>{assignment.fileNumber}</TableCell>
@@ -589,17 +602,19 @@ export function AssignmentList() {
                       className="h-9"
                     />
                   </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    checked={!!assignment.paidAt} 
-                    onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                    title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
-                  />
-                </div>
-              </TableCell>
+                  {showPaidColumn && (
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={!!assignment.paidAt}
+                          onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                          title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
+                        />
+                      </div>
+                    </TableCell>
+                  )}
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
@@ -748,7 +763,11 @@ export function AssignmentList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.openList} />
+              <AssignmentTable
+                list={categorizedAssignments.openList}
+                showInvoiceNumberColumn={false}
+                showPaidColumn={false}
+              />
             </CardContent>
           </Card>
 
