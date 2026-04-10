@@ -409,10 +409,12 @@ export function AssignmentList() {
     list,
     showInvoiceNumberColumn = true,
     showPaidColumn = true,
+    usePaidActionButton = false,
   }: {
     list: Assignment[];
     showInvoiceNumberColumn?: boolean;
     showPaidColumn?: boolean;
+    usePaidActionButton?: boolean;
   }) => {
     const isOverdue = (assignment: Assignment) => {
       if (!assignment.invoiceNumber || !assignment.printingDate || assignment.paidAt || !settings) return false;
@@ -535,6 +537,7 @@ export function AssignmentList() {
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
+            {showPaidColumn && <TableHead>Bezahlt</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
             <TableHead>Patient</TableHead>
             <TableHead>Geburtsdatum</TableHead>
@@ -542,7 +545,6 @@ export function AssignmentList() {
             <TableHead>Gericht</TableHead>
             <TableHead>Gruppe</TableHead>
             <TableHead className="w-[210px]">Abgabe</TableHead>
-            {showPaidColumn && <TableHead>Bezahlt</TableHead>}
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
@@ -581,6 +583,33 @@ export function AssignmentList() {
                   <TableCell>
                     {getStatusBadge(assignment)}
                   </TableCell>
+                  {showPaidColumn && (
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {usePaidActionButton ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTogglePaid(assignment, true);
+                          }}
+                          title="Als bezahlt markieren"
+                        >
+                          Als bezahlt markieren
+                        </Button>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={!!assignment.paidAt}
+                            onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                            title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                  )}
                   {showInvoiceNumberColumn && (
                     <TableCell className="font-medium">
                       {assignment.invoiceNumber || "-"}
@@ -602,19 +631,6 @@ export function AssignmentList() {
                       className="h-9"
                     />
                   </TableCell>
-                  {showPaidColumn && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={!!assignment.paidAt}
-                          onChange={(e) => handleTogglePaid(assignment, e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                          title={assignment.paidAt ? `Bezahlt am ${assignment.paidAt}` : "Noch nicht bezahlt"}
-                        />
-                      </div>
-                    </TableCell>
-                  )}
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
@@ -779,7 +795,7 @@ export function AssignmentList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.ready} />
+              <AssignmentTable list={categorizedAssignments.ready} usePaidActionButton />
             </CardContent>
           </Card>
 
