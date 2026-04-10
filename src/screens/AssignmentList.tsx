@@ -352,10 +352,86 @@ export function AssignmentList() {
       return new Date(assignment.submissionDate) <= twoWeeksFromNow;
     };
 
+    const getDaysDiff = (dateStr: string) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateStr);
+      target.setHours(0, 0, 0, 0);
+      const diffTime = target.getTime() - today.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    const getStatusText = (assignment: Assignment) => {
+      if (assignment.paidAt) {
+        return `Bezahlt am ${new Date(assignment.paidAt).toLocaleDateString("de-DE")}`;
+      }
+
+      if (assignment.invoiceNumber && assignment.printingDate) {
+        const printDate = new Date(assignment.printingDate);
+        const deadlineDate = new Date(printDate);
+        deadlineDate.setDate(deadlineDate.getDate() + (settings?.paymentDeadlineDays || 14));
+        const diff = getDaysDiff(deadlineDate.toISOString());
+        
+        if (diff < 0) {
+          return `Zahlung überfällig (${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'Tag' : 'Tage'})`;
+        } else if (diff === 0) {
+          return "Zahlung heute fällig";
+        } else {
+          return `Zahlung fällig in ${diff} ${diff === 1 ? 'Tag' : 'Tage'}`;
+        }
+      }
+
+      if (assignment.startedWorkingDate) {
+        return "In Bearbeitung";
+      }
+
+      if (assignment.submissionDate) {
+        const diff = getDaysDiff(assignment.submissionDate);
+        if (diff < 0) {
+          return `Abgabe überfällig (vor ${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'Tag' : 'Tage'})`;
+        } else if (diff === 0) {
+          return "Abgabe heute fällig";
+        } else if (diff <= 14) {
+          return `Abgabe in ${diff} ${diff === 1 ? 'Tag' : 'Tage'}`;
+        } else {
+          return `Abgabe am ${new Date(assignment.submissionDate).toLocaleDateString("de-DE")}`;
+        }
+      }
+
+      return "Offen";
+    };
+
+    const getStatusBadge = (assignment: Assignment) => {
+      const overdue = isOverdue(assignment);
+      const workingOn = isWorkingOn(assignment);
+      const urgent = isUrgentOpen(assignment);
+
+      const statusText = getStatusText(assignment);
+
+      let badgeClass = "w-fit text-sm px-2 py-0.5 border-transparent";
+      
+      if (assignment.paidAt) {
+        badgeClass = "w-fit text-sm px-2 py-0.5 border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-50 dark:bg-blue-950 dark:text-blue-400";
+      } else if (workingOn) {
+        badgeClass = "w-fit text-sm px-2 py-0.5 border-green-600 text-green-700 bg-green-50 hover:bg-green-50 dark:bg-green-950 dark:text-green-400";
+      } else if (overdue || urgent) {
+        badgeClass = "w-fit text-sm px-2 py-0.5 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400";
+      } else {
+        badgeClass = "w-fit text-sm px-2 py-0.5 border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-400";
+      }
+
+      return (
+        <Badge variant="outline" className={badgeClass}>
+          {statusText}
+        </Badge>
+      );
+    };
+
     return (
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Status</TableHead>
             <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>
             <TableHead>Patient</TableHead>
             <TableHead>Geburtsdatum</TableHead>
@@ -369,7 +445,7 @@ export function AssignmentList() {
         <TableBody>
           {list.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+              <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
                 Keine Aufträge in dieser Kategorie.
               </TableCell>
             </TableRow>
@@ -392,33 +468,20 @@ export function AssignmentList() {
                   className={`cursor-pointer ${rowClass}`}
                   onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
                 >
+                  <TableCell>
+                    {getStatusBadge(assignment)}
+                  </TableCell>
                   <TableCell className="font-medium">
-                    <div className="flex flex-col gap-1">
-                      {assignment.invoiceNumber || "-"}
-                      {overdue && (
-                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400">
-                          Überfällig
-                        </Badge>
-                      )}
-                      {workingOn && (
-                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-green-600 text-green-700 bg-green-50 hover:bg-green-50 dark:bg-green-950 dark:text-green-400">
-                          In Bearbeitung
-                        </Badge>
-                      )}
-                      {urgent && (
-                        <Badge variant="outline" className="w-fit text-[10px] px-1 py-0 h-4 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400">
-                          Dringend
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>                  <TableCell>{assignment.patientName}</TableCell>
-              <TableCell>{assignment.patientBirthdate}</TableCell>
-              <TableCell>{assignment.fileNumber}</TableCell>
-              <TableCell>{assignment.court}</TableCell>
-              <TableCell>
-                <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
-              </TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
+                    {assignment.invoiceNumber || "-"}
+                  </TableCell>
+                  <TableCell>{assignment.patientName}</TableCell>
+                  <TableCell>{assignment.patientBirthdate}</TableCell>
+                  <TableCell>{assignment.fileNumber}</TableCell>
+                  <TableCell>{assignment.court}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
                   <input 
                     type="checkbox" 
