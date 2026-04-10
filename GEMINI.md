@@ -91,12 +91,17 @@ The data stored for each assignment is:
 - Invoice number (optional, only set after printing)
 - Amount of trips ("Anzahl Anfahrten" to let user charge for multiple trips, even at fractions (e.g. 1.5))
 - Paid date ("Bezahlt am", optional)
+- Submission date ("Abgabedatum", optional)
+- Started working date ("In Bearbeitung seit", optional)
 
 # UI
 
 There are mainly three screens:
 1. List of assignments (Home): Split into four categories:
-   - **In Progress**: Not paid and invoice not yet generated.
+   - **Open**: Not paid and invoice not yet generated. This list is internally categorized and sorted:
+     - **Working on it**: Assignments with a "started working" date (newest first).
+     - **Urgent**: Assignments with a submission deadline within 2 weeks or already passed (most urgent first).
+     - **Others**: Remaining open assignments.
    - **Ready for Billing**: Invoice generated but not yet paid.
    - **Paid This Month**: Assignments paid in the current kalendar month.
    - **Archive**: Paid assignments from previous months (collapsed by default).
