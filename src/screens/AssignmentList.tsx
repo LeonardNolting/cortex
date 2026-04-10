@@ -218,6 +218,8 @@ export function AssignmentList() {
     const missing: string[] = [];
 
     if (!assignment.patientName || assignment.patientName.trim() === "") missing.push("Patientenname");
+    if (!assignment.patientBirthdate || assignment.patientBirthdate.trim() === "") missing.push("Geburtsdatum");
+    if (!assignment.fileNumber || assignment.fileNumber.trim() === "") missing.push("Aktenzeichen");
     if (!assignment.courtId || assignment.courtId === 0) missing.push("Gericht");
     if (!assignment.remunerationGroupId || assignment.remunerationGroupId === 0) missing.push("Vergütungsgruppe");
 

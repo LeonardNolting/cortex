@@ -104,6 +104,8 @@ The warning is shown in the **invoice generation dialog** (opened from the assig
 
 Softly required fields (warn if missing/empty, or \(≤ 0\) for numeric fields):
 - Patient name
+- Patient birthdate
+- File number
 - Court
 - Remuneration group
 - Travel time (minutes)
