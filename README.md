@@ -9,8 +9,8 @@ This template should help get you started developing with Tauri, React and Types
 ## TODO
 ### Später
 - Deadlines erstellen können für Assignments?
+  - Vielleicht drei Gruppen innerhalb der ersten Liste: 1. Als "Werden gerade bearbeitet" markierte Aufträge (grün), 2. Aufträge, deren Wiedervorlagedatum näher rückt (gelb), 3. die restlichen Aufträge, also deren Wiedervorlagedatum noch lange hin ist, die noch nicht aktiv bearbeitet werden
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
-- Vergütungsgruppen parsen
 - Datenbank woanders abspeichern können
 - Datenbank backups (jeden Tag, für die letzten 30 Tage)
 - Icon ändern
@@ -34,3 +34,4 @@ This template should help get you started developing with Tauri, React and Types
   2. Fertige Assignments, aber noch nicht bezahlt
   3. Abgeschlossene Assignments (Rechnungen eingegangen) aus diesem Monat
   4. Eingeklappt (ausklappbar): alle sonstigen, alten abgeschlossenen Assignments
+- ✅ Vergütungsgruppen parsen
