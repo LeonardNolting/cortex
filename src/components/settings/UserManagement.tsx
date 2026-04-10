@@ -9,12 +9,12 @@ import { Save } from "lucide-react";
 import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
 import { NumericInput } from "../ui/numeric-input";
 
-type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentDeadlineDays' | 'submissionWarningDays'> & {
+type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentReminderDays' | 'submissionWarningDays'> & {
   taxRate: string;
   kmFee: string;
   writingFee: string;
   printingFee: string;
-  paymentDeadlineDays: string;
+  paymentReminderDays: string;
   submissionWarningDays: string;
 };
 
@@ -35,7 +35,7 @@ export function UserManagement() {
         kmFee: formatToGermanString(data.kmFee),
         writingFee: formatToGermanString(data.writingFee),
         printingFee: formatToGermanString(data.printingFee),
-        paymentDeadlineDays: formatToGermanString(data.paymentDeadlineDays),
+        paymentReminderDays: formatToGermanString(data.paymentReminderDays),
         submissionWarningDays: formatToGermanString(data.submissionWarningDays),
       });
     } catch (error) {
@@ -54,7 +54,7 @@ export function UserManagement() {
       kmFee: parseGermanNumber(settings.kmFee),
       writingFee: parseGermanNumber(settings.writingFee),
       printingFee: parseGermanNumber(settings.printingFee),
-      paymentDeadlineDays: parseGermanNumber(settings.paymentDeadlineDays),
+      paymentReminderDays: parseGermanNumber(settings.paymentReminderDays),
       submissionWarningDays: parseGermanNumber(settings.submissionWarningDays),
     };
 
@@ -219,12 +219,12 @@ export function UserManagement() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="paymentDeadlineDays">Zahlungsfrist (Tage)</Label>
+            <Label htmlFor="paymentReminderDays">Zahlungserinnerung ab (Tage nach Rechnungsdatum)</Label>
             <NumericInput 
-              id="paymentDeadlineDays" 
-              name="paymentDeadlineDays"
-              value={settings.paymentDeadlineDays} 
-              onValueChange={handleNumericChange("paymentDeadlineDays")}
+              id="paymentReminderDays" 
+              name="paymentReminderDays"
+              value={settings.paymentReminderDays} 
+              onValueChange={handleNumericChange("paymentReminderDays")}
             />
           </div>
           <div className="space-y-2">

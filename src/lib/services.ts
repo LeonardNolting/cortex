@@ -8,7 +8,7 @@ export const SettingsService = {
     
     const settings: any = {};
     for (const row of rows) {
-      if (['taxRate', 'kmFee', 'writingFee', 'printingFee', 'paymentDeadlineDays', 'submissionWarningDays'].includes(row.key)) {
+      if (['taxRate', 'kmFee', 'writingFee', 'printingFee', 'paymentReminderDays', 'submissionWarningDays'].includes(row.key)) {
         const val = parseFloat(row.value);
         settings[row.key] = isNaN(val) ? 0 : val;
       } else {

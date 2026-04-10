@@ -418,12 +418,12 @@ export function AssignmentList() {
     showSubmissionDateColumn?: boolean;
     usePaidActionButton?: boolean;
   }) => {
-    const isOverdue = (assignment: Assignment) => {
+    const isPaymentReminderActive = (assignment: Assignment) => {
       if (!assignment.invoiceNumber || !assignment.printingDate || assignment.paidAt || !settings) return false;
       const printDate = new Date(assignment.printingDate);
-      const deadlineDate = new Date(printDate);
-      deadlineDate.setDate(deadlineDate.getDate() + (settings.paymentDeadlineDays || 14));
-      return new Date() > deadlineDate;
+      const reminderStartDate = new Date(printDate);
+      reminderStartDate.setDate(reminderStartDate.getDate() + (settings.paymentReminderDays || 14));
+      return new Date() >= reminderStartDate;
     };
 
     const isWorkingOn = (assignment: Assignment) => {
@@ -460,9 +460,19 @@ export function AssignmentList() {
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
+    const getDaysSince = (dateInput: string | Date) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = dateInput instanceof Date ? new Date(dateInput) : new Date(dateInput);
+      target.setHours(0, 0, 0, 0);
+      const diffTime = today.getTime() - target.getTime();
+      return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+    };
+
     const formatDays = (days: number) => `${days} ${days === 1 ? "Tag" : "Tage"}`;
     const formatInDays = (days: number) => `in ${days} ${days === 1 ? "Tag" : "Tagen"}`;
     const formatAgoDays = (days: number) => `vor ${days} ${days === 1 ? "Tag" : "Tagen"}`;
+    const formatSinceDays = (days: number) => `seit ${days} ${days === 1 ? "Tag" : "Tagen"}`;
 
     const getStatusText = (assignment: Assignment) => {
       if (assignment.paidAt) {
@@ -471,17 +481,15 @@ export function AssignmentList() {
 
       if (assignment.invoiceNumber && assignment.printingDate) {
         const printDate = new Date(assignment.printingDate);
-        const deadlineDate = new Date(printDate);
-        deadlineDate.setDate(deadlineDate.getDate() + (settings?.paymentDeadlineDays || 14));
-        const diff = getDaysDiff(deadlineDate);
-        
-        if (diff < 0) {
-          return `Zahlung überfällig (${formatDays(Math.abs(diff))})`;
-        } else if (diff === 0) {
-          return "Zahlung heute fällig";
-        } else {
-          return `Zahlung fällig ${formatInDays(diff)}`;
+        const reminderStartDate = new Date(printDate);
+        reminderStartDate.setDate(reminderStartDate.getDate() + (settings?.paymentReminderDays || 14));
+        const diff = getDaysDiff(reminderStartDate);
+
+        if (diff <= 0) {
+          return `Zahlung ausstehend ${formatSinceDays(getDaysSince(printDate))}`;
         }
+
+        return "Zahlung ausstehend";
       }
 
       if (assignment.startedWorkingDate) {
@@ -506,7 +514,7 @@ export function AssignmentList() {
     };
 
     const getStatusBadge = (assignment: Assignment) => {
-      const overdue = isOverdue(assignment);
+      const paymentReminderActive = isPaymentReminderActive(assignment);
       const workingOn = isWorkingOn(assignment);
       const urgent = isUrgentOpen(assignment);
       const submissionOverdue = isSubmissionOverdue(assignment);
@@ -521,7 +529,7 @@ export function AssignmentList() {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-green-600 text-green-700 bg-green-50 hover:bg-green-50 dark:bg-green-950 dark:text-green-400";
       } else if (submissionOverdue) {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-red-600 text-red-700 bg-red-50 hover:bg-red-50 dark:bg-red-950 dark:text-red-400";
-      } else if (overdue || urgent) {
+      } else if (paymentReminderActive || urgent) {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-amber-600 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-400";
       } else {
         badgeClass = "w-fit text-sm px-2 py-0.5 border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-400";
@@ -562,7 +570,7 @@ export function AssignmentList() {
             </TableRow>
           ) : (
             list.map((assignment) => {
-              const overdue = isOverdue(assignment);
+              const paymentReminderActive = isPaymentReminderActive(assignment);
               const workingOn = isWorkingOn(assignment);
               const urgent = isUrgentOpen(assignment);
               const submissionOverdue = isSubmissionOverdue(assignment);
@@ -572,7 +580,7 @@ export function AssignmentList() {
                 rowClass = "bg-green-50/50 hover:bg-green-100/50 dark:bg-green-950/10 dark:hover:bg-green-950/20";
               } else if (submissionOverdue) {
                 rowClass = "bg-red-50/50 hover:bg-red-100/50 dark:bg-red-950/10 dark:hover:bg-red-950/20";
-              } else if (overdue || urgent) {
+              } else if (paymentReminderActive || urgent) {
                 rowClass = "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/10 dark:hover:bg-amber-950/20";
               }
 
