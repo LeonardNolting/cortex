@@ -64,7 +64,8 @@ export function AssignmentList() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [invoiceForm, setInvoiceForm] = useState({
     invoiceNumber: "",
-    printingDate: new Date().toISOString().split('T')[0]
+    printingDate: new Date().toISOString().split('T')[0],
+    useCurrentRates: true
   });
 
   // Income Tax Dialog State
@@ -136,7 +137,8 @@ export function AssignmentList() {
       setSelectedAssignment(assignment);
       setInvoiceForm({
         invoiceNumber,
-        printingDate: assignment.printingDate || new Date().toISOString().split('T')[0]
+        printingDate: assignment.printingDate || new Date().toISOString().split('T')[0],
+        useCurrentRates: !assignment.invoiceNumber
       });
       setIsInvoiceDialogOpen(true);
     } catch (error) {
@@ -158,8 +160,19 @@ export function AssignmentList() {
         throw new Error("Gericht oder Vergütungsgruppe nicht gefunden");
       }
 
+      // If user wants to use current rates, we clear the persisted rates from the assignment
+      // so that calculateInvoiceValues uses the current settings/remuneration group values.
+      const assignmentToProcess = { ...selectedAssignment };
+      if (invoiceForm.useCurrentRates) {
+        delete assignmentToProcess.remunerationGroupValue;
+        delete assignmentToProcess.writingFeeRate;
+        delete assignmentToProcess.printingFeeRate;
+        delete assignmentToProcess.kmFeeRate;
+        delete assignmentToProcess.taxRate;
+      }
+
       const invoiceData = {
-        assignment: selectedAssignment,
+        assignment: assignmentToProcess,
         court,
         remunerationGroup,
         settings,
@@ -480,14 +493,51 @@ export function AssignmentList() {
             <DialogTitle>Rechnung generieren</DialogTitle>
             <DialogDescription>
               Geben Sie das Rechnungsdatum und die Rechnungsnummer für {selectedAssignment?.patientName} an.
-              {selectedAssignment?.invoiceNumber && (
-                <div className="mt-2 text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-200">
-                  Hinweis: Eine Rechnung wurde bereits erstellt. Die gespeicherten Beträge werden überschrieben.
-                </div>
-              )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {selectedAssignment?.invoiceNumber && (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label>Welche Sätze sollen verwendet werden?</Label>
+                  <p className="text-[11px] text-muted-foreground leading-none">
+                    z. B. Vergütungsgruppen, Kopierkosten, etc.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="useOldRates"
+                      name="rateChoice"
+                      checked={!invoiceForm.useCurrentRates}
+                      onChange={() => setInvoiceForm(prev => ({ ...prev, useCurrentRates: false }))}
+                      className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <Label htmlFor="useOldRates" className="cursor-pointer font-normal">
+                      Gespeicherte Sätze der bestehenden Rechnung verwenden 
+                      {selectedAssignment?.printingDate && ` (vom ${new Date(selectedAssignment.printingDate).toLocaleDateString("de-DE")})`}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="useCurrentRates"
+                      name="rateChoice"
+                      checked={invoiceForm.useCurrentRates}
+                      onChange={() => setInvoiceForm(prev => ({ ...prev, useCurrentRates: true }))}
+                      className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <Label htmlFor="useCurrentRates" className="cursor-pointer font-normal">Aktuelle Sätze aus den Einstellungen verwenden</Label>
+                  </div>
+                </div>
+                {invoiceForm.useCurrentRates && (
+                  <div className="mt-2 text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-200 text-xs">
+                    Hinweis: Die zuvor gespeicherten Honorarsätze werden durch die aktuellen Einstellungen überschrieben.
+                  </div>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="printingDate" className="text-right">
                 Datum
