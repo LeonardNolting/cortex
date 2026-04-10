@@ -9,12 +9,13 @@ import { Save } from "lucide-react";
 import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
 import { NumericInput } from "../ui/numeric-input";
 
-type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentDeadlineDays'> & {
+type UserSettingsFormData = Omit<Settings, 'taxRate' | 'kmFee' | 'writingFee' | 'printingFee' | 'paymentDeadlineDays' | 'submissionWarningDays'> & {
   taxRate: string;
   kmFee: string;
   writingFee: string;
   printingFee: string;
   paymentDeadlineDays: string;
+  submissionWarningDays: string;
 };
 
 export function UserManagement() {
@@ -35,6 +36,7 @@ export function UserManagement() {
         writingFee: formatToGermanString(data.writingFee),
         printingFee: formatToGermanString(data.printingFee),
         paymentDeadlineDays: formatToGermanString(data.paymentDeadlineDays),
+        submissionWarningDays: formatToGermanString(data.submissionWarningDays),
       });
     } catch (error) {
       console.error("Failed to load settings", error);
@@ -53,6 +55,7 @@ export function UserManagement() {
       writingFee: parseGermanNumber(settings.writingFee),
       printingFee: parseGermanNumber(settings.printingFee),
       paymentDeadlineDays: parseGermanNumber(settings.paymentDeadlineDays),
+      submissionWarningDays: parseGermanNumber(settings.submissionWarningDays),
     };
 
     try {
@@ -222,6 +225,15 @@ export function UserManagement() {
               name="paymentDeadlineDays"
               value={settings.paymentDeadlineDays} 
               onValueChange={handleNumericChange("paymentDeadlineDays")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="submissionWarningDays">Abgabewarnung (Tage im Voraus)</Label>
+            <NumericInput
+              id="submissionWarningDays"
+              name="submissionWarningDays"
+              value={settings.submissionWarningDays}
+              onValueChange={handleNumericChange("submissionWarningDays")}
             />
           </div>
         </div>

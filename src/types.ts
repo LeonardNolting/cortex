@@ -72,6 +72,7 @@ export interface Settings {
   writingFee: number;
   printingFee: number;
   paymentDeadlineDays: number;
+  submissionWarningDays: number;
   invoiceIntro: string;
   invoiceSubject: string;
   invoiceTitle: string;

@@ -331,21 +331,22 @@ export function AssignmentList() {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
+    const submissionWarningDays = settings?.submissionWarningDays || 14;
 
     const openAssignments = assignments.filter(a => !a.paidAt && !a.invoiceNumber);
-    const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+    const warningThresholdDate = new Date();
+    warningThresholdDate.setDate(warningThresholdDate.getDate() + submissionWarningDays);
 
     const workingOn = openAssignments
       .filter(a => a.startedWorkingDate)
       .sort((a, b) => new Date(b.startedWorkingDate!).getTime() - new Date(a.startedWorkingDate!).getTime());
 
     const urgent = openAssignments
-      .filter(a => !a.startedWorkingDate && a.submissionDate && new Date(a.submissionDate) <= twoWeeksFromNow)
+      .filter(a => !a.startedWorkingDate && a.submissionDate && new Date(a.submissionDate) <= warningThresholdDate)
       .sort((a, b) => new Date(a.submissionDate!).getTime() - new Date(b.submissionDate!).getTime());
 
     const othersOpen = openAssignments
-      .filter(a => !a.startedWorkingDate && (!a.submissionDate || new Date(a.submissionDate) > twoWeeksFromNow))
+      .filter(a => !a.startedWorkingDate && (!a.submissionDate || new Date(a.submissionDate) > warningThresholdDate))
       .sort((a, b) => {
         if (a.submissionDate && b.submissionDate) {
           return new Date(a.submissionDate).getTime() - new Date(b.submissionDate).getTime();
@@ -386,7 +387,7 @@ export function AssignmentList() {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return { openList, ready, paidThisMonth, archive };
-  }, [assignments]);
+  }, [assignments, settings]);
 
   const AssignmentTable = ({ list }: { list: Assignment[] }) => {
     const isOverdue = (assignment: Assignment) => {
@@ -403,13 +404,14 @@ export function AssignmentList() {
 
     const isUrgentOpen = (assignment: Assignment) => {
       if (assignment.paidAt || assignment.invoiceNumber || assignment.startedWorkingDate || !assignment.submissionDate) return false;
-      const twoWeeksFromNow = new Date();
-      twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+      const submissionWarningDays = settings?.submissionWarningDays || 14;
+      const warningThresholdDate = new Date();
+      warningThresholdDate.setDate(warningThresholdDate.getDate() + submissionWarningDays);
       const submissionDate = new Date(assignment.submissionDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       submissionDate.setHours(0, 0, 0, 0);
-      return submissionDate >= today && submissionDate <= twoWeeksFromNow;
+      return submissionDate >= today && submissionDate <= warningThresholdDate;
     };
 
     const isSubmissionOverdue = (assignment: Assignment) => {
@@ -455,12 +457,13 @@ export function AssignmentList() {
       }
 
       if (assignment.submissionDate) {
+        const submissionWarningDays = settings?.submissionWarningDays || 14;
         const diff = getDaysDiff(assignment.submissionDate);
         if (diff < 0) {
           return `Abgabe überfällig (vor ${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'Tag' : 'Tage'})`;
         } else if (diff === 0) {
           return "Abgabe heute fällig";
-        } else if (diff <= 14) {
+        } else if (diff <= submissionWarningDays) {
           return `Abgabe in ${diff} ${diff === 1 ? 'Tag' : 'Tage'}`;
         } else {
           return `Abgabe am ${new Date(assignment.submissionDate).toLocaleDateString("de-DE")}`;

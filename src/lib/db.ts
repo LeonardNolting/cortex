@@ -140,6 +140,7 @@ async function runMigrations(db: Database) {
     ['writingFee', '1.5'],
     ['printingFee', '0.5'],
     ['paymentDeadlineDays', '14'],
+    ['submissionWarningDays', '14'],
     ['invoiceIntro', 'Für die Erstellung eines psychiatrischen Gutachtens erlaube ich mir gemäß Vergütungsgruppe {{remunerationGroup.name}} zu berechnen:'],
     ['invoiceSubject', '{{assignment.patientName}}, geb. am {{assignment.patientBirthdate}}, Aktenzeichen: {{assignment.fileNumber}}'],
     ['invoiceTitle', 'Vergütungsantrag'],
