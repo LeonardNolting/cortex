@@ -78,7 +78,7 @@ export function DatePicker({
         <Button
           variant="outline"
           size="icon"
-          className="h-10 w-10 shrink-0"
+          className="h-9 w-9 shrink-0"
           onClick={() => setDate(undefined)}
           disabled={disabled}
         >
