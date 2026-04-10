@@ -7,7 +7,6 @@ This template should help get you started developing with Tauri, React and Types
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 ## TODO
-- in 2. Liste zeigen, wann Rechnung gedruckt wurde
 ### Später
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
 - Datenbank woanders abspeichern können
@@ -45,3 +44,4 @@ This template should help get you started developing with Tauri, React and Types
 - ✅ Mehr Werte sind verpflichtend (Geburtstag, Aktenzeichen)
 - ✅ Vielleicht drei Gruppen innerhalb der ersten Liste: 1. Als "Werden gerade bearbeitet" markierte Aufträge (grün), 2. Aufträge, deren Wiedervorlagedatum näher rückt (gelb), 3. die restlichen Aufträge, also deren Wiedervorlagedatum noch lange hin ist, die noch nicht aktiv bearbeitet werden
 - ✅ Assignment edit inputs links etwas zusammenrücken
+- ✅ in 2. Liste zeigen, wann Rechnung gedruckt wurde
