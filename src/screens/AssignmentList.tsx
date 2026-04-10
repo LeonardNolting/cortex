@@ -43,6 +43,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { DatePicker } from "../components/ui/date-picker";
 import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
@@ -64,6 +65,8 @@ export function AssignmentList() {
   // Invoice Dialog State
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [missingInvoiceFields, setMissingInvoiceFields] = useState<string[]>([]);
+  const [isMissingInvoiceFieldsDialogOpen, setIsMissingInvoiceFieldsDialogOpen] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState({
     invoiceNumber: "",
     printingDate: new Date().toISOString().split('T')[0],
@@ -190,8 +193,37 @@ export function AssignmentList() {
     }
   };
 
+  const getMissingInvoiceFields = (assignment: Assignment): string[] => {
+    // Based on required inputs in `legacy.html` (and their equivalents in the edit screen).
+    const missing: string[] = [];
+
+    if (!assignment.patientName || assignment.patientName.trim() === "") missing.push("Patientenname");
+    if (!assignment.courtId || assignment.courtId === 0) missing.push("Gericht");
+    if (!assignment.remunerationGroupId || assignment.remunerationGroupId === 0) missing.push("Vergütungsgruppe");
+
+    if (!(typeof assignment.travelTime === "number" && assignment.travelTime > 0)) missing.push("Anfahrt (Minuten)");
+    if (!(typeof assignment.travelCount === "number" && assignment.travelCount > 0)) missing.push("Anzahl Anfahrten");
+    if (!(typeof assignment.preparationTime === "number" && assignment.preparationTime > 0)) missing.push("Vorbereitung (Minuten)");
+    if (!(typeof assignment.evaluationTime === "number" && assignment.evaluationTime > 0)) missing.push("Auswertung (Minuten)");
+    if (!(typeof assignment.writingCharacters === "number" && assignment.writingCharacters > 0)) missing.push("Schreibgebühr (Zeichen)");
+
+    return missing;
+  };
+
+  const showMissingInvoiceFieldsWarning = (assignment: Assignment, missing: string[]) => {
+    setSelectedAssignment(assignment);
+    setMissingInvoiceFields(missing);
+    setIsMissingInvoiceFieldsDialogOpen(true);
+  };
+
   const handleOpenInvoiceDialog = async (assignment: Assignment) => {
     try {
+      const missing = getMissingInvoiceFields(assignment);
+      if (missing.length > 0) {
+        showMissingInvoiceFieldsWarning(assignment, missing);
+        return;
+      }
+
       // Use existing invoice number if available, otherwise get next one
       const invoiceNumber = assignment.invoiceNumber || await AssignmentService.getNextInvoiceNumber();
       
@@ -211,6 +243,13 @@ export function AssignmentList() {
     if (!selectedAssignment) return;
 
     try {
+      const missing = getMissingInvoiceFields(selectedAssignment);
+      if (missing.length > 0) {
+        showMissingInvoiceFieldsWarning(selectedAssignment, missing);
+        setIsInvoiceDialogOpen(false);
+        return;
+      }
+
       const [court, remunerationGroup, settings] = await Promise.all([
         CourtService.getById(selectedAssignment.courtId),
         RemunerationGroupService.getById(selectedAssignment.remunerationGroupId),
@@ -722,6 +761,34 @@ export function AssignmentList() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={isMissingInvoiceFieldsDialogOpen} onOpenChange={setIsMissingInvoiceFieldsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rechnung kann noch nicht generiert werden</AlertDialogTitle>
+            <AlertDialogDescription>
+              Für diesen Auftrag fehlen noch Pflichtangaben:
+              <ul className="mt-2 list-disc pl-5 space-y-1">
+                {missingInvoiceFields.map((field) => (
+                  <li key={field}>{field}</li>
+                ))}
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zurück</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!selectedAssignment) return;
+                setIsMissingInvoiceFieldsDialogOpen(false);
+                navigate(`/edit/${selectedAssignment.id}`);
+              }}
+            >
+              Auftrag bearbeiten
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -777,11 +844,9 @@ export function AssignmentList() {
               <Label htmlFor="printingDate" className="text-right">
                 Datum
               </Label>
-              <Input
-                id="printingDate"
-                type="date"
-                value={invoiceForm.printingDate}
-                onChange={(e) => setInvoiceForm(prev => ({ ...prev, printingDate: e.target.value }))}
+              <DatePicker
+                date={invoiceForm.printingDate}
+                setDate={(date) => setInvoiceForm(prev => ({ ...prev, printingDate: date || "" }))}
                 className="col-span-3"
               />
             </div>
