@@ -779,7 +779,7 @@ export function AssignmentList() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuContent align="end" className="w-56" onClick={(e) => e.stopPropagation()}>
                         {assignment.invoiceNumber && (
                           <>
                             <DropdownMenuItem onClick={(e) => {
