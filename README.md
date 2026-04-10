@@ -8,9 +8,7 @@ This template should help get you started developing with Tauri, React and Types
 
 ## TODO
 - Assignment edit inputs links etwas zusammenrücken
-- Knopf um deadline 1 Woche zurückzustellen (sowohl für submission als auch für Zahldatum?) - wenn Deadline nah kommt
 ### Später
-- Deadlines erstellen können für Assignments?
   - Vielleicht drei Gruppen innerhalb der ersten Liste: 1. Als "Werden gerade bearbeitet" markierte Aufträge (grün), 2. Aufträge, deren Wiedervorlagedatum näher rückt (gelb), 3. die restlichen Aufträge, also deren Wiedervorlagedatum noch lange hin ist, die noch nicht aktiv bearbeitet werden
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
 - Datenbank woanders abspeichern können
@@ -37,9 +35,11 @@ This template should help get you started developing with Tauri, React and Types
   3. Abgeschlossene Assignments (Rechnungen eingegangen) aus diesem Monat
   4. Eingeklappt (ausklappbar): alle sonstigen, alten abgeschlossenen Assignments
 - ✅ Vergütungsgruppen parsen
+- ✅ Deadlines erstellen können für Assignments?
 - ✅ Reset datepicker knopf wird verdrängt
 - ✅ Knopf um Bearbeitung anzufangen
 - ✅ Knopf um Deadline zu setzen
 - ✅ Abgabe überfällig = rot
 - ✅ Generate invoice date input is too narrow
 - ✅ Festlegen können, ab wann man vor kommenden Abgabedaten gewarnt werden will
+- ✅ Knopf um deadline 1 Woche zurückzustellen (sowohl für submission als auch für Zahldatum?) - wenn Deadline nah kommt

@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus } from "lucide-react";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { PageHeader } from "../components/PageHeader";
@@ -183,6 +183,16 @@ export function AssignmentList() {
     } catch (error) {
       console.error("Failed to update submission date:", error);
     }
+  };
+
+  const handlePostponeSubmissionByWeek = async (assignment: Assignment) => {
+    if (!assignment.submissionDate) return;
+
+    const currentSubmissionDate = new Date(assignment.submissionDate);
+    currentSubmissionDate.setDate(currentSubmissionDate.getDate() + 7);
+    const newSubmissionDate = currentSubmissionDate.toISOString().split("T")[0];
+
+    await handleUpdateSubmissionDate(assignment, newSubmissionDate);
   };
 
   const handleDeleteClick = (id: number) => {
@@ -608,6 +618,20 @@ export function AssignmentList() {
                     >
                       <Square className="mr-2 h-4 w-4" />
                       Bearbeitung stoppen
+                    </Button>
+                  )}
+                  {submissionOverdue && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title="Abgabefrist um eine Woche verschieben"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePostponeSubmissionByWeek(assignment);
+                      }}
+                    >
+                      <CalendarPlus className="mr-2 h-4 w-4" />
+                      +1 Woche
                     </Button>
                   )}
                   <Button 
