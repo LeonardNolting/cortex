@@ -32,6 +32,12 @@ export interface Assignment {
   netEuro?: number;
   taxEuro?: number;
   grossEuro?: number;
+  // Persistent rates at the time of invoicing
+  remunerationGroupValue?: number;
+  writingFeeRate?: number;
+  printingFeeRate?: number;
+  kmFeeRate?: number;
+  taxRate?: number;
 }
 
 export interface Court {

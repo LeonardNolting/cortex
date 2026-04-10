@@ -41,28 +41,41 @@ export interface CalculatedValues {
   netEuro: number;
   taxEuro: number;
   grossEuro: number;
+  // Persistent rates
+  remunerationGroupValue: number;
+  writingFeeRate: number;
+  printingFeeRate: number;
+  kmFeeRate: number;
+  taxRate: number;
 }
 
 export function calculateInvoiceValues(data: InvoiceData): CalculatedValues {
   const { assignment, remunerationGroup, settings } = data;
   const travelCount = assignment.travelCount || 1;
   
+  // Use persisted rates if available, otherwise use current ones
+  const remunerationGroupValue = assignment.remunerationGroupValue ?? remunerationGroup.value;
+  const writingFeeRate = assignment.writingFeeRate ?? settings.writingFee ?? 1.5;
+  const printingFeeRate = assignment.printingFeeRate ?? settings.printingFee ?? 0.5;
+  const kmFeeRate = assignment.kmFeeRate ?? settings.kmFee ?? 0.42;
+  const taxRatePercent = assignment.taxRate ?? settings.taxRate ?? 19;
+  
   const totalMinutes = ((assignment.travelTime || 0) * travelCount) + 
                        (assignment.preparationTime || 0) + 
                        (assignment.evaluationTime || 0);
   
   const roundedMinutes = Math.ceil(totalMinutes / 30) * 30;
-  const timeEuro = (roundedMinutes / 60) * remunerationGroup.value;
+  const timeEuro = (roundedMinutes / 60) * remunerationGroupValue;
   
-  const writingEuro = Math.round(Math.ceil((assignment.writingCharacters || 0) / 1000) * (settings.writingFee || 1.5) * 100) / 100;
-  const printingEuro = Math.round((assignment.printingPages || 0) * (settings.printingFee || 0.5) * 100) / 100;
-  const kmEuro = Math.round((assignment.kmCount || 0) * travelCount * (settings.kmFee || 0.42) * 100) / 100;
+  const writingEuro = Math.round(Math.ceil((assignment.writingCharacters || 0) / 1000) * writingFeeRate * 100) / 100;
+  const printingEuro = Math.round((assignment.printingPages || 0) * printingFeeRate * 100) / 100;
+  const kmEuro = Math.round((assignment.kmCount || 0) * travelCount * kmFeeRate * 100) / 100;
   const shippingEuro = Math.round((assignment.shippingFee || 0) * 100) / 100;
   
   const netEuro = Math.round((timeEuro + writingEuro + printingEuro + kmEuro + shippingEuro) * 100) / 100;
   
   // Tax rounding: Using standard 2 decimal places precision for better accuracy.
-  const taxRate = (settings.taxRate || 19) / 100;
+  const taxRate = taxRatePercent / 100;
   const taxEuro = Math.round(netEuro * taxRate * 100) / 100;
   
   const grossEuro = Math.round((netEuro + taxEuro) * 100) / 100;
@@ -77,7 +90,12 @@ export function calculateInvoiceValues(data: InvoiceData): CalculatedValues {
     shippingEuro,
     netEuro,
     taxEuro,
-    grossEuro
+    grossEuro,
+    remunerationGroupValue,
+    writingFeeRate,
+    printingFeeRate,
+    kmFeeRate,
+    taxRate: taxRatePercent
   };
 }
 
@@ -145,7 +163,13 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
     assignment,
     court,
     remunerationGroup,
-    settings,
+    settings: {
+      ...settings,
+      taxRate: values.taxRate,
+      kmFee: values.kmFeeRate,
+      writingFee: values.writingFeeRate,
+      printingFee: values.printingFeeRate
+    },
     values,
     invoiceNumber,
     printingDate: new Date(printingDate).toLocaleDateString("de-DE")
@@ -250,9 +274,9 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
               `${assignment.evaluationTime || 0} Minuten`
             ),
             row(settings.invoiceLabelTotalTime || "Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
-            row(settings.invoiceLabelWriting || "Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(settings.writingFee || 1.5)}/1000`, formatEuro(values.writingEuro)),
-            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} km`, `à ${formatEuro(settings.kmFee || 0.42)}/km`, formatEuro(values.kmEuro)),
-            ...(assignment.printingPages ? [row(settings.invoiceLabelPrinting || "Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(settings.printingFee || 0.5)}/Seite`, formatEuro(values.printingEuro))] : []),
+            row(settings.invoiceLabelWriting || "Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(values.writingFeeRate)}/1000`, formatEuro(values.writingEuro)),
+            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} km`, `à ${formatEuro(values.kmFeeRate)}/km`, formatEuro(values.kmEuro)),
+            ...(assignment.printingPages ? [row(settings.invoiceLabelPrinting || "Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(values.printingFeeRate)}/Seite`, formatEuro(values.printingEuro))] : []),
             row(settings.invoiceLabelShipping || "Versandkosten:", "", "", formatEuro(values.shippingEuro)),
             row(settings.invoiceLabelNet || "Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),
             row(compile(settings.invoiceLabelTax || "Umsatzsteuer {{settings.taxRate}}%:"), "", "", formatEuro(values.taxEuro)),

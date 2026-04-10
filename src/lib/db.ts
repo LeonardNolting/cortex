@@ -67,34 +67,15 @@ async function runMigrations(db: Database) {
       net_euro REAL,
       tax_euro REAL,
       gross_euro REAL,
+      remuneration_group_value REAL,
+      writing_fee_rate REAL,
+      printing_fee_rate REAL,
+      km_fee_rate REAL,
+      tax_rate REAL,
       FOREIGN KEY (court_id) REFERENCES courts(id),
       FOREIGN KEY (remuneration_group_id) REFERENCES remuneration_groups(id)
     )
   `);
-
-  // Migrations for existing tables
-  const migrationColumns = [
-    ["travel_count", "REAL DEFAULT 1"],
-    ["paid_at", "TEXT"],
-    ["total_minutes", "INTEGER"],
-    ["rounded_minutes", "INTEGER"],
-    ["time_euro", "REAL"],
-    ["writing_euro", "REAL"],
-    ["printing_euro", "REAL"],
-    ["km_euro", "REAL"],
-    ["shipping_euro", "REAL"],
-    ["net_euro", "REAL"],
-    ["tax_euro", "REAL"],
-    ["gross_euro", "REAL"]
-  ];
-
-  for (const [col, type] of migrationColumns) {
-    try {
-      await db.execute(`ALTER TABLE assignments ADD COLUMN ${col} ${type}`);
-    } catch (e) {
-      // Column might already exist
-    }
-  }
 
   // Default entries for courts
   const courtsCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM courts");

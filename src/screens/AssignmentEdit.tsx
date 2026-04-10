@@ -104,7 +104,17 @@ export function AssignmentEdit() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      
+      // If remuneration group changes, clear the persisted rate to allow it to be re-fetched
+      if (name === "remunerationGroupId") {
+        delete (next as any).remunerationGroupValue;
+      }
+      
+      return next;
+    });
     
     // Clear error for the field being edited
     if (errors[name]) {

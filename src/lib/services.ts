@@ -131,6 +131,11 @@ export const AssignmentService = {
         a.net_euro as netEuro,
         a.tax_euro as taxEuro,
         a.gross_euro as grossEuro,
+        a.remuneration_group_value as remunerationGroupValue,
+        a.writing_fee_rate as writingFeeRate,
+        a.printing_fee_rate as printingFeeRate,
+        a.km_fee_rate as kmFeeRate,
+        a.tax_rate as taxRate,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -173,6 +178,11 @@ export const AssignmentService = {
         a.net_euro as netEuro,
         a.tax_euro as taxEuro,
         a.gross_euro as grossEuro,
+        a.remuneration_group_value as remunerationGroupValue,
+        a.writing_fee_rate as writingFeeRate,
+        a.printing_fee_rate as printingFeeRate,
+        a.km_fee_rate as kmFeeRate,
+        a.tax_rate as taxRate,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
@@ -217,8 +227,9 @@ export const AssignmentService = {
         travel_time, travel_count, preparation_time, evaluation_time, writing_characters, 
         printing_pages, km_count, shipping_fee, printing_date, paid_at,
         total_minutes, rounded_minutes, time_euro, writing_euro, printing_euro,
-        km_euro, shipping_euro, net_euro, tax_euro, gross_euro
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        km_euro, shipping_euro, net_euro, tax_euro, gross_euro,
+        remuneration_group_value, writing_fee_rate, printing_fee_rate, km_fee_rate, tax_rate
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber, 
@@ -231,7 +242,12 @@ export const AssignmentService = {
         assignment.totalMinutes || null, assignment.roundedMinutes || null, assignment.timeEuro || null, 
         assignment.writingEuro || null, assignment.printingEuro || null,
         assignment.kmEuro || null, assignment.shippingEuro || null, assignment.netEuro || null, 
-        assignment.taxEuro || null, assignment.grossEuro || null
+        assignment.taxEuro || null, assignment.grossEuro || null,
+        assignment.remunerationGroupValue || null,
+        assignment.writingFeeRate || null,
+        assignment.printingFeeRate || null,
+        assignment.kmFeeRate || null,
+        assignment.taxRate || null
       ]
     );
     return result.lastInsertId!;
@@ -247,7 +263,8 @@ export const AssignmentService = {
         writing_characters = ?, printing_pages = ?, km_count = ?, 
         shipping_fee = ?, printing_date = ?, paid_at = ?,
         total_minutes = ?, rounded_minutes = ?, time_euro = ?, writing_euro = ?, printing_euro = ?,
-        km_euro = ?, shipping_euro = ?, net_euro = ?, tax_euro = ?, gross_euro = ?
+        km_euro = ?, shipping_euro = ?, net_euro = ?, tax_euro = ?, gross_euro = ?,
+        remuneration_group_value = ?, writing_fee_rate = ?, printing_fee_rate = ?, km_fee_rate = ?, tax_rate = ?
         WHERE id = ?`,
         [
         assignment.invoiceNumber || null,
@@ -262,6 +279,11 @@ export const AssignmentService = {
         assignment.writingEuro ?? null, assignment.printingEuro ?? null,
         assignment.kmEuro ?? null, assignment.shippingEuro ?? null, assignment.netEuro ?? null, 
         assignment.taxEuro ?? null, assignment.grossEuro ?? null,
+        assignment.remunerationGroupValue ?? null,
+        assignment.writingFeeRate ?? null,
+        assignment.printingFeeRate ?? null,
+        assignment.kmFeeRate ?? null,
+        assignment.taxRate ?? null,
         assignment.id
         ]
     );
@@ -308,6 +330,11 @@ export const AssignmentService = {
         a.net_euro as netEuro,
         a.tax_euro as taxEuro,
         a.gross_euro as grossEuro,
+        a.remuneration_group_value as remunerationGroupValue,
+        a.writing_fee_rate as writingFeeRate,
+        a.printing_fee_rate as printingFeeRate,
+        a.km_fee_rate as kmFeeRate,
+        a.tax_rate as taxRate,
         c.name as court,
         rg.name as remunerationGroup
       FROM assignments a
