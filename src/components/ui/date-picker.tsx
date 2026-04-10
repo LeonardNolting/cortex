@@ -39,13 +39,14 @@ export function DatePicker({
   }, [date])
 
   return (
-    <div className="flex gap-1 w-full">
+    <div className="flex w-full min-w-0 gap-1">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal h-10 px-3",
+              // Must be allowed to shrink when the clear button is present
+              "h-10 flex-1 min-w-0 shrink justify-start px-3 text-left font-normal",
               !selectedDate && "text-muted-foreground",
               className
             )}
