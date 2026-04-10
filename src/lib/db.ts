@@ -100,18 +100,23 @@ async function runMigrations(db: Database) {
     let jvegHash = "";
     
     try {
+      console.log("DB Init: Fetching JVEG rates via Rust...");
       const jsonString = await invoke<string>("fetch_jveg");
+      console.log("DB Init: JVEG JSON fetched, length:", jsonString.length);
       const parsed = parseHtmlForRates(jsonString);
       if (parsed) {
+        console.log("DB Init: JVEG rates parsed successfully:", parsed);
         initialRates = {
           'M1': parsed['M1'] || initialRates['M1'],
           'M2': parsed['M2'] || initialRates['M2'],
           'M3': parsed['M3'] || initialRates['M3']
         };
         jvegHash = await hashString(jsonString);
+      } else {
+        console.warn("DB Init: JVEG parsing returned null, using fallbacks.");
       }
     } catch (error) {
-      console.warn("Could not fetch initial JVEG rates via Rust, using defaults.", error);
+      console.warn("DB Init: Could not fetch initial JVEG rates via Rust, using defaults.", error);
     }
 
     await db.execute(`
