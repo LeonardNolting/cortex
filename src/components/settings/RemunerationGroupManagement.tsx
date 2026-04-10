@@ -8,7 +8,7 @@ import {
   TableRow 
 } from "../ui/table";
 import { Button } from "../ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, RefreshCw } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -33,6 +33,8 @@ import { RemunerationGroupService } from "../../lib/services";
 import { RemunerationGroup } from "../../types";
 import { formatToGermanString, parseGermanNumber } from "../../lib/number-format";
 import { NumericInput } from "../ui/numeric-input";
+import { JvegService, ParsedRates } from "../../lib/jveg";
+import { RemunerationUpdatePreviewDialog } from "./RemunerationUpdatePreviewDialog";
 
 export function RemunerationGroupManagement() {
   const [groups, setGroups] = useState<RemunerationGroup[]>([]);
@@ -40,6 +42,12 @@ export function RemunerationGroupManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<RemunerationGroup | null>(null);
   const [groupIdToDelete, setGroupIdToDelete] = useState<number | null>(null);
+
+  // Sync state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [parsedRates, setParsedRates] = useState<ParsedRates | null>(null);
+  const [latestJson, setLatestJson] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -53,6 +61,34 @@ export function RemunerationGroupManagement() {
   async function loadGroups() {
     const data = await RemunerationGroupService.getAll();
     setGroups(data);
+  }
+
+  async function handleManualSync() {
+    setIsSyncing(true);
+    try {
+      const { jsonString } = await JvegService.fetchLatest();
+      const rates = JvegService.parseHtmlForRates(jsonString);
+      if (rates) {
+        setParsedRates(rates);
+        setLatestJson(jsonString);
+        setIsPreviewOpen(true);
+      } else {
+        alert("Fehler beim Parsen der Vergütungssätze.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Fehler beim Abrufen der JVEG-Daten.");
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
+  async function handleApplySync() {
+    if (parsedRates && latestJson) {
+      await JvegService.applyRates(parsedRates, latestJson);
+      setIsPreviewOpen(false);
+      loadGroups();
+    }
   }
 
   function handleOpen(group?: RemunerationGroup) {
@@ -105,43 +141,58 @@ export function RemunerationGroupManagement() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Vergütungsgruppen</h3>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <Button onClick={() => handleOpen()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Hinzufügen
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleManualSync} disabled={isSyncing}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+            Online abgleichen
           </Button>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingGroup ? "Vergütungsgruppe bearbeiten" : "Neue Vergütungsgruppe hinzufügen"}</DialogTitle>
-              <DialogDescription>
-                Geben Sie die Daten der Vergütungsgruppe ein.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name (z.B. M1)</Label>
-                <Input 
-                  id="name" 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                />
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Button onClick={() => handleOpen()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Hinzufügen
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingGroup ? "Vergütungsgruppe bearbeiten" : "Neue Vergütungsgruppe hinzufügen"}</DialogTitle>
+                <DialogDescription>
+                  Geben Sie die Daten der Vergütungsgruppe ein.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name (z.B. M1)</Label>
+                  <Input 
+                    id="name" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="value">Stundensatz (€)</Label>
+                  <NumericInput 
+                    id="value" 
+                    value={formData.value} 
+                    onValueChange={(val) => setFormData({ ...formData, value: val })}
+                  />
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="value">Stundensatz (€)</Label>
-                <NumericInput 
-                  id="value" 
-                  value={formData.value} 
-                  onValueChange={(val) => setFormData({ ...formData, value: val })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsOpen(false)}>Abbrechen</Button>
-              <Button onClick={handleSave}>Speichern</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsOpen(false)}>Abbrechen</Button>
+                <Button onClick={handleSave}>Speichern</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
+
+      {parsedRates && (
+        <RemunerationUpdatePreviewDialog 
+          isOpen={isPreviewOpen} 
+          onClose={() => setIsPreviewOpen(false)}
+          parsedRates={parsedRates}
+          onConfirm={handleApplySync}
+        />
+      )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

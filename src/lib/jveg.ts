@@ -7,6 +7,12 @@ export type { ParsedRates };
 export const JvegService = {
   hashString,
 
+  async fetchLatest(): Promise<{ jsonString: string; hash: string }> {
+    const jsonString = await invoke<string>("fetch_jveg");
+    const hash = await this.hashString(jsonString);
+    return { jsonString, hash };
+  },
+
   async checkForUpdates(): Promise<{ hasUpdates: boolean; jsonString?: string; error?: string }> {
     const settings = await SettingsService.getSettings();
     
