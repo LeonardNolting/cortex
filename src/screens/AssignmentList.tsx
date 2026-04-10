@@ -479,16 +479,17 @@ export function AssignmentList() {
         return `Bezahlt am ${new Date(assignment.paidAt).toLocaleDateString("de-DE")}`;
       }
 
-      if (assignment.invoiceNumber && assignment.printingDate) {
-        const printDate = new Date(assignment.printingDate);
-        const reminderStartDate = new Date(printDate);
-        reminderStartDate.setDate(reminderStartDate.getDate() + (settings?.paymentReminderDays || 14));
-        const diff = getDaysDiff(reminderStartDate);
+      if (assignment.invoiceNumber) {
+        if (assignment.printingDate) {
+          const printDate = new Date(assignment.printingDate);
+          const reminderStartDate = new Date(printDate);
+          reminderStartDate.setDate(reminderStartDate.getDate() + (settings?.paymentReminderDays || 14));
+          const diff = getDaysDiff(reminderStartDate);
 
-        if (diff <= 0) {
-          return `Zahlung ausstehend ${formatSinceDays(getDaysSince(printDate))}`;
+          if (diff <= 0) {
+            return `Zahlung ausstehend ${formatSinceDays(getDaysSince(printDate))}`;
+          }
         }
-
         return "Zahlung ausstehend";
       }
 
