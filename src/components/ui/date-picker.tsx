@@ -65,7 +65,7 @@ export function DatePicker({
             onSelect={(date) => {
               if (date) {
                 setDate(format(date, "yyyy-MM-dd"))
-              } else {
+              } else if (clearable) {
                 setDate(undefined)
               }
             }}

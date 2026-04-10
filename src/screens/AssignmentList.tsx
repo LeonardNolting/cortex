@@ -251,6 +251,10 @@ export function AssignmentList() {
 
   const handleConfirmInvoice = async () => {
     if (!selectedAssignment) return;
+    if (!invoiceForm.printingDate || invoiceForm.printingDate.trim() === "") {
+      alert("Bitte ein Rechnungsdatum auswählen.");
+      return;
+    }
 
     try {
       const [court, remunerationGroup, settings] = await Promise.all([
@@ -918,7 +922,11 @@ export function AssignmentList() {
             <Button type="button" variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button type="button" onClick={handleConfirmInvoice}>
+            <Button
+              type="button"
+              onClick={handleConfirmInvoice}
+              disabled={!invoiceForm.printingDate || invoiceForm.printingDate.trim() === ""}
+            >
               Bestätigen
             </Button>
           </DialogFooter>
