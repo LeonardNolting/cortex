@@ -830,7 +830,7 @@ export function AssignmentList() {
             {selectedAssignment && getMissingInvoiceFields(selectedAssignment).length > 0 && (
               <div className="text-amber-600 font-medium bg-amber-50 p-2 rounded border border-amber-200 text-xs space-y-2">
                 <div>
-                  Hinweis: Für diesen Auftrag fehlen noch Pflichtangaben. Die Rechnung kann trotzdem generiert werden, kann aber unvollständig sein:
+                  Hinweis: Für diesen Auftrag fehlen noch Pflichtangaben:
                   <ul className="mt-2 list-disc pl-5 space-y-1 font-normal">
                     {getMissingInvoiceFields(selectedAssignment).map((field) => (
                       <li key={field}>{field}</li>

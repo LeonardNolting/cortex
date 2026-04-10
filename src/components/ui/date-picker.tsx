@@ -46,7 +46,7 @@ export function DatePicker({
             variant={"outline"}
             className={cn(
               // Must be allowed to shrink when the clear button is present
-              "h-10 flex-1 min-w-0 shrink justify-start px-3 text-left font-normal",
+              "h-9 flex-1 min-w-0 shrink justify-start px-3 text-left font-normal",
               !selectedDate && "text-muted-foreground",
               className
             )}
