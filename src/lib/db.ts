@@ -1,4 +1,5 @@
 import Database from "@tauri-apps/plugin-sql";
+import { parseHtmlForRates, hashString } from "./jveg-parser";
 
 let db: Database | null = null;
 
@@ -89,10 +90,35 @@ async function runMigrations(db: Database) {
   // Default entries for remuneration groups
   const remCount = await db.select<{ count: number }[]>("SELECT COUNT(*) as count FROM remuneration_groups");
   if (remCount[0].count === 0) {
+    let initialRates = { 'M1': 80, 'M2': 90, 'M3': 120 };
+    let jvegHash = "";
+    
+    try {
+      const response = await fetch("https://gadi.netlify.app/laws/jveg.json");
+      if (response.ok) {
+        const jsonString = await response.text();
+        const parsed = parseHtmlForRates(jsonString);
+        if (parsed) {
+          initialRates = {
+            'M1': parsed['M1'] || initialRates['M1'],
+            'M2': parsed['M2'] || initialRates['M2'],
+            'M3': parsed['M3'] || initialRates['M3']
+          };
+          jvegHash = await hashString(jsonString);
+        }
+      }
+    } catch (error) {
+      console.warn("Could not fetch initial JVEG rates, using defaults.", error);
+    }
+
     await db.execute(`
       INSERT INTO remuneration_groups (name, value)
-      VALUES ('M1', 80), ('M2', 90), ('M3', 120)
-    `);
+      VALUES ('M1', ?), ('M2', ?), ('M3', ?)
+    `, [initialRates['M1'], initialRates['M2'], initialRates['M3']]);
+
+    if (jvegHash) {
+      await db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('jvegLastHash', ?)", [jvegHash]);
+    }
   }
 
   // Default entries for settings
