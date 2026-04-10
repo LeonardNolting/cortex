@@ -617,7 +617,6 @@ export function AssignmentList() {
             <TableHead>Geburtsdatum</TableHead>
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
-            <TableHead>Gruppe</TableHead>
             {showSubmissionDateColumn && <TableHead className="w-[210px]">Abgabe</TableHead>}
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
@@ -626,7 +625,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn && usePaidActionButton ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
+                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn && usePaidActionButton ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -688,9 +687,6 @@ export function AssignmentList() {
                   <TableCell>{assignment.patientBirthdate}</TableCell>
                   <TableCell>{assignment.fileNumber}</TableCell>
                   <TableCell>{assignment.court}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{assignment.remunerationGroup}</Badge>
-                  </TableCell>
                   {showSubmissionDateColumn && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <DatePicker
