@@ -126,6 +126,70 @@ export async function performBackup(reason: string): Promise<string> {
   }
 }
 
+/**
+ * Replaces the current database with a backup file.
+ * Performs a safety backup of the current state first.
+ */
+export async function restoreBackup(backupFilePath: string): Promise<void> {
+  if (isLocked) {
+    throw new Error("Cannot restore: Database is currently locked (likely a backup in progress).");
+  }
+
+  // 1. Set lock to prevent any new queries
+  let resolveLock: (() => void) | null = null;
+  lockPromise = new Promise((resolve) => {
+    resolveLock = resolve;
+  });
+  isLocked = true;
+
+  try {
+    // 2. Wait for current queries to finish
+    while (activeQueries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    // 3. Perform safety backup before overwrite
+    // We do this manually here because performBackup would try to manage its own lock
+    const appDataPath = await appDataDir();
+    const dbFilePath = await join(appDataPath, "cortex.db");
+    
+    if (await exists(dbFilePath)) {
+      const docDir = await documentDir();
+      const safetyDir = await join(docDir, "cortex", "backups");
+      if (!(await exists(safetyDir))) {
+        await mkdir(safetyDir, { recursive: true });
+      }
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const safetyPath = await join(safetyDir, `cortex_pre-restore-safety_${timestamp}.db`);
+      await copyFile(dbFilePath, safetyPath);
+    }
+
+    // 4. Close connection
+    if (dbInstance) {
+      await dbInstance.close();
+      dbInstance = null;
+      dbPromise = null;
+    }
+
+    // 5. Overwrite database file
+    await copyFile(backupFilePath, dbFilePath);
+    
+    console.log(`Database restored from: ${backupFilePath}`);
+
+    // 6. Re-initialize database to ensure migrations/integrity
+    await getDb();
+    
+  } catch (error) {
+    console.error("Restore failed:", error);
+    throw error;
+  } finally {
+    // 7. Release the lock
+    isLocked = false;
+    if (resolveLock) (resolveLock as () => void)();
+    lockPromise = null;
+  }
+}
+
 async function runMigrations(db: Database) {
   // Create tables if they don't exist
   await db.execute(`
