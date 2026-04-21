@@ -91,4 +91,5 @@ export interface Settings {
   invoiceFooter: string;
   jvegLastHash: string;
   jvegLastCheckFailed: string;
+  backupLocation: string;
 }

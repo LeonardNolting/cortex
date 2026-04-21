@@ -1,19 +1,129 @@
 import Database from "@tauri-apps/plugin-sql";
 import { invoke } from "@tauri-apps/api/core";
 import { parseHtmlForRates, hashString } from "./jveg-parser";
+import { appDataDir, documentDir, join } from "@tauri-apps/api/path";
+import { copyFile, mkdir, exists } from "@tauri-apps/plugin-fs";
 
+let dbInstance: Database | null = null;
 let dbPromise: Promise<Database> | null = null;
+let activeQueries = 0;
+let isLocked = false;
+let lockPromise: Promise<void> | null = null;
 
 export async function getDb(): Promise<Database> {
+  // Wait if database is locked for backup
+  if (isLocked && lockPromise) {
+    await lockPromise;
+  }
+
+  if (dbInstance) return dbInstance;
   if (dbPromise) return dbPromise;
   
   dbPromise = (async () => {
     const db = await Database.load("sqlite:cortex.db");
     await runMigrations(db);
-    return db;
+    
+    // Wrap the database to track active queries and ensure it can be closed safely
+    const wrapper = {
+      path: db.path,
+      execute: async (query: string, bindValues?: any[]) => {
+        activeQueries++;
+        try {
+          return await db.execute(query, bindValues);
+        } finally {
+          activeQueries--;
+        }
+      },
+      select: async <T>(query: string, bindValues?: any[]) => {
+        activeQueries++;
+        try {
+          return await db.select<T>(query, bindValues);
+        } finally {
+          activeQueries--;
+        }
+      },
+      close: async () => {
+        return await db.close();
+      }
+    } as unknown as Database;
+
+    dbInstance = wrapper;
+    return wrapper;
   })();
   
   return dbPromise;
+}
+
+/**
+ * Closes the database and performs a file-level backup.
+ * Queues any incoming database requests until the backup is complete.
+ */
+export async function performBackup(reason: string): Promise<string> {
+  // Don't start another backup if one is already in progress
+  if (isLocked) {
+    if (lockPromise) await lockPromise;
+    return "Backup already in progress, waited for it to finish.";
+  }
+
+  // 1. Get backup location before locking
+  const db = await getDb();
+  const settingsRows = await db.select<{ value: string }[]>("SELECT value FROM settings WHERE key = 'backupLocation'");
+  const customBackupLocation = settingsRows.length > 0 ? settingsRows[0].value : "";
+
+  // 2. Set lock to queue new queries
+  let resolveLock: (() => void) | null = null;
+  lockPromise = new Promise((resolve) => {
+    resolveLock = resolve;
+  });
+  isLocked = true;
+
+  try {
+    // 3. Wait for current queries to finish (idle)
+    while (activeQueries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    // 4. Close the database connection
+    if (dbInstance) {
+      await dbInstance.close();
+      dbInstance = null;
+      dbPromise = null;
+    }
+
+    // 5. Determine paths
+    const appDataPath = await appDataDir();
+    const dbFilePath = await join(appDataPath, "cortex.db");
+    
+    let backupDir = customBackupLocation;
+    if (!backupDir) {
+      const docDir = await documentDir();
+      backupDir = await join(docDir, "cortex", "backups");
+    }
+
+    // Ensure backup directory exists
+    if (!(await exists(backupDir))) {
+      await mkdir(backupDir, { recursive: true });
+    }
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + now.getHours() + '-' + now.getMinutes() + '-' + now.getSeconds();
+    const backupFileName = `cortex_${reason}_${timestamp}.db`;
+    const backupPath = await join(backupDir, backupFileName);
+
+    // 6. Copy the database file
+    await copyFile(dbFilePath, backupPath);
+    
+    console.log(`Database backup created: ${backupPath}`);
+    return backupPath;
+  } catch (error) {
+    console.error("Backup failed:", error);
+    throw error;
+  } finally {
+    // 7. Release the lock
+    isLocked = false;
+    if (resolveLock) (resolveLock as () => void)();
+    lockPromise = null;
+  }
 }
 
 async function runMigrations(db: Database) {
@@ -158,7 +268,8 @@ async function runMigrations(db: Database) {
     ['invoiceLabelGross', 'Gesamt (Brutto):'],
     ['invoiceFooter', 'Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:\n\n{{settings.userName}}, {{settings.userBank}},\n\nIBAN: {{settings.userIban}}, BIC: {{settings.userBic}}'],
     ['jvegLastHash', ''],
-    ['jvegLastCheckFailed', 'false']
+    ['jvegLastCheckFailed', 'false'],
+    ['backupLocation', '']
   ];
 
   for (const [key, value] of defaultSettings) {
