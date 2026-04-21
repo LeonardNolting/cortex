@@ -151,3 +151,19 @@ A JSON version of the law is here: https://gadi.netlify.app/laws/jveg.json
 There are two steps to this:
 1. Whenever the app is started, e.g. at the same time when the app checks for new updates for the app, query the JSON and compare to the previously stored version. If the string has any differences, notify the user at the top of the assignment list screen with a note. This is the first step - just to make the user aware of changes / to be transparent. If the request fails, a warning should appear instead (which can be closed and remains closed even if the request fails the next day - only after it succeeds again, the warning should come again if it fails again afterwards).
 2. The second step is to try parse the changes automatically. This requires traversing the JSON and the HTML inside the JSON. As the law will have changed when this parsing happens, the parsing should be resistent to the text changing. However, we should not try to understand a new version of this JSON file when it was changed beyond what we can understand - so the parsing should still be strict enough to not deliver false positives (e.g. parsing M1, M2, M3 but not M4 if M4 was newly introduced). If the parsing is successful, we can show a button in the user notice from the first step to automatically use the new rates for new remuneration groups. This should open a dialog to preview the new rates and a hint about when these changes took effect (if it's possible to parse that easily - if not, just say "Detected: \[day of detection\]"). Then the user can choose to apply these new rates and they will change the existing entries in remuneration groups.
+
+## Database backups
+
+We deal with important data and losing it would be disastrous. Especially because my app is still under active development and not stable, i.e. it may accidentally publish changes that break the database (lack of migrations or so). To prevent data loss, I would like to aggressively create backups.
+1. These backups should be stored at a location that the user can decide on. By default in BaseDirectory.Document/cortex/backups.
+2. We deal with small amounts of data, even after years or use. The backup cache should be allowed to hold up to 100 copies.
+3. New copies should be created at a tight schedule and during special events:
+   - Every hour that the app is open
+   - At least once a day, checked on startup
+   - Before a new update of the app is downloaded and installed
+   - The backup name should indicate when and why it was created (e.g. before a new app update, or daily backup, or hourly backup)
+   - When the maximum amount of copies of 100 is exceeded, move the oldest one to the user's trash
+
+There are two UI elements necessary for this:
+1. In the user settings, allow the user to choose where backups are stored (a folder picker whose result is stored in the database).
+2. In the user settings, add a button that navigates to a new screen "backup view". It lists the backups and lets the user reinstall one. Before reinstalling one, save the current database to the backups folder with the respective time and reason.
