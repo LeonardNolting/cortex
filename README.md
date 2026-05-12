@@ -1,17 +1,11 @@
-# Tauri + React + Typescript
-
-This template should help get you started developing with Tauri, React and Typescript in Vite.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
-
-## TODO
+# TODO
+- Einkommensliste drucken funktioniert nicht, gibt Fehler "Fehler beim Generieren der Einnahmenübersicht."
+- Geburtsdatum tippen können oder zumindest schnell das Jahr auswählen können
+- Erinnerung 3 Monate nach Auftragseingang Rechnungsstellung? sonst läuft es ab
 ### Später
 - Autosave? Oder bei Änderungen fragen ob gespeichert werden soll bevor man geht?
 - Datenbank woanders abspeichern können
 - Datenbank backups (jeden Tag, für die letzten 30 Tage)
-- Icon ändern
 - Code aufräumen
 - Werte sind nicht ganz stimmig, TypeScript Fehler? <any> casts?
 - Sicherstellen, dass alle Einstellungen und Werte überhaupt durch handlebar templates genutzt werden können
