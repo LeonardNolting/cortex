@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
-  Popover,
+  Popover, PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
@@ -33,6 +33,7 @@ export function DatePicker({
   clearable = false
 }: DatePickerProps) {
   const [inputValue, setInputValue] = React.useState("")
+  const [open, setOpen] = React.useState(false)
 
   const selectedDate = React.useMemo(() => {
     if (!date) return undefined
@@ -66,13 +67,23 @@ export function DatePicker({
   }
 
   const handleBlur = () => {
-    if (selectedDate) {
-      setInputValue(format(selectedDate, "dd.MM.yyyy"))
-    } else if (inputValue === "") {
+    // Only trigger updates if the value actually changed
+    const formattedSelected = selectedDate ? format(selectedDate, "dd.MM.yyyy") : ""
+    
+    if (inputValue === formattedSelected) {
+      return
+    }
+
+    if (inputValue === "") {
       setDate(undefined)
     } else {
-      // If invalid on blur, revert to empty or previous valid date
-      setInputValue(selectedDate ? format(selectedDate, "dd.MM.yyyy") : "")
+      const parsed = parse(inputValue, "dd.MM.yyyy", new Date())
+      if (isValid(parsed)) {
+        setDate(format(parsed, "yyyy-MM-dd"))
+      } else {
+        // If invalid on blur, revert to previous valid date
+        setInputValue(formattedSelected)
+      }
     }
   }
 
@@ -81,16 +92,18 @@ export function DatePicker({
       const parsed = parse(inputValue, "dd.MM.yyyy", new Date())
       if (isValid(parsed)) {
         setDate(format(parsed, "yyyy-MM-dd"))
-        // Optional: close popover on Enter if desired, 
-        // but Popover usually handles this or stays open.
+        setOpen(false)
       }
+    }
+    if (e.key === "Escape") {
+      setOpen(false)
     }
   }
 
   return (
     <div className={cn("flex w-full min-w-0 gap-1", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverAnchor asChild>
           <div className="relative flex-1 min-w-0">
             <Input
               className={cn(
@@ -101,24 +114,31 @@ export function DatePicker({
               onChange={handleInputChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
+              onFocus={() => setOpen(true)}
+              onClick={() => setOpen(true)}
               placeholder={placeholder}
               disabled={disabled}
             />
             <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        </PopoverAnchor>
+        <PopoverContent 
+          className="w-auto p-0" 
+          align="start"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={(date) => {
               if (date) {
                 setDate(format(date, "yyyy-MM-dd"))
+                setOpen(false)
               } else if (clearable) {
                 setDate(undefined)
+                setOpen(false)
               }
             }}
-            // initialFocus
             locale={de}
             captionLayout="dropdown"
             startMonth={new Date(1900, 0)}
@@ -126,6 +146,7 @@ export function DatePicker({
           />
         </PopoverContent>
       </Popover>
+
       {clearable && selectedDate && (
         <Button
           variant="outline"
