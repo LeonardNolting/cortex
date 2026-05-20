@@ -1,6 +1,7 @@
 import { check } from '@tauri-apps/plugin-updater';
-import { ask, message } from '@tauri-apps/plugin-dialog';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { BackupService } from './backup-service';
 
 export async function checkForUpdates() {
     try {
@@ -17,6 +18,9 @@ export async function checkForUpdates() {
             });
 
             if (yes) {
+                // Perform backup before update
+                await BackupService.runPreUpdateBackup();
+
                 // Download and install the update
                 await update.downloadAndInstall();
                 // Relaunch the app to apply changes
