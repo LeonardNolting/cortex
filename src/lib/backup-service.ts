@@ -21,22 +21,39 @@ export const BackupService = {
     }, 60 * 60 * 1000);
   },
 
+  async getBackupDir(): Promise<string> {
+    const settings = await SettingsService.getSettings();
+    let backupDir = settings.backupLocation;
+    
+    if (!backupDir) {
+      const docDir = await documentDir();
+      backupDir = await join(docDir, "cortex", "backups");
+    }
+    return backupDir;
+  },
+
   async runDailyCheck() {
-    const db = await getDb();
-    const lastDailyRow = await db.select<{ value: string }[]>("SELECT value FROM settings WHERE key = 'lastDailyBackup'");
-    const lastDaily = lastDailyRow.length > 0 ? lastDailyRow[0].value : "";
-    
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (lastDaily !== today) {
-      console.log("Running daily backup...");
-      try {
-        await performBackup("daily");
-        await db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('lastDailyBackup', ?)", [today]);
-        await this.rotateBackups();
-      } catch (e) {
-        console.error("Daily backup failed:", e);
+    try {
+      const backupDir = await this.getBackupDir();
+      const today = new Date().toISOString().split('T')[0];
+
+      if (await exists(backupDir)) {
+        const entries = await readDir(backupDir);
+        const dailyBackupToday = entries.some(e => 
+          e.isFile && e.name.startsWith(`cortex_daily_${today}`)
+        );
+
+        if (dailyBackupToday) {
+          console.log("Daily backup already exists for today.");
+          return;
+        }
       }
+
+      console.log("Running daily backup...");
+      await performBackup("daily");
+      await this.rotateBackups();
+    } catch (e) {
+      console.error("Daily backup check failed:", e);
     }
   },
 
@@ -65,13 +82,7 @@ export const BackupService = {
    */
   async rotateBackups() {
     try {
-      const settings = await SettingsService.getSettings();
-      let backupDir = settings.backupLocation;
-      
-      if (!backupDir) {
-        const docDir = await documentDir();
-        backupDir = await join(docDir, "cortex", "backups");
-      }
+      const backupDir = await this.getBackupDir();
 
       if (!(await exists(backupDir))) return;
 
