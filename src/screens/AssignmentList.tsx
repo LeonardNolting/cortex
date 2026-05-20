@@ -53,6 +53,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
+import { formatNameLastFirst } from "../lib/utils/name-parser";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { JvegService, ParsedRates } from "../lib/jveg";
@@ -609,11 +610,11 @@ export function AssignmentList() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Patient</TableHead>
             <TableHead>Status</TableHead>
             {showInvoiceDateColumn && <TableHead>Rechnungsdatum</TableHead>}
             {showPaidColumn && usePaidActionButton && <TableHead>Bezahlt</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
-            <TableHead>Patient</TableHead>
             <TableHead>Geburtsdatum</TableHead>
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
@@ -653,6 +654,7 @@ export function AssignmentList() {
                   className={`cursor-pointer ${rowClass}`}
                   onDoubleClick={() => navigate(`/edit/${assignment.id}`)}
                 >
+                  <TableCell className="font-medium">{formatNameLastFirst(assignment.patientName)}</TableCell>
                   <TableCell>
                     {getStatusBadge(assignment)}
                   </TableCell>
@@ -683,7 +685,6 @@ export function AssignmentList() {
                       {assignment.invoiceNumber || "-"}
                     </TableCell>
                   )}
-                  <TableCell>{assignment.patientName}</TableCell>
                   <TableCell>{assignment.patientBirthdate}</TableCell>
                   <TableCell>{assignment.fileNumber}</TableCell>
                   <TableCell>{assignment.court}</TableCell>
