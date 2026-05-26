@@ -202,8 +202,8 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
         new Paragraph({ children: [run(settings.userName || "")] }),
         new Paragraph({ children: [run(settings.userStreet || "")] }),
         new Paragraph({ children: [run(`${settings.userZip || ""} ${settings.userCity || ""}`)] }),
-        new Paragraph({ children: [run(`geb. ${settings.userBirthday || ""}`)] }),
-        new Paragraph({ children: [run(`Steuer ID: ${settings.userTaxId || ""}`)] }),
+        ...(court.showBirthday ? [new Paragraph({ children: [run(`geb. ${settings.userBirthday || ""}`)] })] : []),
+        ...(court.showTaxId ? [new Paragraph({ children: [run(`Steuer ID: ${settings.userTaxId || ""}`)] })] : []),
         new Paragraph({ children: [] }),
 
         // Recipient + date
