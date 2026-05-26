@@ -22,9 +22,61 @@
     "sql:allow-load",
     "sql:default",
     "fs:default",
-    "fs:allow-write",
-    "fs:allow-read",
-    "fs:allow-exists",
+    {
+      "identifier": "fs:allow-copy-file",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
+      ]
+    },
     "core:path:default",
     "fs:allow-document-write-recursive",
     "fs:allow-document-read-recursive",
