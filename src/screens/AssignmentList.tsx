@@ -54,6 +54,7 @@ import {
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { formatNameLastFirst } from "../lib/utils/name-parser";
+import { formatDate } from "../lib/utils";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { JvegService, ParsedRates } from "../lib/jveg";
@@ -539,7 +540,7 @@ export function AssignmentList() {
 
     const getStatusText = (assignment: Assignment) => {
       if (assignment.paidAt) {
-        return `Bezahlt am ${new Date(assignment.paidAt).toLocaleDateString("de-DE")}`;
+        return `Bezahlt am ${formatDate(assignment.paidAt)}`;
       }
 
       if (assignment.invoiceNumber) {
@@ -570,7 +571,7 @@ export function AssignmentList() {
         } else if (diff <= submissionWarningDays) {
           return `Abgabe ${formatInDays(diff)}`;
         } else {
-          return `Abgabe am ${new Date(assignment.submissionDate).toLocaleDateString("de-DE")}`;
+          return `Abgabe am ${formatDate(assignment.submissionDate)}`;
         }
       }
 
@@ -661,7 +662,7 @@ export function AssignmentList() {
                   {showInvoiceDateColumn && (
                     <TableCell>
                       {assignment.printingDate
-                        ? new Date(assignment.printingDate).toLocaleDateString("de-DE")
+                        ? formatDate(assignment.printingDate)
                         : "-"}
                     </TableCell>
                   )}
@@ -1027,7 +1028,7 @@ export function AssignmentList() {
                     />
                     <Label htmlFor="useOldRates" className="cursor-pointer font-normal">
                       Gespeicherte Sätze der bestehenden Rechnung verwenden 
-                      {selectedAssignment?.printingDate && ` (vom ${new Date(selectedAssignment.printingDate).toLocaleDateString("de-DE")})`}
+                      {selectedAssignment?.printingDate && ` (vom ${formatDate(selectedAssignment.printingDate)})`}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">

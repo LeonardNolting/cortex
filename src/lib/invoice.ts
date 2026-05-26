@@ -1,4 +1,5 @@
 import { Assignment, Court, RemunerationGroup, Settings } from "../types";
+import { formatDate } from "./utils";
 import Handlebars from "handlebars";
 import { 
   AlignmentType, 
@@ -160,7 +161,15 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
 
   // Template context
   const context = {
-    assignment,
+    assignment: {
+      ...assignment,
+      patientBirthdate: formatDate(assignment.patientBirthdate),
+      createdAt: formatDate(assignment.createdAt),
+      printingDate: formatDate(assignment.printingDate),
+      paidAt: formatDate(assignment.paidAt),
+      submissionDate: formatDate(assignment.submissionDate),
+      startedWorkingDate: formatDate(assignment.startedWorkingDate),
+    },
     court,
     remunerationGroup,
     settings: {
@@ -168,11 +177,12 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
       taxRate: values.taxRate,
       kmFee: values.kmFeeRate,
       writingFee: values.writingFeeRate,
-      printingFee: values.printingFeeRate
+      printingFee: values.printingFeeRate,
+      userBirthday: formatDate(settings.userBirthday)
     },
     values,
     invoiceNumber,
-    printingDate: new Date(printingDate).toLocaleDateString("de-DE")
+    printingDate: formatDate(printingDate)
   };
 
   const compile = (template: string) => Handlebars.compile(template || "")(context);
@@ -324,7 +334,7 @@ export async function generateIncomeTaxDocx(
   const assignmentsWithAmount = assignments.filter((a) => (a.grossEuro || 0) !== 0);
 
   const tableRows = assignmentsWithAmount.map(a => {
-    const dateStr = a.paidAt ? new Date(a.paidAt).toLocaleDateString("de-DE") : "-";
+    const dateStr = a.paidAt ? formatDate(a.paidAt) : "-";
     const amountStr = formatEuro(a.grossEuro || 0);
     
     return new TableRow({

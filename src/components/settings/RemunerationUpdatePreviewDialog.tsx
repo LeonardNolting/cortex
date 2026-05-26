@@ -21,6 +21,8 @@ interface Props {
   onConfirm: () => void;
 }
 
+import { formatDate } from "@/lib/utils.ts";
+
 export function RemunerationUpdatePreviewDialog({ isOpen, onClose, parsedRates, onConfirm }: Props) {
   const [existingGroups, setExistingGroups] = useState<RemunerationGroup[]>([]);
 
@@ -35,7 +37,7 @@ export function RemunerationUpdatePreviewDialog({ isOpen, onClose, parsedRates, 
     setExistingGroups(groups);
   }
 
-  const today = new Date().toLocaleDateString("de-DE");
+  const today = formatDate(new Date());
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
