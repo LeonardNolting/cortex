@@ -33,28 +33,39 @@ export const SettingsService = {
 export const CourtService = {
   async getAll(): Promise<Court[]> {
     const db = await getDb();
-    return db.select<Court[]>("SELECT * FROM courts ORDER BY name ASC");
+    const rows = await db.select<any[]>("SELECT * FROM courts ORDER BY name ASC");
+    return rows.map(row => ({
+      ...row,
+      showBirthday: !!row.show_birthday,
+      showTaxId: !!row.show_tax_id
+    }));
   },
 
   async getById(id: number): Promise<Court | null> {
     const db = await getDb();
-    const results = await db.select<Court[]>("SELECT * FROM courts WHERE id = ?", [id]);
-    return results.length > 0 ? results[0] : null;
+    const results = await db.select<any[]>("SELECT * FROM courts WHERE id = ?", [id]);
+    if (results.length === 0) return null;
+    const row = results[0];
+    return {
+      ...row,
+      showBirthday: !!row.show_birthday,
+      showTaxId: !!row.show_tax_id
+    };
   },
 
   async create(court: Omit<Court, "id">): Promise<void> {
     const db = await getDb();
     await db.execute(
-      "INSERT INTO courts (name, department, street, zip, city) VALUES (?, ?, ?, ?, ?)",
-      [court.name, court.department, court.street, court.zip, court.city]
+      "INSERT INTO courts (name, department, street, zip, city, show_birthday, show_tax_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [court.name, court.department, court.street, court.zip, court.city, court.showBirthday ? 1 : 0, court.showTaxId ? 1 : 0]
     );
   },
 
   async update(court: Court): Promise<void> {
     const db = await getDb();
     await db.execute(
-      "UPDATE courts SET name = ?, department = ?, street = ?, zip = ?, city = ? WHERE id = ?",
-      [court.name, court.department, court.street, court.zip, court.city, court.id]
+      "UPDATE courts SET name = ?, department = ?, street = ?, zip = ?, city = ?, show_birthday = ?, show_tax_id = ? WHERE id = ?",
+      [court.name, court.department, court.street, court.zip, court.city, court.showBirthday ? 1 : 0, court.showTaxId ? 1 : 0, court.id]
     );
   },
 

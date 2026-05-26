@@ -49,6 +49,8 @@ export interface Court {
   street: string;
   zip: string;
   city: string;
+  showBirthday: boolean;
+  showTaxId: boolean;
 }
 
 export interface RemunerationGroup {

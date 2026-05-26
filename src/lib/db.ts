@@ -199,7 +199,9 @@ async function runMigrations(db: Database) {
       department TEXT DEFAULT 'Abteilung für Betreuungssachen',
       street TEXT NOT NULL,
       zip TEXT NOT NULL,
-      city TEXT NOT NULL
+      city TEXT NOT NULL,
+      show_birthday INTEGER DEFAULT 1,
+      show_tax_id INTEGER DEFAULT 1
     )
   `);
 
@@ -354,5 +356,17 @@ async function runMigrations(db: Database) {
     await db.execute("ALTER TABLE assignments ADD COLUMN started_working_date TEXT");
   } catch (e) {
     // Ignore error if column already exists
+  }
+
+  try {
+    await db.execute("ALTER TABLE courts ADD COLUMN show_birthday INTEGER DEFAULT 1");
+  } catch (e) {
+    // Ignore
+  }
+
+  try {
+    await db.execute("ALTER TABLE courts ADD COLUMN show_tax_id INTEGER DEFAULT 1");
+  } catch (e) {
+    // Ignore
   }
 }

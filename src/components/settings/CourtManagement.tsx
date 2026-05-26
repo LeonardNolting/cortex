@@ -44,7 +44,9 @@ export function CourtManagement() {
     department: "Abteilung für Betreuungssachen",
     street: "",
     zip: "",
-    city: ""
+    city: "",
+    showBirthday: true,
+    showTaxId: true
   });
 
   useEffect(() => {
@@ -64,7 +66,9 @@ export function CourtManagement() {
         department: court.department,
         street: court.street,
         zip: court.zip,
-        city: court.city
+        city: court.city,
+        showBirthday: court.showBirthday,
+        showTaxId: court.showTaxId
       });
     } else {
       setEditingCourt(null);
@@ -73,7 +77,9 @@ export function CourtManagement() {
         department: "Abteilung für Betreuungssachen",
         street: "",
         zip: "",
-        city: ""
+        city: "",
+        showBirthday: true,
+        showTaxId: true
       });
     }
     setIsOpen(true);
@@ -160,6 +166,29 @@ export function CourtManagement() {
                     value={formData.city} 
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })} 
                   />
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showBirthday"
+                    checked={formData.showBirthday}
+                    onChange={(e) => setFormData({ ...formData, showBirthday: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  />
+                  <Label htmlFor="showBirthday" className="font-normal cursor-pointer">Geburtsdatum des Gutachters auf Rechnung anzeigen</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showTaxId"
+                    checked={formData.showTaxId}
+                    onChange={(e) => setFormData({ ...formData, showTaxId: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  />
+                  <Label htmlFor="showTaxId" className="font-normal cursor-pointer">Steuer-ID des Gutachters auf Rechnung anzeigen</Label>
                 </div>
               </div>
             </div>
