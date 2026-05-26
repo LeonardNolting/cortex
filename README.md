@@ -1,6 +1,5 @@
 # TODO
 - Einkommensliste drucken funktioniert nicht, gibt Fehler "Fehler beim Generieren der Einnahmenübersicht."
-- Geburtsdatum tippen können oder zumindest schnell das Jahr auswählen können
 - Erinnerung 3 Monate nach Auftragseingang Rechnungsstellung? sonst läuft es ab
 - Assoziierte Dokumente abspeichern können
   - dynamisch: Gutachtenordner parsen und schauen, welche Gutachten denselben Namen tragen
