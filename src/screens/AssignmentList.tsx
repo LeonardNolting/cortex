@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, Euro } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, Euro, Check } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -752,7 +752,7 @@ export function AssignmentList() {
                         handleOpenInvoiceDialog(assignment);
                       }}
                     >
-                      <FileText className="mr-1 text-emerald-600 dark:text-emerald-500" />
+                      <Check className="mr-1 text-emerald-600 dark:text-emerald-500" />
                       Rechnung drucken
                     </Button>
                   )}
@@ -789,7 +789,7 @@ export function AssignmentList() {
                               e.stopPropagation();
                               handleOpenInvoiceDialog(assignment);
                             }}>
-                              <FileText className="mr-1 text-emerald-600 dark:text-emerald-500" />
+                              <Check className="mr-1 text-emerald-600 dark:text-emerald-500" />
                               <span>Neue Rechnung drucken</span>
                             </DropdownMenuItem>
                           </>
