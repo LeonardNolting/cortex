@@ -686,7 +686,7 @@ export function AssignmentList() {
                       {assignment.invoiceNumber || "-"}
                     </TableCell>
                   )}
-                  <TableCell>{assignment.patientBirthdate}</TableCell>
+                  <TableCell>{formatDate(assignment.patientBirthdate)}</TableCell>
                   <TableCell>{assignment.fileNumber}</TableCell>
                   <TableCell>{assignment.court}</TableCell>
                   {showSubmissionDateColumn && (
