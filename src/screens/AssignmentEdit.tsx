@@ -352,24 +352,34 @@ export function AssignmentEdit() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="travelTime">Anfahrt (Minuten)</Label>
-                <NumericInput 
-                  id="travelTime" 
-                  name="travelTime" 
-                  value={formData.travelTime} 
-                  onValueChange={handleNumericChange("travelTime")}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="travelCount">Anzahl Anfahrten</Label>
-                <NumericInput 
-                  id="travelCount" 
-                  name="travelCount" 
-                  value={formData.travelCount} 
-                  onValueChange={handleNumericChange("travelCount")}
-                />
+            <div className="space-y-2">
+              <Label>Anfahrt (Minuten, Kilometer, Anzahl)</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <NumericInput 
+                    id="travelTime" 
+                    name="travelTime" 
+                    value={formData.travelTime} 
+                    onValueChange={handleNumericChange("travelTime")}
+                  />
+                </div>
+                <div className="flex-1">
+                  <NumericInput 
+                    id="kmCount" 
+                    name="kmCount" 
+                    value={formData.kmCount} 
+                    onValueChange={handleNumericChange("kmCount")}
+                  />
+                </div>
+                <span className="text-muted-foreground text-sm font-medium">x</span>
+                <div className="w-20">
+                  <NumericInput 
+                    id="travelCount" 
+                    name="travelCount" 
+                    value={formData.travelCount} 
+                    onValueChange={handleNumericChange("travelCount")}
+                  />
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -413,15 +423,6 @@ export function AssignmentEdit() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="kmCount">Kilometer (1 Weg)</Label>
-                <NumericInput 
-                  id="kmCount" 
-                  name="kmCount" 
-                  value={formData.kmCount} 
-                  onValueChange={handleNumericChange("kmCount")}
-                />
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="shippingFee">Versandkosten (€)</Label>
                 <NumericInput 
