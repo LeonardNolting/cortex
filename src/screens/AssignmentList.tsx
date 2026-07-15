@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, CheckCircle } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -696,6 +696,7 @@ export function AssignmentList() {
                       }}
                       title="Als bezahlt markieren"
                     >
+                      <CheckCircle className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
                       Als bezahlt markieren
                     </Button>
                   )}
@@ -737,7 +738,7 @@ export function AssignmentList() {
                         handlePostponeSubmissionByWeek(assignment);
                       }}
                     >
-                      <CalendarPlus className="mr-2 h-4 w-4" />
+                      <CalendarPlus className="mr-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
                       +1 Woche
                     </Button>
                   )}
@@ -781,14 +782,14 @@ export function AssignmentList() {
                               e.stopPropagation();
                               handleOpenExistingInvoice(assignment);
                             }}>
-                              <ExternalLink className="mr-2 h-4 w-4" />
+                              <ExternalLink className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
                               <span>Bestehende Rechnung öffnen</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               handleOpenInvoiceDialog(assignment);
                             }}>
-                              <FileText className="mr-2 h-4 w-4" />
+                              <FileText className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
                               <span>Neue Rechnung drucken</span>
                             </DropdownMenuItem>
                           </>
@@ -798,7 +799,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetInvoice(assignment);
                           }}>
-                            <RotateCcw className="mr-2 h-4 w-4" />
+                            <RotateCcw className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-500" />
                             <span>Rechnung zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -807,7 +808,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetPayment(assignment);
                           }}>
-                            <Undo2 className="mr-2 h-4 w-4" />
+                            <Undo2 className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-500" />
                             <span>Zahlungsstatus zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -828,15 +829,15 @@ export function AssignmentList() {
   const actions = (
     <>
       <Button variant="outline" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
-        <Calculator className="mr-2 h-4 w-4" />
+        <Calculator className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
         Einnahmen
       </Button>
       <Button variant="outline" onClick={() => navigate("/settings")}>
-        <Settings className="mr-2 h-4 w-4" />
+        <Settings className="mr-2 h-4 w-4 text-slate-500 dark:text-slate-400" />
         Einstellungen
       </Button>
       <Button onClick={() => navigate("/edit/new")}>
-        <PlusCircle className="mr-2 h-4 w-4" />
+        <PlusCircle className="mr-2 h-4 w-4 text-green-600 dark:text-green-500" />
         Neuer Auftrag
       </Button>
     </>
