@@ -696,7 +696,7 @@ export function AssignmentList() {
                       }}
                       title="Rechnung eingegangen"
                     >
-                      <Euro className="mr-1 translate-y-px text-emerald-600 dark:text-emerald-500" />
+                      <Euro className="mr-1 text-emerald-600 dark:text-emerald-500" />
                       Rechnung eingegangen
                     </Button>
                   )}
@@ -710,7 +710,7 @@ export function AssignmentList() {
                         handleStartWorking(assignment);
                       }}
                     >
-                      <Play className="mr-1 translate-y-px text-green-600 dark:text-green-500" />
+                      <Play className="mr-1 text-green-600 dark:text-green-500" />
                       Anfangen
                     </Button>
                   )}
@@ -724,7 +724,7 @@ export function AssignmentList() {
                         handleStopWorking(assignment);
                       }}
                     >
-                      <Square className="mr-1 translate-y-px text-red-600 dark:text-red-500" />
+                      <Square className="mr-1 text-red-600 dark:text-red-500" />
                       Bearbeitung stoppen
                     </Button>
                   )}
@@ -738,7 +738,7 @@ export function AssignmentList() {
                         handlePostponeSubmissionByWeek(assignment);
                       }}
                     >
-                      <CalendarPlus className="mr-1 translate-y-px text-amber-500 dark:text-amber-400" />
+                      <CalendarPlus className="mr-1 text-amber-500 dark:text-amber-400" />
                       +1 Woche
                     </Button>
                   )}
@@ -752,7 +752,7 @@ export function AssignmentList() {
                         handleOpenInvoiceDialog(assignment);
                       }}
                     >
-                      <FileText className="mr-1 translate-y-px text-emerald-600 dark:text-emerald-500" />
+                      <FileText className="mr-1 text-emerald-600 dark:text-emerald-500" />
                       Rechnung drucken
                     </Button>
                   )}
@@ -765,7 +765,7 @@ export function AssignmentList() {
                       handleDeleteClick(assignment.id);
                     }}
                   >
-                    <Trash2 className="translate-y-px h-4 w-4" />
+                    <Trash2 className=" h-4 w-4" />
                   </Button>
 
                   {(assignment.paidAt || assignment.invoiceNumber) && (
@@ -782,14 +782,14 @@ export function AssignmentList() {
                               e.stopPropagation();
                               handleOpenExistingInvoice(assignment);
                             }}>
-                              <ExternalLink className="mr-1 translate-y-px text-emerald-600 dark:text-emerald-500" />
+                              <ExternalLink className="mr-1 text-emerald-600 dark:text-emerald-500" />
                               <span>Bestehende Rechnung öffnen</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               handleOpenInvoiceDialog(assignment);
                             }}>
-                              <FileText className="mr-1 translate-y-px text-emerald-600 dark:text-emerald-500" />
+                              <FileText className="mr-1 text-emerald-600 dark:text-emerald-500" />
                               <span>Neue Rechnung drucken</span>
                             </DropdownMenuItem>
                           </>
@@ -799,7 +799,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetInvoice(assignment);
                           }}>
-                            <RotateCcw className="mr-1 translate-y-px text-amber-600 dark:text-amber-500" />
+                            <RotateCcw className="mr-1 text-amber-600 dark:text-amber-500" />
                             <span>Rechnung zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -808,7 +808,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetPayment(assignment);
                           }}>
-                            <Undo2 className="mr-1 translate-y-px text-amber-600 dark:text-amber-500" />
+                            <Undo2 className="mr-1 text-amber-600 dark:text-amber-500" />
                             <span>Zahlungsstatus zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -829,15 +829,15 @@ export function AssignmentList() {
   const actions = (
     <>
       <Button variant="outline" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
-        <Euro className="mr-1 translate-y-px text-emerald-600 dark:text-emerald-500" />
+        <Euro className="mr-1 text-emerald-600 dark:text-emerald-500" />
         Einnahmen
       </Button>
       <Button variant="outline" onClick={() => navigate("/settings")}>
-        <Settings className="mr-1 translate-y-px text-slate-500 dark:text-slate-400" />
+        <Settings className="mr-1 text-slate-500 dark:text-slate-400" />
         Einstellungen
       </Button>
       <Button onClick={() => navigate("/edit/new")}>
-        <PlusCircle className="mr-1 translate-y-px text-green-600 dark:text-green-500" />
+        <PlusCircle className="mr-1 text-green-600 dark:text-green-500" />
         Neuer Auftrag
       </Button>
     </>
