@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, CheckCircle } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, Euro } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -694,10 +694,10 @@ export function AssignmentList() {
                         e.stopPropagation();
                         handleTogglePaid(assignment, true);
                       }}
-                      title="Als bezahlt markieren"
+                      title="Rechnung eingegangen"
                     >
-                      <CheckCircle className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
-                      Als bezahlt markieren
+                      <Euro className="text-emerald-600 dark:text-emerald-500" />
+                      Rechnung eingegangen
                     </Button>
                   )}
                   {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
@@ -710,7 +710,7 @@ export function AssignmentList() {
                         handleStartWorking(assignment);
                       }}
                     >
-                      <Play className="mr-2 h-4 w-4 text-green-600 dark:text-green-500" />
+                      <Play className="text-green-600 dark:text-green-500" />
                       Anfangen
                     </Button>
                   )}
@@ -724,7 +724,7 @@ export function AssignmentList() {
                         handleStopWorking(assignment);
                       }}
                     >
-                      <Square className="mr-2 h-4 w-4 text-red-600 dark:text-red-500" />
+                      <Square className="text-red-600 dark:text-red-500" />
                       Bearbeitung stoppen
                     </Button>
                   )}
@@ -738,7 +738,7 @@ export function AssignmentList() {
                         handlePostponeSubmissionByWeek(assignment);
                       }}
                     >
-                      <CalendarPlus className="mr-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
+                      <CalendarPlus className="text-amber-500 dark:text-amber-400" />
                       +1 Woche
                     </Button>
                   )}
@@ -752,8 +752,8 @@ export function AssignmentList() {
                         handleOpenInvoiceDialog(assignment);
                       }}
                     >
-                      <FileText className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
-                      Rechnung
+                      <FileText className="text-emerald-600 dark:text-emerald-500" />
+                      Rechnung drucken
                     </Button>
                   )}
                   <Button 
@@ -782,14 +782,14 @@ export function AssignmentList() {
                               e.stopPropagation();
                               handleOpenExistingInvoice(assignment);
                             }}>
-                              <ExternalLink className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
+                              <ExternalLink className="text-emerald-600 dark:text-emerald-500" />
                               <span>Bestehende Rechnung öffnen</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               handleOpenInvoiceDialog(assignment);
                             }}>
-                              <FileText className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
+                              <FileText className="text-emerald-600 dark:text-emerald-500" />
                               <span>Neue Rechnung drucken</span>
                             </DropdownMenuItem>
                           </>
@@ -799,7 +799,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetInvoice(assignment);
                           }}>
-                            <RotateCcw className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-500" />
+                            <RotateCcw className="text-amber-600 dark:text-amber-500" />
                             <span>Rechnung zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -808,7 +808,7 @@ export function AssignmentList() {
                             e.stopPropagation();
                             handleResetPayment(assignment);
                           }}>
-                            <Undo2 className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-500" />
+                            <Undo2 className="text-amber-600 dark:text-amber-500" />
                             <span>Zahlungsstatus zurücksetzen</span>
                           </DropdownMenuItem>
                         )}
@@ -829,15 +829,15 @@ export function AssignmentList() {
   const actions = (
     <>
       <Button variant="outline" onClick={() => setIsTaxDialogOpen(true)} title="Einnahmenübersicht">
-        <Calculator className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
+        <Euro className="text-emerald-600 dark:text-emerald-500" />
         Einnahmen
       </Button>
       <Button variant="outline" onClick={() => navigate("/settings")}>
-        <Settings className="mr-2 h-4 w-4 text-slate-500 dark:text-slate-400" />
+        <Settings className="text-slate-500 dark:text-slate-400" />
         Einstellungen
       </Button>
       <Button onClick={() => navigate("/edit/new")}>
-        <PlusCircle className="mr-2 h-4 w-4 text-green-600 dark:text-green-500" />
+        <PlusCircle className="text-green-600 dark:text-green-500" />
         Neuer Auftrag
       </Button>
     </>
@@ -892,7 +892,7 @@ export function AssignmentList() {
             <CardHeader>
               <CardTitle>Offen</CardTitle>
               <CardDescription>
-                Offene Aufträge, für die noch keine Rechnung erstellt wurde.
+                Aufträge, für die noch keine Rechnung erstellt wurde.
               </CardDescription>
             </CardHeader>
             <CardContent>
