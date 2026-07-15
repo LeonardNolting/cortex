@@ -614,7 +614,6 @@ export function AssignmentList() {
             <TableHead>Patient</TableHead>
             <TableHead>Status</TableHead>
             {showInvoiceDateColumn && <TableHead>Rechnungsdatum</TableHead>}
-            {showPaidColumn && usePaidActionButton && <TableHead>Bezahlt</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
             <TableHead>Geburtsdatum</TableHead>
             <TableHead>Aktenzeichen</TableHead>
@@ -627,7 +626,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showPaidColumn && usePaidActionButton ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
+                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -666,21 +665,6 @@ export function AssignmentList() {
                         : "-"}
                     </TableCell>
                   )}
-                  {showPaidColumn && usePaidActionButton && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTogglePaid(assignment, true);
-                        }}
-                        title="Als bezahlt markieren"
-                      >
-                        Als bezahlt markieren
-                      </Button>
-                    </TableCell>
-                  )}
                   {showInvoiceNumberColumn && (
                     <TableCell className="font-medium">
                       {assignment.invoiceNumber || "-"}
@@ -702,6 +686,19 @@ export function AssignmentList() {
                   )}
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
+                  {showPaidColumn && usePaidActionButton && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTogglePaid(assignment, true);
+                      }}
+                      title="Als bezahlt markieren"
+                    >
+                      Als bezahlt markieren
+                    </Button>
+                  )}
                   {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
                     <Button
                       variant="outline"
@@ -712,7 +709,7 @@ export function AssignmentList() {
                         handleStartWorking(assignment);
                       }}
                     >
-                      <Play className="mr-2 h-4 w-4" />
+                      <Play className="mr-2 h-4 w-4 text-green-600 dark:text-green-500" />
                       Anfangen
                     </Button>
                   )}
@@ -726,7 +723,7 @@ export function AssignmentList() {
                         handleStopWorking(assignment);
                       }}
                     >
-                      <Square className="mr-2 h-4 w-4" />
+                      <Square className="mr-2 h-4 w-4 text-red-600 dark:text-red-500" />
                       Bearbeitung stoppen
                     </Button>
                   )}
@@ -754,7 +751,7 @@ export function AssignmentList() {
                         handleOpenInvoiceDialog(assignment);
                       }}
                     >
-                      <FileText className="mr-2 h-4 w-4" />
+                      <FileText className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500" />
                       Rechnung
                     </Button>
                   )}
