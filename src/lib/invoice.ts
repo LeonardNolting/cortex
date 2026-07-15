@@ -181,9 +181,30 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
       userBirthday: formatDate(settings.userBirthday)
     },
     values,
+    formattedValues: {
+      timeEuro: formatEuro(values.timeEuro),
+      writingEuro: formatEuro(values.writingEuro),
+      printingEuro: formatEuro(values.printingEuro),
+      kmEuro: formatEuro(values.kmEuro),
+      shippingEuro: formatEuro(values.shippingEuro),
+      netEuro: formatEuro(values.netEuro),
+      taxEuro: formatEuro(values.taxEuro),
+      grossEuro: formatEuro(values.grossEuro),
+      remunerationGroupValue: formatEuro(values.remunerationGroupValue),
+      writingFeeRate: formatEuro(values.writingFeeRate),
+      printingFeeRate: formatEuro(values.printingFeeRate),
+      kmFeeRate: formatEuro(values.kmFeeRate),
+    },
     invoiceNumber,
     printingDate: formatDate(printingDate)
   };
+
+  Handlebars.registerHelper('formatEuro', function(value) {
+    if (typeof value === 'number') {
+      return formatEuro(value);
+    }
+    return value;
+  });
 
   const compile = (template: string) => Handlebars.compile(template || "")(context);
 
