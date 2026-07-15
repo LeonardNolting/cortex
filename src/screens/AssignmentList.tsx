@@ -909,7 +909,7 @@ export function AssignmentList() {
             <CardHeader>
               <CardTitle>Bereit zur Abrechnung / Offen</CardTitle>
               <CardDescription>
-                Gutachten mit erstellter Rechnung, die noch nicht als bezahlt markiert wurden.
+                Aufträge mit erstellter Rechnung, die noch nicht als bezahlt markiert wurden.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -921,7 +921,7 @@ export function AssignmentList() {
             <CardHeader>
               <CardTitle>Diesen Monat bezahlt</CardTitle>
               <CardDescription>
-                Gutachten, die im aktuellen Kalendermonat bezahlt wurden.
+                Aufträge, die im aktuellen Kalendermonat bezahlt wurden.
               </CardDescription>
             </CardHeader>
             <CardContent>
