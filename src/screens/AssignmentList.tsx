@@ -62,7 +62,8 @@ import { RemunerationUpdatePreviewDialog } from "../components/settings/Remunera
 import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx, getInvoiceFileName } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { documentDir, join } from "@tauri-apps/api/path";
+import { join } from "@tauri-apps/api/path";
+import { getDefaultOutputPath } from "../lib/paths";
 
 export function AssignmentList() {
   const navigate = useNavigate();
@@ -254,7 +255,7 @@ export function AssignmentList() {
     if (!assignment.invoiceNumber) return;
     try {
       const fileName = getInvoiceFileName(assignment, settings);
-      const outputDir = settings?.invoiceOutputLocation || await documentDir();
+      const outputDir = settings?.invoiceOutputLocation || await getDefaultOutputPath();
       const docPath = await join(outputDir, fileName);
       await openPath(docPath);
     } catch (error) {
@@ -354,7 +355,7 @@ export function AssignmentList() {
       const values = calculateInvoiceValues(invoiceData);
 
       const fileName = getInvoiceFileName(selectedAssignment, settings, invoiceForm.invoiceNumber, invoiceForm.printingDate);
-      const outputDir = settings?.invoiceOutputLocation || await documentDir();
+      const outputDir = settings?.invoiceOutputLocation || await getDefaultOutputPath();
       const docPath = await join(outputDir, fileName);
       
       await writeFile(docPath, docxArray);
@@ -394,7 +395,7 @@ export function AssignmentList() {
 
       const monthStr = taxForm.month.toString().padStart(2, '0');
       const fileName = `Einnahmen_${taxForm.year}_${monthStr}.docx`;
-      const outputDir = settings?.taxListingOutputLocation || await documentDir();
+      const outputDir = settings?.taxListingOutputLocation || await getDefaultOutputPath();
       const docPath = await join(outputDir, fileName);
       
       await writeFile(docPath, docxArray);

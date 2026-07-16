@@ -1,9 +1,10 @@
 import Database from "@tauri-apps/plugin-sql";
 import { invoke } from "@tauri-apps/api/core";
 import { parseHtmlForRates, hashString } from "./jveg-parser";
-import { appDataDir, documentDir, join } from "@tauri-apps/api/path";
+import { appDataDir, join } from "@tauri-apps/api/path";
 import { copyFile, mkdir, exists } from "@tauri-apps/plugin-fs";
 import { DEFAULT_INVOICE_FILE_NAME } from "../types";
+import { getDefaultBackupPath } from "./paths";
 
 let dbInstance: Database | null = null;
 let dbPromise: Promise<Database> | null = null;
@@ -97,8 +98,7 @@ export async function performBackup(reason: string): Promise<string> {
     
     let backupDir = customBackupLocation;
     if (!backupDir) {
-      const docDir = await documentDir();
-      backupDir = await join(docDir, "cortex", "backups");
+      backupDir = await getDefaultBackupPath();
     }
 
     // Ensure backup directory exists
@@ -155,8 +155,7 @@ export async function restoreBackup(backupFilePath: string): Promise<void> {
     const dbFilePath = await join(appDataPath, "cortex.db");
     
     if (await exists(dbFilePath)) {
-      const docDir = await documentDir();
-      const safetyDir = await join(docDir, "cortex", "backups");
+      const safetyDir = await getDefaultBackupPath();
       if (!(await exists(safetyDir))) {
         await mkdir(safetyDir, { recursive: true });
       }
