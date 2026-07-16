@@ -1,6 +1,15 @@
 import { Assignment, Court, RemunerationGroup, Settings, DEFAULT_INVOICE_FILE_NAME } from "../types";
 import { formatDate } from "./utils";
+import { formatNameLastFirst } from "./utils/name-parser";
 import Handlebars from "handlebars";
+
+Handlebars.registerHelper('formatName', function(name, options) {
+  const hash = options.hash || {};
+  const includeTitles = hash.includeTitles !== false;
+  const includeFirstName = hash.includeFirstName !== false;
+  return formatNameLastFirst(name, { includeTitles, includeFirstName });
+});
+
 import { 
   AlignmentType, 
   Document, 

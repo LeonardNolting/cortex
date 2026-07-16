@@ -8,7 +8,13 @@
  * - Multiple first names: "Hans Peter Mueller" -> "Mueller, Hans Peter"
  * - Titles: "Dr. Hans Mueller" -> "Mueller, Dr. Hans" (or should title be handled differently? Usually titles go with first name in "Lastname, Firstname" lists)
  */
-export function formatNameLastFirst(fullName: string | undefined | null): string {
+export interface FormatNameOptions {
+  includeTitles?: boolean;
+  includeFirstName?: boolean;
+}
+
+export function formatNameLastFirst(fullName: string | undefined | null, options: FormatNameOptions = {}): string {
+  const { includeTitles = true, includeFirstName = true } = options;
   if (!fullName) return "";
   
   const trimmedName = fullName.trim();
@@ -36,27 +42,33 @@ export function formatNameLastFirst(fullName: string | undefined | null): string
       let lastName = commaParts[0];
       let firstName = commaParts.slice(1).join(" ");
       
+      const lastNameParts = lastName.split(/\s+/);
+      const { titles: lastTitles, remaining: lastRemaining } = extractTitles(lastNameParts);
+      lastName = lastRemaining.join(" ");
+
       const firstParts = firstName.split(/\s+/);
-      const { titles, remaining } = extractTitles(firstParts);
+      const { titles: firstTitles, remaining: firstRemaining } = extractTitles(firstParts);
       
-      if (titles.length > 0) {
-        lastName = `${titles.join(" ")} ${lastName}`;
-        firstName = remaining.join(" ");
+      const allTitles = [...lastTitles, ...firstTitles];
+      
+      if (allTitles.length > 0 && includeTitles) {
+        lastName = `${allTitles.join(" ")} ${lastName}`;
       }
+      firstName = firstRemaining.join(" ");
       
-      return firstName ? `${lastName}, ${firstName}` : lastName;
+      return includeFirstName && firstName ? `${lastName}, ${firstName}` : lastName;
     }
-    return trimmedName;
+    return includeTitles ? trimmedName : trimmedName; // Fallback
   }
 
   const parts = trimmedName.split(/\s+/);
   if (parts.length <= 1) return trimmedName;
 
   const { titles, remaining: remainingParts } = extractTitles(parts);
-  const titleStr = titles.length > 0 ? `${titles.join(" ")} ` : "";
+  const titleStr = includeTitles && titles.length > 0 ? `${titles.join(" ")} ` : "";
 
   if (remainingParts.length <= 1) {
-      return trimmedName;
+      return includeTitles ? trimmedName : remainingParts.join(" ");
   }
 
   const prefixes = ["von", "van", "de", "der", "zu", "le", "la", "di", "da", "del", "du"];
@@ -65,7 +77,9 @@ export function formatNameLastFirst(fullName: string | undefined | null): string
   if (remainingParts.length >= 3 && prefixes.includes(remainingParts[remainingParts.length - 2].toLowerCase())) {
     const lastName = remainingParts.slice(remainingParts.length - 2).join(" ");
     const firstName = remainingParts.slice(0, remainingParts.length - 2).join(" ");
-    return `${titleStr}${lastName}, ${firstName}`;
+    return includeFirstName && firstName 
+      ? `${titleStr}${lastName}, ${firstName}` 
+      : `${titleStr}${lastName}`;
   }
 
   // Handle case like "von Mueller" (length 2, first word is prefix)
@@ -76,5 +90,7 @@ export function formatNameLastFirst(fullName: string | undefined | null): string
   // Default: last part is last name
   const lastName = remainingParts[remainingParts.length - 1];
   const firstName = remainingParts.slice(0, remainingParts.length - 1).join(" ");
-  return `${titleStr}${lastName}, ${firstName}`;
+  return includeFirstName && firstName 
+    ? `${titleStr}${lastName}, ${firstName}` 
+    : `${titleStr}${lastName}`;
 }
