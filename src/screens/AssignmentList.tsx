@@ -756,65 +756,61 @@ export function AssignmentList() {
                       Rechnung drucken
                     </Button>
                   )}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-destructive hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteClick(assignment.id);
-                    }}
-                  >
-                    <Trash2 className=" h-4 w-4" />
-                  </Button>
-
-                  {(assignment.paidAt || assignment.invoiceNumber) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56" onClick={(e) => e.stopPropagation()}>
-                        {assignment.invoiceNumber && (
-                          <>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenExistingInvoice(assignment);
-                            }}>
-                              <ExternalLink className="mr-1 text-emerald-600 dark:text-emerald-500" />
-                              <span>Bestehende Rechnung öffnen</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenInvoiceDialog(assignment);
-                            }}>
-                              <Check className="mr-1 text-emerald-600 dark:text-emerald-500" />
-                              <span>Neue Rechnung drucken</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {assignment.invoiceNumber && !assignment.paidAt && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56" onClick={(e) => e.stopPropagation()}>
+                      {assignment.invoiceNumber && (
+                        <>
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
-                            handleResetInvoice(assignment);
+                            handleOpenExistingInvoice(assignment);
                           }}>
-                            <RotateCcw className="mr-1 text-amber-600 dark:text-amber-500" />
-                            <span>Rechnung zurücksetzen</span>
+                            <ExternalLink className="mr-1 text-emerald-600 dark:text-emerald-500" />
+                            <span>Bestehende Rechnung öffnen</span>
                           </DropdownMenuItem>
-                        )}
-                        {assignment.paidAt && (
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
-                            handleResetPayment(assignment);
+                            handleOpenInvoiceDialog(assignment);
                           }}>
-                            <Undo2 className="mr-1 text-amber-600 dark:text-amber-500" />
-                            <span>Zahlungsstatus zurücksetzen</span>
+                            <Check className="mr-1 text-emerald-600 dark:text-emerald-500" />
+                            <span>Neue Rechnung drucken</span>
                           </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                        </>
+                      )}
+                      {assignment.invoiceNumber && !assignment.paidAt && (
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleResetInvoice(assignment);
+                        }}>
+                          <RotateCcw className="mr-1 text-amber-600 dark:text-amber-500" />
+                          <span>Rechnung zurücksetzen</span>
+                        </DropdownMenuItem>
+                      )}
+                      {assignment.paidAt && (
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleResetPayment(assignment);
+                        }}>
+                          <Undo2 className="mr-1 text-amber-600 dark:text-amber-500" />
+                          <span>Zahlungsstatus zurücksetzen</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem 
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(assignment.id);
+                        }}
+                      >
+                        <Trash2 className="mr-1 h-4 w-4" />
+                        <span>Auftrag löschen</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TableCell>
             </TableRow>
