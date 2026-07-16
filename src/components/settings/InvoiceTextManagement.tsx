@@ -74,6 +74,11 @@ export function InvoiceTextManagement() {
     <div className="space-y-6">
       <div className="space-y-4">
         <h4 className="text-sm font-medium border-b pb-2">Allgemein</h4>
+        <InputField
+            id="invoiceFileName"
+            label="Dateiname der Rechnung"
+            value={settings.invoiceFileName}
+        />
         <TextAreaField 
           id="invoiceIntro" 
           label="Einleitungstext" 
@@ -89,11 +94,6 @@ export function InvoiceTextManagement() {
           id="invoiceTitle" 
           label="Überschrift" 
           value={settings.invoiceTitle} 
-        />
-        <InputField 
-          id="invoiceFileName" 
-          label="Dateiname der Rechnung" 
-          value={settings.invoiceFileName} 
         />
       </div>
 
