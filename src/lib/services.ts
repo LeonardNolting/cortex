@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import {Assignment, Court, RemunerationGroup, Settings} from "../types";
+import {Assignment, Court, RemunerationGroup, Settings, DEFAULT_INVOICE_FILE_NAME} from "../types";
 
 export const SettingsService = {
   async getSettings(): Promise<Settings> {
@@ -14,6 +14,10 @@ export const SettingsService = {
       } else {
         settings[row.key] = row.value;
       }
+    }
+    
+    if (!settings.invoiceFileName) {
+      settings.invoiceFileName = DEFAULT_INVOICE_FILE_NAME;
     }
     
     return settings as Settings;

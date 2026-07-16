@@ -90,6 +90,11 @@ export function InvoiceTextManagement() {
           label="Überschrift" 
           value={settings.invoiceTitle} 
         />
+        <InputField 
+          id="invoiceFileName" 
+          label="Dateiname der Rechnung" 
+          value={settings.invoiceFileName} 
+        />
       </div>
 
       <div className="space-y-4">

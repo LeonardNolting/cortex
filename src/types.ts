@@ -91,7 +91,10 @@ export interface Settings {
   invoiceLabelTax: string;
   invoiceLabelGross: string;
   invoiceFooter: string;
+  invoiceFileName: string;
   jvegLastHash: string;
   jvegLastCheckFailed: string;
   backupLocation: string;
 }
+
+export const DEFAULT_INVOICE_FILE_NAME = "Rechnung_{{invoiceNumber}}_{{assignment.patientName}}";

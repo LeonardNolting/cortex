@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { parseHtmlForRates, hashString } from "./jveg-parser";
 import { appDataDir, documentDir, join } from "@tauri-apps/api/path";
 import { copyFile, mkdir, exists } from "@tauri-apps/plugin-fs";
+import { DEFAULT_INVOICE_FILE_NAME } from "../types";
 
 let dbInstance: Database | null = null;
 let dbPromise: Promise<Database> | null = null;
@@ -333,6 +334,7 @@ async function runMigrations(db: Database) {
     ['invoiceLabelTax', 'Umsatzsteuer {{settings.taxRate}}%:'],
     ['invoiceLabelGross', 'Gesamt (Brutto):'],
     ['invoiceFooter', 'Ich bitte um Überweisung unter Angabe der Rechnungsnummer auf folgendes Konto:\n\n{{settings.userName}}, {{settings.userBank}},\n\nIBAN: {{settings.userIban}}, BIC: {{settings.userBic}}'],
+    ['invoiceFileName', DEFAULT_INVOICE_FILE_NAME],
     ['jvegLastHash', ''],
     ['jvegLastCheckFailed', 'false'],
     ['backupLocation', '']

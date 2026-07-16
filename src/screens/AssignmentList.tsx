@@ -59,7 +59,7 @@ import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { JvegService, ParsedRates } from "../lib/jveg";
 import { RemunerationUpdatePreviewDialog } from "../components/settings/RemunerationUpdatePreviewDialog";
-import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx } from "../lib/invoice";
+import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx, getInvoiceFileName } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { documentDir, join } from "@tauri-apps/api/path";
@@ -253,7 +253,7 @@ export function AssignmentList() {
   const handleOpenExistingInvoice = async (assignment: Assignment) => {
     if (!assignment.invoiceNumber) return;
     try {
-      const fileName = `Rechnung_${assignment.invoiceNumber}_${assignment.patientName.replace(/\s+/g, '_')}.docx`;
+      const fileName = getInvoiceFileName(assignment, settings);
       const docPath = await join(await documentDir(), fileName);
       await openPath(docPath);
     } catch (error) {
@@ -352,7 +352,7 @@ export function AssignmentList() {
       const docxArray = await generateInvoiceDocx(invoiceData);
       const values = calculateInvoiceValues(invoiceData);
 
-      const fileName = `Rechnung_${invoiceForm.invoiceNumber}_${selectedAssignment.patientName.replace(/\s+/g, '_')}.docx`;
+      const fileName = getInvoiceFileName(selectedAssignment, settings, invoiceForm.invoiceNumber, invoiceForm.printingDate);
       const docPath = await join(await documentDir(), fileName);
       
       await writeFile(docPath, docxArray);

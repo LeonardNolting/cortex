@@ -1,4 +1,4 @@
-import { Assignment, Court, RemunerationGroup, Settings } from "../types";
+import { Assignment, Court, RemunerationGroup, Settings, DEFAULT_INVOICE_FILE_NAME } from "../types";
 import { formatDate } from "./utils";
 import Handlebars from "handlebars";
 import { 
@@ -153,6 +153,26 @@ function rowMulti(lines: string[], quantity: string) {
       baseCell(cellParagraph({ alignment: AlignmentType.RIGHT }), COL4),
     ],
   });
+}
+
+export function getInvoiceFileName(assignment: Assignment, settings: Settings, invoiceNumber?: string, printingDate?: string): string {
+  const context = {
+    assignment,
+    settings,
+    invoiceNumber: invoiceNumber || assignment.invoiceNumber,
+    printingDate: printingDate ? formatDate(printingDate) : (assignment.printingDate ? formatDate(assignment.printingDate) : '')
+  };
+
+  const templateString = settings.invoiceFileName || DEFAULT_INVOICE_FILE_NAME;
+  const compile = Handlebars.compile(templateString);
+  let fileName = compile(context);
+  
+  // Remove invalid characters but keep spaces
+  fileName = fileName.replace(/[\/\\?%*:|"<>]/g, '');
+  if (!fileName.toLowerCase().endsWith('.docx')) {
+    fileName += '.docx';
+  }
+  return fileName;
 }
 
 export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array> {
