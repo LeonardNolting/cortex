@@ -214,7 +214,7 @@ export function AssignmentEdit() {
         <div className="text-amber-600 font-medium bg-amber-50 p-3 rounded border border-amber-200 flex items-center gap-3">
           <AlertTriangle className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm">
-            Hinweis: Für diesen Auftrag wurde bereits eine Rechnung generiert.
+            Hinweis: Für diesen Auftrag wurde bereits eine Rechnung generiert. Änderungen betreffen bereits existierende Rechnungen nicht.
           </p>
         </div>
       )}
