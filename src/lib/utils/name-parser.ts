@@ -14,11 +14,37 @@ export function formatNameLastFirst(fullName: string | undefined | null): string
   const trimmedName = fullName.trim();
   if (!trimmedName) return "";
 
+  const extractTitles = (parts: string[]): { titles: string[], remaining: string[] } => {
+    const titles: string[] = [];
+    let nameStartIndex = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i].toLowerCase();
+      if (parts[i].endsWith(".") || ["dr", "prof", "pd"].includes(p)) {
+        titles.push(parts[i]);
+        nameStartIndex = i + 1;
+      } else {
+        break;
+      }
+    }
+    return { titles, remaining: parts.slice(nameStartIndex) };
+  };
+
   // If already contains a comma, assume it's already Lastname, Firstname
   if (trimmedName.includes(",")) {
-    const parts = trimmedName.split(",").map(p => p.trim());
-    if (parts.length >= 2) {
-      return `${parts[0]}, ${parts.slice(1).join(" ")}`;
+    const commaParts = trimmedName.split(",").map(p => p.trim());
+    if (commaParts.length >= 2) {
+      let lastName = commaParts[0];
+      let firstName = commaParts.slice(1).join(" ");
+      
+      const firstParts = firstName.split(/\s+/);
+      const { titles, remaining } = extractTitles(firstParts);
+      
+      if (titles.length > 0) {
+        lastName = `${titles.join(" ")} ${lastName}`;
+        firstName = remaining.join(" ");
+      }
+      
+      return firstName ? `${lastName}, ${firstName}` : lastName;
     }
     return trimmedName;
   }
@@ -26,22 +52,29 @@ export function formatNameLastFirst(fullName: string | undefined | null): string
   const parts = trimmedName.split(/\s+/);
   if (parts.length <= 1) return trimmedName;
 
+  const { titles, remaining: remainingParts } = extractTitles(parts);
+  const titleStr = titles.length > 0 ? `${titles.join(" ")} ` : "";
+
+  if (remainingParts.length <= 1) {
+      return trimmedName;
+  }
+
   const prefixes = ["von", "van", "de", "der", "zu", "le", "la", "di", "da", "del", "du"];
   
   // Check if second to last part is a prefix
-  if (parts.length >= 3 && prefixes.includes(parts[parts.length - 2].toLowerCase())) {
-    const lastName = parts.slice(parts.length - 2).join(" ");
-    const firstName = parts.slice(0, parts.length - 2).join(" ");
-    return `${lastName}, ${firstName}`;
+  if (remainingParts.length >= 3 && prefixes.includes(remainingParts[remainingParts.length - 2].toLowerCase())) {
+    const lastName = remainingParts.slice(remainingParts.length - 2).join(" ");
+    const firstName = remainingParts.slice(0, remainingParts.length - 2).join(" ");
+    return `${titleStr}${lastName}, ${firstName}`;
   }
 
   // Handle case like "von Mueller" (length 2, first word is prefix)
-  if (parts.length === 2 && prefixes.includes(parts[0].toLowerCase())) {
-    return trimmedName; // Return as is, or maybe "von Mueller, "? Probably just as is.
+  if (remainingParts.length === 2 && prefixes.includes(remainingParts[0].toLowerCase())) {
+    return `${titleStr}${remainingParts.join(" ")}`; 
   }
 
   // Default: last part is last name
-  const lastName = parts[parts.length - 1];
-  const firstName = parts.slice(0, parts.length - 1).join(" ");
-  return `${lastName}, ${firstName}`;
+  const lastName = remainingParts[remainingParts.length - 1];
+  const firstName = remainingParts.slice(0, remainingParts.length - 1).join(" ");
+  return `${titleStr}${lastName}, ${firstName}`;
 }
