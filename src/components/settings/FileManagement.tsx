@@ -4,7 +4,8 @@ import { Settings } from "../../types";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Save, FolderSearch, ExternalLink } from "lucide-react";
+import { Save, FolderSearch, ExternalLink, Snowflake } from "lucide-react";
+import { BackupService } from "../../lib/backup-service";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { getDefaultOutputPath, getDefaultBackupPath } from "../../lib/paths";
@@ -40,6 +41,20 @@ export function FileManagement() {
       await SettingsService.updateSettings(settings);
     } catch (error) {
       console.error("Failed to save settings", error);
+    }
+  }
+
+  async function handleFreezeBackups() {
+    try {
+      const success = await BackupService.freezeBackups();
+      if (success) {
+        alert("Backups wurden erfolgreich eingefroren.");
+      } else {
+        alert("Fehler beim Einfrieren der Backups. Möglicherweise gibt es keine Backups zum Einfrieren.");
+      }
+    } catch (error) {
+      console.error("Error freezing backups:", error);
+      alert("Fehler beim Einfrieren der Backups.");
     }
   }
 
@@ -112,12 +127,18 @@ export function FileManagement() {
             value={settings.taxListingOutputLocation}
             defaultPath={defaultPaths.output}
         />
-        <DirectoryPickerField
-            id="backupLocation"
-            label="Ausgabeverzeichnis für Datenbank-Backups"
-            value={settings.backupLocation}
-            defaultPath={defaultPaths.backup}
-        />
+        <div className="space-y-3">
+          <DirectoryPickerField
+              id="backupLocation"
+              label="Ausgabeverzeichnis für Datenbank-Backups"
+              value={settings.backupLocation}
+              defaultPath={defaultPaths.backup}
+          />
+          <Button variant="outline" size="sm" onClick={handleFreezeBackups}>
+            <Snowflake className="h-4 w-4 mr-2" />
+            Aktuelle Backups einfrieren
+          </Button>
+        </div>
       </div>
 
       <div className="flex justify-end">

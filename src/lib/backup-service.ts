@@ -1,6 +1,6 @@
 import { performBackup, getDb } from "./db";
 import { appDataDir, documentDir, join } from "@tauri-apps/api/path";
-import { readDir, remove, exists } from "@tauri-apps/plugin-fs";
+import { readDir, remove, exists, mkdir, copyFile } from "@tauri-apps/plugin-fs";
 import { SettingsService } from "./services";
 
 const MAX_BACKUPS = 100;
@@ -74,6 +74,45 @@ export const BackupService = {
       await this.rotateBackups();
     } catch (e) {
       console.error("Pre-update backup failed:", e);
+    }
+  },
+
+  /**
+   * Freezes current backups by copying them to a freezes subdirectory
+   */
+  async freezeBackups() {
+    try {
+      const backupDir = await this.getBackupDir();
+      if (!(await exists(backupDir))) return false;
+
+      const entries = await readDir(backupDir);
+      const backupFiles = entries.filter(e => e.isFile && e.name.startsWith("cortex_") && e.name.endsWith(".db"));
+
+      if (backupFiles.length === 0) return false;
+
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+      
+      const freezesDir = await join(backupDir, "freezes");
+      if (!(await exists(freezesDir))) {
+        await mkdir(freezesDir, { recursive: true });
+      }
+
+      const targetDir = await join(freezesDir, dateStr);
+      await mkdir(targetDir, { recursive: true });
+
+      for (const file of backupFiles) {
+        const sourcePath = await join(backupDir, file.name);
+        const targetPath = await join(targetDir, file.name);
+        await copyFile(sourcePath, targetPath);
+      }
+      
+      console.log(`Froze ${backupFiles.length} backups into ${targetDir}`);
+      return true;
+    } catch (e) {
+      console.error("Failed to freeze backups:", e);
+      return false;
     }
   },
 
