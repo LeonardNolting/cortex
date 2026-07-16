@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { Save, FolderSearch, ExternalLink } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { documentDir } from "@tauri-apps/api/path";
+import { documentDir, join } from "@tauri-apps/api/path";
 
 export function FileManagement() {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -49,7 +49,7 @@ export function FileManagement() {
     });
   };
 
-  const DirectoryPickerField = ({ id, label, value }: { id: keyof Settings, label: string, value: string }) => {
+  const DirectoryPickerField = ({ id, label, value, fallbackText = "Standard-Dokumentenordner" }: { id: keyof Settings, label: string, value: string, fallbackText?: string }) => {
     const handlePickDirectory = async () => {
       const selected = await open({
         directory: true,
@@ -63,7 +63,14 @@ export function FileManagement() {
 
     const handleOpenDirectory = async () => {
       try {
-        const dirToOpen = value || await documentDir();
+        let dirToOpen = value;
+        if (!dirToOpen) {
+          if (fallbackText === "Standard-Dokumentenordner/cortex/backups") {
+            dirToOpen = await join(await documentDir(), "cortex", "backups");
+          } else {
+            dirToOpen = await documentDir();
+          }
+        }
         await openPath(dirToOpen);
       } catch (error) {
         console.error("Failed to open directory", error);
@@ -76,9 +83,9 @@ export function FileManagement() {
         <div className="flex items-center gap-2">
           <div 
             className="flex-1 px-3 py-2 bg-muted/50 text-sm rounded-md truncate border border-transparent"
-            title={value || "Standard-Dokumentenordner"}
+            title={value || fallbackText}
           >
-            {value || <span className="text-muted-foreground italic">Standard-Dokumentenordner</span>}
+            {value || <span className="text-muted-foreground italic">{fallbackText}</span>}
           </div>
           <Button variant="outline" size="icon" onClick={handlePickDirectory} title="Ordner ändern">
             <FolderSearch className="h-4 w-4" />
@@ -103,6 +110,12 @@ export function FileManagement() {
             id="taxListingOutputLocation"
             label="Ausgabeverzeichnis für Einnahmenübersicht"
             value={settings.taxListingOutputLocation}
+        />
+        <DirectoryPickerField
+            id="backupLocation"
+            label="Ausgabeverzeichnis für Datenbank-Backups"
+            value={settings.backupLocation}
+            fallbackText="Standard-Dokumentenordner/cortex/backups"
         />
       </div>
 
