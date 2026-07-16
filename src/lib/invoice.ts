@@ -7,7 +7,30 @@ Handlebars.registerHelper('formatName', function(name, options) {
   const hash = options.hash || {};
   const includeTitles = hash.includeTitles !== false;
   const includeFirstName = hash.includeFirstName !== false;
-  return formatNameLastFirst(name, { includeTitles, includeFirstName });
+  const includeComma = hash.includeComma !== false;
+  return formatNameLastFirst(name, { includeTitles, includeFirstName, includeComma });
+});
+
+Handlebars.registerHelper('abbreviateCourt', function(courtName) {
+  if (!courtName) return '';
+  return courtName
+    .replace(/\bAmtsgericht\b/gi, 'AG')
+    .replace(/\bLandgericht\b/gi, 'LG')
+    .replace(/\bOberlandesgericht\b/gi, 'OLG')
+    .replace(/\bBundesgerichtshof\b/gi, 'BGH')
+    .replace(/\bSozialgericht\b/gi, 'SG')
+    .replace(/\bLandessozialgericht\b/gi, 'LSG')
+    .replace(/\bBundessozialgericht\b/gi, 'BSG')
+    .replace(/\bArbeitsgericht\b/gi, 'ArbG')
+    .replace(/\bLandesarbeitsgericht\b/gi, 'LAG')
+    .replace(/\bBundesarbeitsgericht\b/gi, 'BAG')
+    .replace(/\bVerwaltungsgericht\b/gi, 'VG')
+    .replace(/\bOberverwaltungsgericht\b/gi, 'OVG')
+    .replace(/\bVerwaltungsgerichtshof\b/gi, 'VGH')
+    .replace(/\bBundesverwaltungsgericht\b/gi, 'BVerwG')
+    .replace(/\bFinanzgericht\b/gi, 'FG')
+    .replace(/\bBundesfinanzhof\b/gi, 'BFH')
+    .replace(/\bFamiliengericht\b/gi, 'FamG');
 });
 
 import { 

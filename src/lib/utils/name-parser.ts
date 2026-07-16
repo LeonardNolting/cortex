@@ -14,10 +14,11 @@
 export interface FormatNameOptions {
   includeTitles?: boolean;
   includeFirstName?: boolean;
+  includeComma?: boolean;
 }
 
 export function formatNameLastFirst(fullName: string | undefined | null, options: FormatNameOptions = {}): string {
-  const { includeTitles = true, includeFirstName = true } = options;
+  const { includeTitles = true, includeFirstName = true, includeComma = true } = options;
   if (!fullName) return "";
   
   const trimmedName = fullName.trim();
@@ -40,8 +41,9 @@ export function formatNameLastFirst(fullName: string | undefined | null, options
 
   const formatResult = (lastName: string, firstName: string, titles: string[]): string => {
     const titleStr = includeTitles && titles.length > 0 ? `${titles.join(" ")} ` : "";
+    const separator = includeComma ? ", " : " ";
     return includeFirstName && firstName 
-      ? `${titleStr}${lastName}, ${firstName}` 
+      ? `${titleStr}${lastName}${separator}${firstName}` 
       : `${titleStr}${lastName}`;
   };
 

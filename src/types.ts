@@ -99,4 +99,4 @@ export interface Settings {
   taxListingOutputLocation: string;
 }
 
-export const DEFAULT_INVOICE_FILE_NAME = "Rechnung_{{invoiceNumber}}_{{formatName assignment.patientName includeTitles=false includeFirstName=false}}";
+export const DEFAULT_INVOICE_FILE_NAME = "{{formatName assignment.patientName includeTitles=false includeComma=false}} RG {{abbreviateCourt assignment.court}} {{printingDate}}";
