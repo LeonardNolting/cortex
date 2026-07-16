@@ -59,6 +59,8 @@ export function InvoiceTextManagement() {
     </div>
   );
 
+
+
   const InputField = ({ id, label, value }: { id: keyof Settings, label: string, value: string }) => (
     <div className="space-y-2">
       <Label htmlFor={String(id)}>{label}</Label>
@@ -74,6 +76,7 @@ export function InvoiceTextManagement() {
     <div className="space-y-6">
       <div className="space-y-4">
         <h4 className="text-sm font-medium border-b pb-2">Allgemein</h4>
+
         <InputField
             id="invoiceFileName"
             label="Dateiname der Rechnung"

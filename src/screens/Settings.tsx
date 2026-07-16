@@ -13,6 +13,7 @@ import { CourtManagement } from "../components/settings/CourtManagement";
 import { RemunerationGroupManagement } from "../components/settings/RemunerationGroupManagement";
 import { UserManagement } from "../components/settings/UserManagement";
 import { InvoiceTextManagement } from "../components/settings/InvoiceTextManagement";
+import { FileManagement } from "../components/settings/FileManagement";
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -52,6 +53,16 @@ export function SettingsScreen() {
           <CardContent className="space-y-8">
             <CourtManagement />
             <RemunerationGroupManagement />
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Dateiverwaltung</CardTitle>
+            <CardDescription>Speicherorte für Rechnungen und Einnahmenübersichten festlegen.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FileManagement />
           </CardContent>
         </Card>
 

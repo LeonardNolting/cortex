@@ -95,6 +95,8 @@ export interface Settings {
   jvegLastHash: string;
   jvegLastCheckFailed: string;
   backupLocation: string;
+  invoiceOutputLocation: string;
+  taxListingOutputLocation: string;
 }
 
 export const DEFAULT_INVOICE_FILE_NAME = "Rechnung_{{invoiceNumber}}_{{assignment.patientName}}";

@@ -254,7 +254,8 @@ export function AssignmentList() {
     if (!assignment.invoiceNumber) return;
     try {
       const fileName = getInvoiceFileName(assignment, settings);
-      const docPath = await join(await documentDir(), fileName);
+      const outputDir = settings?.invoiceOutputLocation || await documentDir();
+      const docPath = await join(outputDir, fileName);
       await openPath(docPath);
     } catch (error) {
       console.error("Failed to open existing invoice:", error);
@@ -353,7 +354,8 @@ export function AssignmentList() {
       const values = calculateInvoiceValues(invoiceData);
 
       const fileName = getInvoiceFileName(selectedAssignment, settings, invoiceForm.invoiceNumber, invoiceForm.printingDate);
-      const docPath = await join(await documentDir(), fileName);
+      const outputDir = settings?.invoiceOutputLocation || await documentDir();
+      const docPath = await join(outputDir, fileName);
       
       await writeFile(docPath, docxArray);
       await openPath(docPath);
@@ -392,7 +394,8 @@ export function AssignmentList() {
 
       const monthStr = taxForm.month.toString().padStart(2, '0');
       const fileName = `Einnahmen_${taxForm.year}_${monthStr}.docx`;
-      const docPath = await join(await documentDir(), fileName);
+      const outputDir = settings?.taxListingOutputLocation || await documentDir();
+      const docPath = await join(outputDir, fileName);
       
       await writeFile(docPath, docxArray);
       await openPath(docPath);

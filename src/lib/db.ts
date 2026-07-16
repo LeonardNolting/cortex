@@ -337,7 +337,9 @@ async function runMigrations(db: Database) {
     ['invoiceFileName', DEFAULT_INVOICE_FILE_NAME],
     ['jvegLastHash', ''],
     ['jvegLastCheckFailed', 'false'],
-    ['backupLocation', '']
+    ['backupLocation', ''],
+    ['invoiceOutputLocation', ''],
+    ['taxListingOutputLocation', '']
   ];
 
   for (const [key, value] of defaultSettings) {
