@@ -903,7 +903,7 @@ export function AssignmentList() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Bereit zur Abrechnung / Offen</CardTitle>
+              <CardTitle>Warte auf Zahlungseingang</CardTitle>
               <CardDescription>
                 Aufträge mit erstellter Rechnung, die noch nicht als bezahlt markiert wurden.
               </CardDescription>
