@@ -59,7 +59,7 @@ import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { JvegService, ParsedRates } from "../lib/jveg";
 import { RemunerationUpdatePreviewDialog } from "../components/settings/RemunerationUpdatePreviewDialog";
-import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx, getInvoiceFileName } from "../lib/invoice";
+import { generateInvoiceDocx, calculateInvoiceValues, generateIncomeTaxDocx, getInvoiceFileName, generateStatusReportDocx } from "../lib/invoice";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { join } from "@tauri-apps/api/path";
@@ -90,6 +90,16 @@ export function AssignmentList() {
   // Delete Dialog State
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<number | null>(null);
+
+  // Status Report Dialog State
+  const [isStatusReportDialogOpen, setIsStatusReportDialogOpen] = useState(false);
+  const [statusReportAssignment, setStatusReportAssignment] = useState<Assignment | null>(null);
+  const [statusReportForm, setStatusReportForm] = useState({
+    submissionDate: new Date().toISOString().split('T')[0],
+    explored: false,
+    greeting: "Sehr geehrte",
+    certainty: "medium" as 'high' | 'medium' | 'low'
+  });
 
   // JVEG Update State
   const [jvegUpdates, setJvegUpdates] = useState<{ hasUpdates: boolean; jsonString?: string; error?: string }>({ hasUpdates: false });
@@ -274,6 +284,54 @@ export function AssignmentList() {
       } catch (error) {
         console.error("Failed to delete assignment:", error);
       }
+    }
+  };
+
+  const handleOpenStatusReportDialog = (assignment: Assignment) => {
+    setStatusReportAssignment(assignment);
+    setStatusReportForm({
+      submissionDate: assignment.submissionDate || new Date().toISOString().split('T')[0],
+      explored: false,
+      greeting: "Sehr geehrte",
+      certainty: "medium"
+    });
+    setIsStatusReportDialogOpen(true);
+  };
+
+  const handleConfirmStatusReport = async () => {
+    if (!statusReportAssignment) return;
+    try {
+      const [court, settingsData] = await Promise.all([
+        CourtService.getById(statusReportAssignment.courtId),
+        SettingsService.getSettings()
+      ]);
+      if (!court) throw new Error("Gericht nicht gefunden");
+
+      const docxArray = await generateStatusReportDocx({
+        assignment: statusReportAssignment,
+        court,
+        settings: settingsData,
+        submissionDate: statusReportForm.submissionDate,
+        explored: statusReportForm.explored,
+        greeting: statusReportForm.greeting,
+        certainty: statusReportForm.certainty,
+      });
+      
+      const fileName = `Sachstandsmitteilung_${statusReportAssignment.patientName.replace(/[^a-z0-9A-Z]/gi, '_')}.docx`;
+      const outputDir = settingsData?.taxListingOutputLocation || await getDefaultOutputPath();
+      const docPath = await join(outputDir, fileName);
+      
+      await writeFile(docPath, docxArray);
+      await openPath(docPath);
+      
+      if (statusReportForm.submissionDate !== statusReportAssignment.submissionDate) {
+        await handleUpdateSubmissionDate(statusReportAssignment, statusReportForm.submissionDate);
+      }
+
+      setIsStatusReportDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to generate status report:", error);
+      alert("Fehler beim Generieren der Sachstandsmitteilung.");
     }
   };
 
@@ -746,6 +804,19 @@ export function AssignmentList() {
                       +1 Woche
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    title="Sachstandsmitteilung drucken"
+                    className="text-slate-600 dark:text-slate-400"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenStatusReportDialog(assignment);
+                    }}
+                  >
+                    <Info className="mr-1 h-4 w-4 text-slate-500" />
+                    Sachstandsmitteilung drucken
+                  </Button>
                   {!assignment.invoiceNumber && (
                     <Button 
                       variant="outline" 
@@ -1131,6 +1202,97 @@ export function AssignmentList() {
             </Button>
             <Button type="button" onClick={handleGenerateTaxListing}>
               Generieren
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isStatusReportDialogOpen} onOpenChange={setIsStatusReportDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Sachstandsmitteilung drucken</DialogTitle>
+            <DialogDescription>
+              Details für die Sachstandsmitteilung anpassen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Abgabedatum</Label>
+              <div className="col-span-3">
+                <DatePicker
+                  date={statusReportForm.submissionDate}
+                  setDate={(date) => setStatusReportForm(prev => ({ ...prev, submissionDate: date || "" }))}
+                  placeholder="Abgabedatum"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <div className="col-start-2 col-span-3 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="exploredCheckbox"
+                  checked={statusReportForm.explored}
+                  onChange={(e) => setStatusReportForm(prev => ({ ...prev, explored: e.target.checked }))}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="exploredCheckbox" className="font-normal cursor-pointer">
+                  Exploration stattgefunden
+                </Label>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Anrede</Label>
+              <Input
+                value={statusReportForm.greeting}
+                onChange={(e) => setStatusReportForm(prev => ({ ...prev, greeting: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Gewissheit</Label>
+              <div className="col-span-3 flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'low' }))}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-l-md border ${
+                    statusReportForm.certainty === 'low' 
+                      ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 z-10' 
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
+                  }`}
+                >
+                  Niedrig
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'medium' }))}
+                  className={`flex-1 px-3 py-2 text-xs font-medium border-t border-b ${
+                    statusReportForm.certainty === 'medium' 
+                      ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800 z-10' 
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
+                  }`}
+                >
+                  Mittel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'high' }))}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-r-md border ${
+                    statusReportForm.certainty === 'high' 
+                      ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 z-10' 
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
+                  }`}
+                >
+                  Hoch
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsStatusReportDialogOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button type="button" onClick={handleConfirmStatusReport}>
+              Drucken
             </Button>
           </DialogFooter>
         </DialogContent>
