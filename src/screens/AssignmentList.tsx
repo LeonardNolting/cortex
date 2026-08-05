@@ -701,11 +701,10 @@ export function AssignmentList() {
             <TableHead>Status</TableHead>
             {showInvoiceDateColumn && <TableHead>Rechnungsdatum</TableHead>}
             {showInvoiceNumberColumn && <TableHead className="w-[120px]">Rechnungs-Nr.</TableHead>}
-            <TableHead>Geburtsdatum</TableHead>
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
             {showSubmissionDateColumn && <TableHead className="w-[210px]">Abgabe</TableHead>}
-            {showTotalColumn && <TableHead className="text-right">Betrag</TableHead>}
+            {showTotalColumn && <TableHead className="text-left">Betrag</TableHead>}
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
@@ -713,7 +712,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0) + (showTotalColumn ? 1 : 0)}
+                colSpan={5 + (showInvoiceNumberColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0) + (showTotalColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -757,7 +756,6 @@ export function AssignmentList() {
                       {assignment.invoiceNumber || "-"}
                     </TableCell>
                   )}
-                  <TableCell>{formatDate(assignment.patientBirthdate)}</TableCell>
                   <TableCell>{assignment.fileNumber}</TableCell>
                   <TableCell>{assignment.court}</TableCell>
                   {showSubmissionDateColumn && (
@@ -774,7 +772,7 @@ export function AssignmentList() {
                   {showTotalColumn && (
                     <TableCell className="text-right whitespace-nowrap font-medium" onClick={(e) => e.stopPropagation()}>
                       {editingTotalId === assignment.id ? (
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1 w-full text-right">
                           <Input
                             className="w-20 h-7 text-right text-xs"
                             value={editTotalValue}
@@ -793,8 +791,8 @@ export function AssignmentList() {
                           </Button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-end gap-2 group">
-                          <div className="flex flex-col items-end">
+                        <div className="flex items-center justify-end gap-2 group w-full">
+                          <div className="flex flex-col items-end text-right w-full">
                             {assignment.overwrittenTotal !== undefined && assignment.overwrittenTotal !== null ? (
                               <>
                                 <span className="line-through text-xs text-muted-foreground font-normal">
@@ -838,83 +836,88 @@ export function AssignmentList() {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="max-w-[150px]"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleTogglePaid(assignment, true);
                       }}
                       title="Rechnung eingegangen"
                     >
-                      <Euro className="mr-1 text-emerald-600 dark:text-emerald-500" />
-                      Rechnung eingegangen
+                      <Euro className="mr-1 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                      <span className="truncate">Rechnung eingegangen</span>
                     </Button>
                   )}
                   {!assignment.paidAt && !assignment.invoiceNumber && !assignment.startedWorkingDate && (
                     <Button
                       variant="outline"
                       size="sm"
+                      className="max-w-[150px]"
                       title="Bearbeitung starten"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStartWorking(assignment);
                       }}
                     >
-                      <Play className="mr-1 text-green-600 dark:text-green-500" />
-                      Anfangen
+                      <Play className="mr-1 shrink-0 text-green-600 dark:text-green-500" />
+                      <span className="truncate">Anfangen</span>
                     </Button>
                   )}
                   {!assignment.paidAt && !assignment.invoiceNumber && !!assignment.startedWorkingDate && (
                     <Button
                       variant="outline"
                       size="sm"
+                      className="max-w-[150px]"
                       title="Bearbeitung stoppen"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStopWorking(assignment);
                       }}
                     >
-                      <Square className="mr-1 text-red-600 dark:text-red-500" />
-                      Bearbeitung stoppen
+                      <Square className="mr-1 shrink-0 text-red-600 dark:text-red-500" />
+                      <span className="truncate">Bearbeitung stoppen</span>
                     </Button>
                   )}
                   {submissionOverdue && (
                     <Button
                       variant="outline"
                       size="sm"
+                      className="max-w-[150px]"
                       title="Abgabefrist um eine Woche verschieben"
                       onClick={(e) => {
                         e.stopPropagation();
                         handlePostponeSubmissionByWeek(assignment);
                       }}
                     >
-                      <CalendarPlus className="mr-1 text-amber-500 dark:text-amber-400" />
-                      +1 Woche
+                      <CalendarPlus className="mr-1 shrink-0 text-amber-500 dark:text-amber-400" />
+                      <span className="truncate">+1 Woche</span>
                     </Button>
                   )}
                   <Button
                     variant="outline"
                     size="sm"
                     title="Sachstandsmitteilung drucken"
-                    className="text-slate-600 dark:text-slate-400"
+                    className="text-slate-600 dark:text-slate-400 max-w-[150px]"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleOpenStatusReportDialog(assignment);
                     }}
                   >
-                    <Info className="mr-1 h-4 w-4 text-slate-500" />
-                    Sachstandsmitteilung drucken
+                    <Info className="mr-1 h-4 w-4 shrink-0 text-slate-500" />
+                    <span className="truncate">Sachstandsmitteilung drucken</span>
                   </Button>
                   {!assignment.invoiceNumber && (
                     <Button 
                       variant="outline" 
                       size="sm" 
+                      className="max-w-[150px]"
                       title="Rechnung generieren"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenInvoiceDialog(assignment);
                       }}
                     >
-                      <Check className="mr-1 text-emerald-600 dark:text-emerald-500" />
-                      Rechnung drucken
+                      <Check className="mr-1 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                      <span className="truncate">Rechnung drucken</span>
                     </Button>
                   )}
                   <DropdownMenu>
@@ -1070,7 +1073,7 @@ export function AssignmentList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.ready} usePaidActionButton showInvoiceDateColumn />
+              <AssignmentTable list={categorizedAssignments.ready} usePaidActionButton showInvoiceDateColumn showTotalColumn />
             </CardContent>
           </Card>
 

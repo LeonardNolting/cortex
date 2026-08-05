@@ -101,7 +101,7 @@ export function DatePicker({
   }
 
   return (
-    <div className={cn("flex w-full min-w-0 gap-1", className)}>
+    <div className={cn("flex w-full min-w-[140px] gap-1", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverAnchor asChild>
           <div className="relative flex-1 min-w-0">
