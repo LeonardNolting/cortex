@@ -250,6 +250,7 @@ async function runMigrations(db: Database) {
       net_euro REAL,
       tax_euro REAL,
       gross_euro REAL,
+      overwritten_total REAL,
       remuneration_group_value REAL,
       writing_fee_rate REAL,
       printing_fee_rate REAL,
@@ -371,5 +372,11 @@ async function runMigrations(db: Database) {
     await db.execute("ALTER TABLE courts ADD COLUMN show_tax_id INTEGER DEFAULT 1");
   } catch (e) {
     // Ignore
+  }
+
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN overwritten_total REAL");
+  } catch (e) {
+    // Ignore error if column already exists
   }
 }

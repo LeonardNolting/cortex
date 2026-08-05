@@ -44,7 +44,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { DatePicker } from "../components/ui/date-picker";
-import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, Euro, Check } from "lucide-react";
+import { PlusCircle, Settings, FileText, Trash2, Calculator, AlertCircle, X, Info, Play, Square, CalendarPlus, MoreVertical, RotateCcw, Undo2, ExternalLink, Euro, Check, Edit2 } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +91,25 @@ export function AssignmentList() {
   // Delete Dialog State
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<number | null>(null);
+
+  // Edit Total State
+  const [editingTotalId, setEditingTotalId] = useState<number | null>(null);
+  const [editTotalValue, setEditTotalValue] = useState<string>("");
+
+  const handleUpdateTotal = async (assignment: Assignment) => {
+    try {
+      const valStr = editTotalValue.replace(',', '.');
+      const val = parseFloat(valStr);
+      await AssignmentService.update({
+        ...assignment,
+        overwrittenTotal: isNaN(val) ? undefined : val
+      });
+      setEditingTotalId(null);
+      await loadAssignments();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Status Report Dialog State
   const [isStatusReportDialogOpen, setIsStatusReportDialogOpen] = useState(false);
@@ -751,8 +770,64 @@ export function AssignmentList() {
                     </TableCell>
                   )}
                   {showTotalColumn && (
-                    <TableCell className="text-right whitespace-nowrap font-medium">
-                      {typeof(assignment.grossEuro) === "number" ? `${assignment.grossEuro.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "-"}
+                    <TableCell className="text-right whitespace-nowrap font-medium" onClick={(e) => e.stopPropagation()}>
+                      {editingTotalId === assignment.id ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <Input
+                            className="w-20 h-7 text-right text-xs"
+                            value={editTotalValue}
+                            autoFocus
+                            onChange={(e) => setEditTotalValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleUpdateTotal(assignment);
+                              if (e.key === 'Escape') setEditingTotalId(null);
+                            }}
+                          />
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleUpdateTotal(assignment)}>
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingTotalId(null)}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2 group">
+                          <div className="flex flex-col items-end">
+                            {assignment.overwrittenTotal !== undefined && assignment.overwrittenTotal !== null ? (
+                              <>
+                                <span className="line-through text-xs text-muted-foreground font-normal">
+                                  {typeof(assignment.grossEuro) === "number" ? `${assignment.grossEuro.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "-"}
+                                </span>
+                                <span>
+                                  {`${assignment.overwrittenTotal.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
+                                </span>
+                              </>
+                            ) : (
+                              <span>
+                                {typeof(assignment.grossEuro) === "number" ? `${assignment.grossEuro.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "-"}
+                              </span>
+                            )}
+                          </div>
+                          {typeof(assignment.grossEuro) === "number" && (
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Gesamtbetrag überschreiben"
+                              onClick={() => {
+                                setEditingTotalId(assignment.id);
+                                setEditTotalValue(
+                                  assignment.overwrittenTotal !== undefined && assignment.overwrittenTotal !== null
+                                    ? assignment.overwrittenTotal.toString().replace('.', ',')
+                                    : (assignment.grossEuro || 0).toString().replace('.', ',')
+                                );
+                              }}
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                   )}
               <TableCell className="text-right">
