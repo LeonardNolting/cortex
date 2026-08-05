@@ -14,6 +14,7 @@ export interface Assignment {
   evaluationTime?: number; // minutes
   writingCharacters?: number;
   printingPages?: number;
+  testung?: boolean;
   kmCount?: number;
   shippingFee?: number;
   court?: string; // For UI display

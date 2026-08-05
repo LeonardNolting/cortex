@@ -296,27 +296,27 @@ export async function generateInvoiceDocx(data: InvoiceData): Promise<Uint8Array
           },
           rows: [
             row(
-              assignment.travelCount === 1 ? (settings.invoiceLabelTravelSingle || "Anfahrt:") : (settings.invoiceLabelTravelMultiple || "Anfahrten:"),
+              compile(assignment.travelCount === 1 ? (settings.invoiceLabelTravelSingle || "Anfahrt:") : (settings.invoiceLabelTravelMultiple || "Anfahrten:")),
               `${((assignment.travelTime || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} Minuten`,
               assignment.travelCount !== 1 ? `(${(assignment.travelCount || 1).toLocaleString("de-DE")} x ${assignment.travelTime || 0} Min.)` : "",
               ""
             ),
             rowMulti(
-              (settings.invoiceLabelPreparation || "Exploration, Fremdanamnese\nund Durchsicht der Unterlagen:").split("\n"),
+              compile(settings.invoiceLabelPreparation || "Exploration, Fremdanamnese\nund Durchsicht der Unterlagen:").split("\n"),
               `${assignment.preparationTime || 0} Minuten`
             ),
             rowMulti(
-              (settings.invoiceLabelEvaluation || "Auswertung der Untersuchung und\nder neuropsycholog. Testung,\nVerfassen des Gutachtens:").split("\n"),
+              compile(settings.invoiceLabelEvaluation || "Auswertung der Untersuchung{{#if assignment.testung}} und\nder neuropsycholog. Testung{{/if}},\nVerfassen des Gutachtens:").split("\n"),
               `${assignment.evaluationTime || 0} Minuten`
             ),
-            row(settings.invoiceLabelTotalTime || "Gesamtzeit:", `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
-            row(settings.invoiceLabelWriting || "Schreibgebühr:", (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(values.writingFeeRate)}/1000`, formatEuro(values.writingEuro)),
-            row(settings.invoiceLabelKm || "Kilometerpauschale:", `${((assignment.kmCount || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} km`, `à ${formatEuro(values.kmFeeRate)}/km`, formatEuro(values.kmEuro)),
-            ...(assignment.printingPages ? [row(settings.invoiceLabelPrinting || "Kopierkosten:", `${assignment.printingPages} Seiten`, `à ${formatEuro(values.printingFeeRate)}/Seite`, formatEuro(values.printingEuro))] : []),
-            row(settings.invoiceLabelShipping || "Versandkosten:", "", "", formatEuro(values.shippingEuro)),
-            row(settings.invoiceLabelNet || "Gesamt (Netto):", "", "", formatEuro(values.netEuro), undefined, true),
+            row(compile(settings.invoiceLabelTotalTime || "Gesamtzeit:"), `${values.totalMinutes} Minuten`, `(${values.roundedMinutes} Minuten)`, formatEuro(values.timeEuro)),
+            row(compile(settings.invoiceLabelWriting || "Schreibgebühr:"), (assignment.writingCharacters || 0).toLocaleString("de-DE"), `à ${formatEuro(values.writingFeeRate)}/1000`, formatEuro(values.writingEuro)),
+            row(compile(settings.invoiceLabelKm || "Kilometerpauschale:"), `${((assignment.kmCount || 0) * (assignment.travelCount || 1)).toLocaleString("de-DE")} km`, `à ${formatEuro(values.kmFeeRate)}/km`, formatEuro(values.kmEuro)),
+            ...(assignment.printingPages ? [row(compile(settings.invoiceLabelPrinting || "Kopierkosten:"), `${assignment.printingPages} Seiten`, `à ${formatEuro(values.printingFeeRate)}/Seite`, formatEuro(values.printingEuro))] : []),
+            row(compile(settings.invoiceLabelShipping || "Versandkosten:"), "", "", formatEuro(values.shippingEuro)),
+            row(compile(settings.invoiceLabelNet || "Gesamt (Netto):"), "", "", formatEuro(values.netEuro), undefined, true),
             row(compile(settings.invoiceLabelTax || "Umsatzsteuer {{settings.taxRate}}%:"), "", "", formatEuro(values.taxEuro)),
-            row(settings.invoiceLabelGross || "Gesamt (Brutto):", "", "", formatEuro(values.grossEuro), true),
+            row(compile(settings.invoiceLabelGross || "Gesamt (Brutto):"), "", "", formatEuro(values.grossEuro), true),
           ],
         }),
 

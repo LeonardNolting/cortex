@@ -138,6 +138,7 @@ export const AssignmentService = {
         a.paid_at as paidAt,
         a.submission_date as submissionDate,
         a.started_working_date as startedWorkingDate,
+        a.testung as testung,
         a.total_minutes as totalMinutes,
         a.rounded_minutes as roundedMinutes,
         a.time_euro as timeEuro,
@@ -161,7 +162,10 @@ export const AssignmentService = {
       JOIN remuneration_groups rg ON a.remuneration_group_id = rg.id
       ORDER BY a.created_at DESC
     `);
-    return rows;
+    return rows.map(row => ({
+      ...row,
+      testung: !!row.testung
+    }));
   },
 
   async getById(id: number): Promise<Assignment | null> {
@@ -188,6 +192,7 @@ export const AssignmentService = {
         a.paid_at as paidAt,
         a.submission_date as submissionDate,
         a.started_working_date as startedWorkingDate,
+        a.testung as testung,
         a.total_minutes as totalMinutes,
         a.rounded_minutes as roundedMinutes,
         a.time_euro as timeEuro,
@@ -212,7 +217,10 @@ export const AssignmentService = {
       WHERE a.id = ?
     `, [id]);
     if (results.length === 0) return null;
-    return results[0] as Assignment;
+    return {
+      ...results[0],
+      testung: !!results[0].testung
+    } as Assignment;
   },
 
   async getNextInvoiceNumber(): Promise<string> {
@@ -247,11 +255,11 @@ export const AssignmentService = {
         invoice_number, patient_name, patient_birthdate, file_number, court_id, remuneration_group_id,
         travel_time, travel_count, preparation_time, evaluation_time, writing_characters,
         printing_pages, km_count, shipping_fee, printing_date, paid_at,
-        submission_date, started_working_date,
+        submission_date, started_working_date, testung,
         total_minutes, rounded_minutes, time_euro, writing_euro, printing_euro,
         km_euro, shipping_euro, net_euro, tax_euro, gross_euro, overwritten_total,
         remuneration_group_value, writing_fee_rate, printing_fee_rate, km_fee_rate, tax_rate
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assignment.invoiceNumber || null,
         assignment.patientName, assignment.patientBirthdate, assignment.fileNumber,
@@ -263,6 +271,7 @@ export const AssignmentService = {
         assignment.paidAt || null,
         assignment.submissionDate || null,
         assignment.startedWorkingDate || null,
+        assignment.testung ? 1 : 0,
         assignment.totalMinutes || null, assignment.roundedMinutes || null, assignment.timeEuro || null,        assignment.writingEuro || null, assignment.printingEuro || null,
         assignment.kmEuro || null, assignment.shippingEuro || null, assignment.netEuro || null, 
         assignment.taxEuro || null, assignment.grossEuro || null, assignment.overwrittenTotal || null,
@@ -285,7 +294,7 @@ export const AssignmentService = {
         travel_time = ?, travel_count = ?, preparation_time = ?, evaluation_time = ?, 
         writing_characters = ?, printing_pages = ?, km_count = ?, 
         shipping_fee = ?, printing_date = ?, paid_at = ?,
-        submission_date = ?, started_working_date = ?,
+        submission_date = ?, started_working_date = ?, testung = ?,
         total_minutes = ?, rounded_minutes = ?, time_euro = ?, writing_euro = ?, printing_euro = ?,
         km_euro = ?, shipping_euro = ?, net_euro = ?, tax_euro = ?, gross_euro = ?, overwritten_total = ?,
         remuneration_group_value = ?, writing_fee_rate = ?, printing_fee_rate = ?, km_fee_rate = ?, tax_rate = ?
@@ -301,6 +310,7 @@ export const AssignmentService = {
         assignment.paidAt || null,
         assignment.submissionDate || null,
         assignment.startedWorkingDate || null,
+        assignment.testung ? 1 : 0,
         assignment.totalMinutes ?? null, assignment.roundedMinutes ?? null, assignment.timeEuro ?? null, 
         assignment.writingEuro ?? null, assignment.printingEuro ?? null,
         assignment.kmEuro ?? null, assignment.shippingEuro ?? null, assignment.netEuro ?? null, 
@@ -348,6 +358,7 @@ export const AssignmentService = {
         a.paid_at as paidAt,
         a.submission_date as submissionDate,
         a.started_working_date as startedWorkingDate,
+        a.testung as testung,
         a.total_minutes as totalMinutes,
         a.rounded_minutes as roundedMinutes,
         a.time_euro as timeEuro,
@@ -373,6 +384,9 @@ export const AssignmentService = {
       ORDER BY a.paid_at ASC
     `, [pattern]);
     
-    return rows;
+    return rows.map(row => ({
+      ...row,
+      testung: !!row.testung
+    }));
   }
 };

@@ -17,6 +17,7 @@ import { Assignment, Court, RemunerationGroup } from "../types";
 import { formatToGermanString, parseGermanNumber } from "../lib/number-format";
 import { NumericInput } from "../components/ui/numeric-input";
 import { DatePicker } from "../components/ui/date-picker";
+import { Checkbox } from "../components/ui/checkbox";
 
 type AssignmentFormData = Omit<Partial<Assignment>, 'travelTime' | 'travelCount' | 'preparationTime' | 'evaluationTime' | 'writingCharacters' | 'printingPages' | 'kmCount' | 'shippingFee'> & {
   travelTime: string;
@@ -56,7 +57,8 @@ export function AssignmentEdit() {
     printingDate: "",
     paidAt: "",
     submissionDate: "",
-    startedWorkingDate: ""
+    startedWorkingDate: "",
+    testung: false
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -93,7 +95,8 @@ export function AssignmentEdit() {
               printingDate: assignment.printingDate || "",
               paidAt: paidAt,
               submissionDate: assignment.submissionDate || "",
-              startedWorkingDate: assignment.startedWorkingDate || ""
+              startedWorkingDate: assignment.startedWorkingDate || "",
+              testung: assignment.testung || false
             });
           }
         }
@@ -431,6 +434,14 @@ export function AssignmentEdit() {
                   value={formData.shippingFee} 
                   onValueChange={handleNumericChange("shippingFee")}
                 />
+              </div>
+              <div className="flex items-center space-x-2 pt-8">
+                <Checkbox 
+                  id="testung" 
+                  checked={formData.testung}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, testung: checked as boolean }))}
+                />
+                <Label htmlFor="testung" className="font-normal cursor-pointer">Testung</Label>
               </div>
             </div>
           </CardContent>

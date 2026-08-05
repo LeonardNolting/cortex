@@ -324,7 +324,7 @@ async function runMigrations(db: Database) {
     ['invoiceLabelTravelSingle', 'Anfahrt:'],
     ['invoiceLabelTravelMultiple', 'Anfahrten:'],
     ['invoiceLabelPreparation', 'Exploration, Fremdanamnese\nund Durchsicht der Unterlagen:'],
-    ['invoiceLabelEvaluation', 'Auswertung der Untersuchung und\nder neuropsycholog. Testung,\nVerfassen des Gutachtens:'],
+    ['invoiceLabelEvaluation', 'Auswertung der Untersuchung{{#if assignment.testung}} und\nder neuropsycholog. Testung{{/if}},\nVerfassen des Gutachtens:'],
     ['invoiceLabelTotalTime', 'Gesamtzeit:'],
     ['invoiceLabelWriting', 'Schreibgebühr:'],
     ['invoiceLabelKm', 'Kilometerpauschale:'],
@@ -392,5 +392,21 @@ Mit freundlichen Grüßen
     await db.execute("ALTER TABLE assignments ADD COLUMN overwritten_total REAL");
   } catch (e) {
     // Ignore error if column already exists
+  }
+
+  try {
+    await db.execute("ALTER TABLE assignments ADD COLUMN testung INTEGER DEFAULT 0");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+
+  try {
+    await db.execute(`
+      UPDATE settings 
+      SET value = 'Auswertung der Untersuchung{{#if assignment.testung}} und\nder neuropsycholog. Testung{{/if}},\nVerfassen des Gutachtens:'
+      WHERE key = 'invoiceLabelEvaluation' AND value = 'Auswertung der Untersuchung und\nder neuropsycholog. Testung,\nVerfassen des Gutachtens:'
+    `);
+  } catch (e) {
+    // Ignore error
   }
 }
