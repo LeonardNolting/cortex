@@ -9,18 +9,6 @@ Handlebars.registerHelper('eq', function (a, b) {
   return a === b;
 });
 
-const defaultStatusReportTemplate = `{{#if greeting}}{{greeting}}{{else}}Sehr geehrte{{/if}} Damen und Herren,
-
-in der Betreuungssache betreffend {{formatName assignment.patientName includeTitles=false includeComma=false}} (Az.: {{assignment.fileNumber}}) teile ich Ihnen mit, dass das Gutachten {{#if (eq certainty "high")}}werden sicher{{else}}{{#if (eq certainty "low")}}können möglicherweise{{else}}werden voraussichtlich{{/if}}{{/if}} bis zum {{formattedSubmissionDate}} fertiggestellt wird.
-{{#if explored}}
-
-Die psychiatrische Exploration des Betroffenen hat bereits stattgefunden.{{/if}}
-
-Mit freundlichen Grüßen
-
-
-{{settings.userName}}`;
-
 
 export interface StatusReportData {
   assignment: Assignment;
@@ -49,7 +37,7 @@ export async function generateStatusReportDocx(data: StatusReportData): Promise<
     certainty
   };
 
-  const compile = Handlebars.compile(settings.statusReportTemplate || defaultStatusReportTemplate);
+  const compile = Handlebars.compile(settings.statusReportTemplate || '');
   const compiledText = compile(templateContext);
 
   const bodyParagraphs = compiledText.split('\n').map((line) => {

@@ -339,7 +339,19 @@ async function runMigrations(db: Database) {
     ['jvegLastCheckFailed', 'false'],
     ['backupLocation', ''],
     ['invoiceOutputLocation', ''],
-    ['taxListingOutputLocation', '']
+    ['taxListingOutputLocation', ''],
+    ['statusReportTemplate', `{{greeting}},
+
+
+in der Betreuungssache betreffend {{formatName assignment.patientName includeTitles=false includeComma=false}} ({{assignment.fileNumber}}) teile ich Ihnen mit, dass das Gutachten bis zum {{formattedSubmissionDate}} fertiggestellt wird.{{#if explored}}
+
+Die psychiatrische Exploration des Betroffenen hat bereits stattgefunden.{{/if}}
+
+
+Mit freundlichen Grüßen
+
+
+{{settings.userName}}`]
   ];
 
   for (const [key, value] of defaultSettings) {

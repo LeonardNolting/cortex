@@ -13,6 +13,7 @@ import { CourtManagement } from "../components/settings/CourtManagement";
 import { RemunerationGroupManagement } from "../components/settings/RemunerationGroupManagement";
 import { UserManagement } from "../components/settings/UserManagement";
 import { InvoiceTextManagement } from "../components/settings/InvoiceTextManagement";
+import { StatusReportTextManagement } from "../components/settings/StatusReportTextManagement";
 import { FileManagement } from "../components/settings/FileManagement";
 
 export function SettingsScreen() {
@@ -73,6 +74,16 @@ export function SettingsScreen() {
           </CardHeader>
           <CardContent>
             <InvoiceTextManagement />
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Sachstandsmitteilung</CardTitle>
+            <CardDescription>Standardformulierung für die Sachstandsmitteilung.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StatusReportTextManagement />
           </CardContent>
         </Card>
       </div>
