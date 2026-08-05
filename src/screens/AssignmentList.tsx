@@ -537,6 +537,7 @@ export function AssignmentList() {
     showInvoiceDateColumn = false,
     showSubmissionDateColumn = false,
     usePaidActionButton = false,
+    showTotalColumn = false,
   }: {
     list: Assignment[];
     showInvoiceNumberColumn?: boolean;
@@ -544,6 +545,7 @@ export function AssignmentList() {
     showInvoiceDateColumn?: boolean;
     showSubmissionDateColumn?: boolean;
     usePaidActionButton?: boolean;
+    showTotalColumn?: boolean;
   }) => {
     const isPaymentReminderActive = (assignment: Assignment) => {
       if (!assignment.invoiceNumber || !assignment.printingDate || assignment.paidAt || !settings) return false;
@@ -682,6 +684,7 @@ export function AssignmentList() {
             <TableHead>Aktenzeichen</TableHead>
             <TableHead>Gericht</TableHead>
             {showSubmissionDateColumn && <TableHead className="w-[210px]">Abgabe</TableHead>}
+            {showTotalColumn && <TableHead className="text-right">Betrag</TableHead>}
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
@@ -689,7 +692,7 @@ export function AssignmentList() {
           {list.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0)}
+                colSpan={6 + (showInvoiceNumberColumn ? 1 : 0) + (showInvoiceDateColumn ? 1 : 0) + (showSubmissionDateColumn ? 1 : 0) + (showTotalColumn ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 Keine Aufträge in dieser Kategorie.
@@ -745,6 +748,11 @@ export function AssignmentList() {
                         clearable
                         className="h-9"
                       />
+                    </TableCell>
+                  )}
+                  {showTotalColumn && (
+                    <TableCell className="text-right whitespace-nowrap font-medium">
+                      {typeof(assignment.grossEuro) === "number" ? `${assignment.grossEuro.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "-"}
                     </TableCell>
                   )}
               <TableCell className="text-right">
@@ -997,7 +1005,7 @@ export function AssignmentList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AssignmentTable list={categorizedAssignments.paidThisMonth} />
+              <AssignmentTable list={categorizedAssignments.paidThisMonth} showTotalColumn />
             </CardContent>
           </Card>
 
@@ -1017,7 +1025,7 @@ export function AssignmentList() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <AssignmentTable list={categorizedAssignments.archive} />
+                    <AssignmentTable list={categorizedAssignments.archive} showTotalColumn />
                   </CardContent>
                 </Card>
               </AccordionContent>
