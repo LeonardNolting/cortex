@@ -62,6 +62,7 @@ export interface RemunerationGroup {
 export interface Settings {
   userName: string;
   userBirthday: string;
+  statusReportTemplate?: string;
   userStreet: string;
   userZip: string;
   userCity: string;

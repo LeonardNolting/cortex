@@ -3,6 +3,24 @@ import { formatDate } from "./utils";
 import { formatNameLastFirst } from "./utils/name-parser";
 import { Document, Packer, Paragraph, TabStopType, AlignmentType } from "docx";
 import { run, CONTENT_WIDTH } from "./docx-utils";
+import Handlebars from "handlebars";
+
+Handlebars.registerHelper('eq', function (a, b) {
+  return a === b;
+});
+
+const defaultStatusReportTemplate = `{{#if greeting}}{{greeting}}{{else}}Sehr geehrte{{/if}} Damen und Herren,
+
+in der Betreuungssache betreffend {{formatName assignment.patientName includeTitles=false includeComma=false}} (Az.: {{assignment.fileNumber}}) teile ich Ihnen mit, dass das Gutachten {{#if (eq certainty "high")}}werden sicher{{else}}{{#if (eq certainty "low")}}können möglicherweise{{else}}werden voraussichtlich{{/if}}{{/if}} bis zum {{formattedSubmissionDate}} fertiggestellt wird.
+{{#if explored}}
+
+Die psychiatrische Exploration des Betroffenen hat bereits stattgefunden.{{/if}}
+
+Mit freundlichen Grüßen
+
+
+{{settings.userName}}`;
+
 
 export interface StatusReportData {
   assignment: Assignment;
@@ -20,32 +38,23 @@ export async function generateStatusReportDocx(data: StatusReportData): Promise<
   const formattedSubmissionDate = formatDate(submissionDate);
   const dateStr = new Date().toLocaleDateString("de-DE", { year: "numeric", month: "2-digit", day: "2-digit" });
 
-  let certaintyText = "werden voraussichtlich";
-  if (certainty === 'high') certaintyText = "werden sicher";
-  if (certainty === 'low') certaintyText = "können möglicherweise";
+  const templateContext = {
+    assignment,
+    court,
+    settings,
+    submissionDate,
+    formattedSubmissionDate,
+    explored,
+    greeting,
+    certainty
+  };
 
-  let bodyParagraphs = [
-    new Paragraph({ children: [run(`${greeting || 'Sehr geehrte'} Damen und Herren,`)] }),
-    new Paragraph({ children: [] }),
-    new Paragraph({
-      children: [
-        run(`in der Betreuungssache betreffend ${formatNameLastFirst(assignment.patientName, { includeTitles: false, includeComma: false })} `),
-        run(`(Az.: ${assignment.fileNumber}) `),
-        run(`teile ich Ihnen mit, dass das Gutachten ${certaintyText} bis zum ${formattedSubmissionDate} fertiggestellt wird.`)
-      ]
-    }),
-  ];
+  const compile = Handlebars.compile(settings.statusReportTemplate || defaultStatusReportTemplate);
+  const compiledText = compile(templateContext);
 
-  if (explored) {
-    bodyParagraphs.push(new Paragraph({ children: [] }));
-    bodyParagraphs.push(new Paragraph({ children: [run("Die psychiatrische Exploration des Betroffenen hat bereits stattgefunden.")] }));
-  }
-
-  bodyParagraphs.push(new Paragraph({ children: [] }));
-  bodyParagraphs.push(new Paragraph({ children: [run("Mit freundlichen Grüßen")] }));
-  bodyParagraphs.push(new Paragraph({ children: [] }));
-  bodyParagraphs.push(new Paragraph({ children: [] }));
-  bodyParagraphs.push(new Paragraph({ children: [run(settings.userName || "")] }));
+  const bodyParagraphs = compiledText.split('\n').map((line) => {
+    return new Paragraph({ children: line ? [run(line)] : [] });
+  });
 
   const doc = new Document({
     styles: {
