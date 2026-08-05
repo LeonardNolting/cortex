@@ -1,5 +1,5 @@
 import { Assignment, Court, RemunerationGroup, Settings, DEFAULT_INVOICE_FILE_NAME } from "../types";
-import { formatDate } from "./utils";
+import { formatDate, getTimestampString } from "./utils";
 import { formatNameLastFirst } from "./utils/name-parser";
 import Handlebars from "handlebars";
 
@@ -143,7 +143,8 @@ export function getInvoiceFileName(assignment: Assignment, settings: Settings, i
     assignment,
     settings,
     invoiceNumber: invoiceNumber || assignment.invoiceNumber,
-    printingDate: printingDate ? formatDate(printingDate) : (assignment.printingDate ? formatDate(assignment.printingDate) : '')
+    printingDate: printingDate ? formatDate(printingDate) : (assignment.printingDate ? formatDate(assignment.printingDate) : ''),
+    timestamp: getTimestampString()
   };
 
   const templateString = settings.invoiceFileName || DEFAULT_INVOICE_FILE_NAME;
@@ -151,7 +152,8 @@ export function getInvoiceFileName(assignment: Assignment, settings: Settings, i
   let fileName = compile(context);
   
   // Remove invalid characters but keep spaces
-  fileName = fileName.replace(/[\/\\?%*:|"<>]/g, '');
+  fileName = fileName.replace(/[\/\\?%*:|"<>]/g, '').trim();
+
   if (!fileName.toLowerCase().endsWith('.docx')) {
     fileName += '.docx';
   }

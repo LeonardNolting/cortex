@@ -54,7 +54,7 @@ import {
 import { AssignmentService } from "../lib/services";
 import { Assignment } from "../types";
 import { formatNameLastFirst } from "../lib/utils/name-parser";
-import { formatDate } from "../lib/utils";
+import { formatDate, getTimestampString } from "../lib/utils";
 import { PageHeader } from "../components/PageHeader";
 import { CourtService, RemunerationGroupService, SettingsService } from "../lib/services";
 import { JvegService, ParsedRates } from "../lib/jveg";
@@ -337,7 +337,8 @@ export function AssignmentList() {
         highWorkload: statusReportForm.highWorkload,
       });
       
-      const fileName = `Sachstandsmitteilung_${statusReportAssignment.patientName.replace(/[^a-z0-9A-Z]/gi, '_')}.docx`;
+      const dateStr = getTimestampString();
+      const fileName = `Sachstandsmitteilung ${statusReportAssignment.patientName.replace(/[^a-z0-9A-Z]/gi, '_')} ${dateStr}.docx`;
       const outputDir = settingsData?.taxListingOutputLocation || await getDefaultOutputPath();
       const docPath = await join(outputDir, fileName);
       
@@ -472,7 +473,8 @@ export function AssignmentList() {
       );
 
       const monthStr = taxForm.month.toString().padStart(2, '0');
-      const fileName = `Einnahmen_${taxForm.year}_${monthStr}.docx`;
+      const dateStr = getTimestampString();
+      const fileName = `Einnahmen ${taxForm.year}-${monthStr} ${dateStr}.docx`;
       const outputDir = settings?.taxListingOutputLocation || await getDefaultOutputPath();
       const docPath = await join(outputDir, fileName);
       

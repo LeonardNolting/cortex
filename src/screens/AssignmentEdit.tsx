@@ -384,12 +384,12 @@ export function AssignmentEdit() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="preparationTime">Vorbereitung (Minuten)</Label>
+                <Label htmlFor="writingCharacters">Schreibgebühr (Zeichen)</Label>
                 <NumericInput 
-                  id="preparationTime" 
-                  name="preparationTime" 
-                  value={formData.preparationTime} 
-                  onValueChange={handleNumericChange("preparationTime")}
+                  id="writingCharacters" 
+                  name="writingCharacters" 
+                  value={formData.writingCharacters} 
+                  onValueChange={handleNumericChange("writingCharacters")}
                 />
               </div>
               <div className="space-y-2">
@@ -404,12 +404,12 @@ export function AssignmentEdit() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="writingCharacters">Schreibgebühr (Zeichen)</Label>
+                <Label htmlFor="preparationTime">Vorbereitung (Minuten)</Label>
                 <NumericInput 
-                  id="writingCharacters" 
-                  name="writingCharacters" 
-                  value={formData.writingCharacters} 
-                  onValueChange={handleNumericChange("writingCharacters")}
+                  id="preparationTime" 
+                  name="preparationTime" 
+                  value={formData.preparationTime} 
+                  onValueChange={handleNumericChange("preparationTime")}
                 />
               </div>
               <div className="space-y-2">
