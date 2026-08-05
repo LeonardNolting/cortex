@@ -17,11 +17,11 @@ export interface StatusReportData {
   submissionDate: string;
   explored: boolean;
   greeting: string;
-  certainty: 'high' | 'medium' | 'low';
+  highWorkload: boolean;
 }
 
 export async function generateStatusReportDocx(data: StatusReportData): Promise<Uint8Array> {
-  const { assignment, court, settings, submissionDate, explored, greeting, certainty } = data;
+  const { assignment, court, settings, submissionDate, explored, greeting, highWorkload } = data;
   
   const formattedSubmissionDate = formatDate(submissionDate);
   const dateStr = new Date().toLocaleDateString("de-DE", { year: "numeric", month: "2-digit", day: "2-digit" });
@@ -34,7 +34,7 @@ export async function generateStatusReportDocx(data: StatusReportData): Promise<
     formattedSubmissionDate,
     explored,
     greeting,
-    certainty
+    highWorkload
   };
 
   const compile = Handlebars.compile(settings.statusReportTemplate || '');

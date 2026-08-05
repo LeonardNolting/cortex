@@ -118,7 +118,7 @@ export function AssignmentList() {
     submissionDate: new Date().toISOString().split('T')[0],
     explored: false,
     greeting: "Sehr geehrte",
-    certainty: "medium" as 'high' | 'medium' | 'low'
+    highWorkload: false
   });
 
   // JVEG Update State
@@ -313,7 +313,7 @@ export function AssignmentList() {
       submissionDate: assignment.submissionDate || new Date().toISOString().split('T')[0],
       explored: false,
       greeting: "Sehr geehrte",
-      certainty: "medium"
+      highWorkload: false
     });
     setIsStatusReportDialogOpen(true);
   };
@@ -334,7 +334,7 @@ export function AssignmentList() {
         submissionDate: statusReportForm.submissionDate,
         explored: statusReportForm.explored,
         greeting: statusReportForm.greeting,
-        certainty: statusReportForm.certainty,
+        highWorkload: statusReportForm.highWorkload,
       });
       
       const fileName = `Sachstandsmitteilung_${statusReportAssignment.patientName.replace(/[^a-z0-9A-Z]/gi, '_')}.docx`;
@@ -1333,41 +1333,17 @@ export function AssignmentList() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Gewissheit</Label>
-              <div className="col-span-3 flex rounded-md shadow-sm" role="group">
-                <button
-                  type="button"
-                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'low' }))}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-l-md border ${
-                    statusReportForm.certainty === 'low' 
-                      ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 z-10' 
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
-                  }`}
-                >
-                  Niedrig
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'medium' }))}
-                  className={`flex-1 px-3 py-2 text-xs font-medium border-t border-b ${
-                    statusReportForm.certainty === 'medium' 
-                      ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800 z-10' 
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
-                  }`}
-                >
-                  Mittel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusReportForm(prev => ({ ...prev, certainty: 'high' }))}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-r-md border ${
-                    statusReportForm.certainty === 'high' 
-                      ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 z-10' 
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-slate-950 dark:text-gray-300 dark:border-slate-800 dark:hover:bg-slate-900'
-                  }`}
-                >
-                  Hoch
-                </button>
+              <div className="col-start-2 col-span-3 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="highWorkloadCheckbox"
+                  checked={statusReportForm.highWorkload}
+                  onChange={(e) => setStatusReportForm(prev => ({ ...prev, highWorkload: e.target.checked }))}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="highWorkloadCheckbox" className="font-normal cursor-pointer">
+                  Hohes Arbeitsaufkommen
+                </Label>
               </div>
             </div>
           </div>

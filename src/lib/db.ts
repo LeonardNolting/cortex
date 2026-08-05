@@ -343,7 +343,9 @@ async function runMigrations(db: Database) {
     ['statusReportTemplate', `{{greeting}},
 
 
-in der Betreuungssache betreffend {{formatName assignment.patientName includeTitles=false includeComma=false}} ({{assignment.fileNumber}}) teile ich Ihnen mit, dass das Gutachten bis zum {{formattedSubmissionDate}} fertiggestellt wird.{{#if explored}}
+in der Betreuungssache betreffend {{formatName assignment.patientName includeTitles=false includeComma=false}} ({{assignment.fileNumber}}) teile ich Ihnen mit, dass das Gutachten voraussichtlich bis zum {{formattedSubmissionDate}} fertiggestellt wird.{{#if highWorkload}}
+
+Für die lange Wartezeit ist das hohe Arbeitsaufkommen verantwortlich.{{/if}}{{#if explored}}
 
 Die psychiatrische Exploration des Betroffenen hat bereits stattgefunden.{{/if}}
 

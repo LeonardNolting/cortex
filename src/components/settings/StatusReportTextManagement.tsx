@@ -65,7 +65,7 @@ export function StatusReportTextManagement() {
           id="statusReportTemplate" 
           label="Vorlage für die Sachstandsmitteilung" 
           value={settings.statusReportTemplate || ""} 
-          help="Verwenden Sie Handlebars-Platzhalter wie {{greeting}}, {{formatName assignment.patientName includeTitles=false includeComma=false}}, {{#if isCertaintyHigh}}...{{/if}}."
+          help="Verwenden Sie Handlebars-Platzhalter wie {{greeting}}, {{formatName assignment.patientName includeTitles=false includeComma=false}}, {{#if highWorkload}}...{{/if}}."
         />
       </div>
 
